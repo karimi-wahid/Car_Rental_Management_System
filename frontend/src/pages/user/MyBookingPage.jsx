@@ -13,13 +13,16 @@ import {
 import { PageHeader } from "@/components/common/PageHeader";
 import { BookingCard } from "@/components/user/BookingCard";
 import { EmptyState } from "@/components/common/EmptyState";
-import { Pagination } from "@/components/common/Pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import useAuthStore from "@/store/authStore";
-// import { bookingService } from "@/services/booking.service";
 import { toast } from "react-hot-toast";
+import useBookingStore from "@/store/bookingStore";
 
 const MyBookingsPage = () => {
   const user = useAuthStore((state) => state.user);
+  const { fetchUserBookings, cancelBooking } = useBookingStore(
+    (state) => state,
+  );
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
@@ -35,33 +38,40 @@ const MyBookingsPage = () => {
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
-      const params = {
-        page: pagination.page,
-        limit: pagination.limit,
-        sortBy:
-          sortBy === "newest"
-            ? "createdAt"
-            : sortBy === "oldest"
-              ? "createdAt"
-              : "startDate",
-        sortOrder:
-          sortBy === "newest" ? "desc" : sortBy === "oldest" ? "asc" : "asc",
-      };
+      // Fix: Pass parameters correctly according to store method signature
+      const response = await fetchUserBookings(
+        activeTab !== "all" ? activeTab : "",
+        pagination.page,
+        pagination.limit,
+      );
 
-      if (activeTab !== "all") {
-        params.status = activeTab;
+      // Add defensive checks
+      setBookings(response?.data?.bookings || []);
+
+      // Ensure pagination object exists with defaults
+      if (response?.pagination) {
+        setPagination({
+          page: response.pagination.currentPage || 1,
+          limit: response.pagination.itemsPerPage || 9,
+          total: response.pagination.totalItems || 0,
+          pages: response.pagination.totalPages || 0,
+        });
       }
-
-      const response = await bookingService.getUserBookings(params);
-      setBookings(response.data.bookings);
-      setPagination(response.data.pagination);
     } catch (error) {
       toast.error("خطا در دریافت رزروها");
       console.log(error);
+      // Reset to default state on error
+      setBookings([]);
+      setPagination({
+        page: 1,
+        limit: 9,
+        total: 0,
+        pages: 0,
+      });
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, sortBy, activeTab]);
+  }, [pagination.page, pagination.limit, activeTab, fetchUserBookings]);
 
   useEffect(() => {
     fetchBookings();
@@ -69,7 +79,7 @@ const MyBookingsPage = () => {
 
   const handleCancelBooking = async (bookingId) => {
     try {
-      await bookingService.cancelBooking(bookingId, "لغو توسط کاربر");
+      await cancelBooking(bookingId, "لغو توسط کاربر");
       toast.success("رزرو با موفقیت لغو شد");
       fetchBookings();
     } catch (error) {
@@ -79,7 +89,6 @@ const MyBookingsPage = () => {
   };
 
   const handleModifyBooking = (bookingId) => {
-    // Navigate to modify booking page
     window.location.href = `/bookings/${bookingId}/modify`;
   };
 

@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -23,7 +24,6 @@ const LoginPage = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState("");
 
   const {
     register,
@@ -39,7 +39,6 @@ const LoginPage = () => {
   // Clear error when component mounts
   useEffect(() => {
     clearError();
-    setServerError("");
   }, [clearError]);
 
   // Redirect if already authenticated and user is loaded
@@ -59,13 +58,8 @@ const LoginPage = () => {
   }, [isAuthenticated, user, navigate, location.state]);
 
   const onSubmit = async (data) => {
-    setServerError("");
-
-    const result = await login(data.email, data.password);
-
-    if (!result.success) {
-      setServerError(result.error);
-    }
+    clearError();
+    await login(data.email, data.password);
   };
 
   return (
@@ -75,13 +69,13 @@ const LoginPage = () => {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Server Error Display */}
-        {(serverError || error) && (
+        {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center"
           >
-            {serverError || error}
+            {error}
           </motion.div>
         )}
 

@@ -22,3 +22,11 @@ export function formatDate(date) {
     day: "numeric",
   });
 }
+
+export function formatCurrency(amount) {
+  return new Intl.NumberFormat("AFN", {
+    style: "currency",
+    currency: "AFN",
+    minimumFractionDigits: 2,
+  }).format(amount);
+}

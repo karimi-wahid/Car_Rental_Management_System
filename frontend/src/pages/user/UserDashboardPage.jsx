@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import {
   Car,
@@ -20,79 +20,87 @@ import useAuthStore from "@/store/authStore";
 //import { formatCurrency } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import { formatDate } from "@/lib/utils";
+import useBookingStore from "@/store/bookingStore";
+
+// Helper function to get status badge variant
+const getStatusBadge = (status) => {
+  switch (status) {
+    case "confirmed":
+      return { variant: "default", label: "تایید شده", icon: CheckCircle };
+    case "completed":
+      return { variant: "secondary", label: "تکمیل شده", icon: CheckCircle };
+    case "cancelled":
+      return { variant: "destructive", label: "لغو شده", icon: AlertCircle };
+    case "pending":
+      return { variant: "outline", label: "در انتظار", icon: Clock };
+    default:
+      return { variant: "outline", label: status, icon: AlertCircle };
+  }
+};
 
 const UserDashboardPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const { userBookings, fetchUserBookings, loading } = useBookingStore();
+
   const [upcomingBookings, setUpcomingBookings] = useState([]);
   const [recentBookings, setRecentBookings] = useState([]);
+  let isLoading = loading;
   const [stats, setStats] = useState({
     totalBookings: 0,
     totalSpent: 0,
     upcomingTrips: 0,
     completedTrips: 0,
-    membershipTier: "نقره‌ای",
-    points: 1250,
-    nextTierPoints: 5000,
   });
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
+    const loadDashboard = async () => {
       try {
-        // Uncomment and adjust when you have the booking service
-        // const [upcomingRes, recentRes] = await Promise.all([
-        //   bookingService.getUserBookings({
-        //     status: 'confirmed',
-        //     limit: 3,
-        //     sortBy: 'startDate',
-        //     sortOrder: 'asc',
-        //   }),
-        //   bookingService.getUserBookings({
-        //     limit: 5,
-        //     sortBy: 'createdAt',
-        //     sortOrder: 'desc',
-        //   }),
-        // ]);
-        // setUpcomingBookings(upcomingRes.data.bookings);
-        // setRecentBookings(recentRes.data.bookings);
-        // const allBookings = await bookingService.getUserBookings({ limit: 100 });
-        // const bookings = allBookings.data.bookings;
-        // const totalSpent = bookings.reduce((sum, booking) => sum + booking.totalPrice, 0);
-        // const upcoming = bookings.filter(
-        //   (b) => b.status === 'confirmed' && new Date(b.startDate) > new Date()
-        // ).length;
-        // const completed = bookings.filter((b) => b.status === 'completed').length;
-        // setStats((prev) => ({
-        //   ...prev,
-        //   totalBookings: bookings.length,
-        //   totalSpent,
-        //   upcomingTrips: upcoming,
-        //   completedTrips: completed,
-        // }));
+        // Fetch all user bookings
+        const res = await fetchUserBookings("", 1, 50);
 
-        // Mock data for now
-        setStats({
-          totalBookings: 12,
-          totalSpent: 4500000,
-          upcomingTrips: 3,
-          completedTrips: 9,
-          membershipTier: "نقره‌ای",
-          points: 1250,
-          nextTierPoints: 5000,
-        });
+        const bookings = res?.data?.bookings || [];
+
+        // ===== Split bookings =====
+        const now = new Date();
+
+        const upcoming = bookings.filter(
+          (b) => b.status === "confirmed" && new Date(b.startDate) > now,
+        );
+
+        const recent = [...bookings]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5);
+
+        // ===== Stats =====
+        const totalSpent = bookings.reduce(
+          (sum, b) => sum + (b.totalPrice || 0),
+          0,
+        );
+
+        const completed = bookings.filter(
+          (b) => b.status === "completed",
+        ).length;
+
+        setUpcomingBookings(upcoming.slice(0, 3));
+        setRecentBookings(recent);
+
+        setStats((prev) => ({
+          ...prev,
+          totalBookings: bookings.length,
+          totalSpent,
+          upcomingTrips: upcoming.length,
+          completedTrips: completed,
+        }));
       } catch (error) {
         toast.error("خطا در دریافت اطلاعات داشبورد");
-        console.log(error);
-      } finally {
-        setIsLoading(false);
+        console.error(error);
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    loadDashboard();
+  }, [fetchUserBookings]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -109,22 +117,6 @@ const UserDashboardPage = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Helper function to get status badge variant
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "confirmed":
-        return { variant: "default", label: "تایید شده", icon: CheckCircle };
-      case "completed":
-        return { variant: "secondary", label: "تکمیل شده", icon: CheckCircle };
-      case "cancelled":
-        return { variant: "destructive", label: "لغو شده", icon: AlertCircle };
-      case "pending":
-        return { variant: "outline", label: "در انتظار", icon: Clock };
-      default:
-        return { variant: "outline", label: status, icon: AlertCircle };
-    }
-  };
-
   return (
     <motion.div
       variants={containerVariants}
@@ -136,36 +128,6 @@ const UserDashboardPage = () => {
         title={`خوش آمدید، ${user?.name || "کاربر"}!`}
         description="نمای کلی از حساب کاربری و فعالیت‌های اخیر شما"
       />
-
-      {/* Welcome Message */}
-      {user && (
-        <motion.div variants={itemVariants} className="mb-6">
-          <Card className="bg-linear-to-r from-primary/10 to-primary/5 border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">
-                    عضویت {stats.membershipTier}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    شما {stats.points} امتیاز دارید.
-                    {stats.nextTierPoints - stats.points} امتیاز تا سطح بعدی
-                  </p>
-                </div>
-                <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {stats.points}
-                    </div>
-                    <div className="text-xs text-muted-foreground">امتیاز</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <motion.div variants={itemVariants}>
@@ -250,7 +212,6 @@ const UserDashboardPage = () => {
           </Button>
         </div>
       </motion.div>
-
       {/* Upcoming Bookings */}
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -288,7 +249,6 @@ const UserDashboardPage = () => {
           </Card>
         )}
       </motion.div>
-
       {/* Recent Activity */}
       <motion.div variants={itemVariants}>
         <div className="flex items-center justify-between mb-4">

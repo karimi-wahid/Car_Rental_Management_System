@@ -1,50 +1,30 @@
-// stores/bookingStore.js (Complete version with bookings)
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
-
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Add token to requests
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
+import {
+  createBookingService,
+  getUserBookingsService,
+  getBookingByIdService,
+  updateBookingService,
+  cancelBookingService,
+  checkAvailabilityService,
+  getTimeSlotsService,
+  getAllBookingsService,
+  updateBookingStatusService,
+  getBookingStatsService,
+  buildBookingQuery,
+} from "@/services/bookingService";
 
 const useBookingStore = create(
   persist(
     (set, get) => ({
-      // Cars State
-      cars: [],
-      filteredCars: [],
-      brands: [],
-      selectedCar: null,
-
-      // Bookings State
       bookings: [],
-      selectedBooking: null,
       userBookings: [],
+      selectedBooking: null,
 
-      // UI State
       loading: false,
       error: null,
 
-      // Pagination
       pagination: {
         currentPage: 1,
         totalPages: 1,
@@ -52,598 +32,278 @@ const useBookingStore = create(
         itemsPerPage: 10,
       },
 
-      // Filters
       filters: {
-        brand: "",
-        minPrice: "",
-        maxPrice: "",
-        transmission: "",
-        fuelType: "",
-        seats: "",
-        search: "",
+        status: "",
         startDate: null,
         endDate: null,
-        status: "",
+        minPrice: "",
+        maxPrice: "",
+        carId: "",
       },
 
-      // Sorting
       sort: "-createdAt",
 
-      // Availability check
-      availability: {
-        isChecking: false,
-        available: null,
-        availableTimeSlots: [],
-        conflictingBookings: [],
+      // ================= USER =================
+
+      createBooking: async (data) => {
+        set({ loading: true, error: null });
+
+        try {
+          const res = await createBookingService(data);
+
+          set((state) => ({
+            userBookings: [res.data.data.booking, ...state.userBookings],
+            selectedBooking: res.data.data.booking,
+            loading: false,
+          }));
+
+          return res.data;
+        } catch (err) {
+          set({ error: err.response?.data?.message, loading: false });
+          throw err;
+        }
       },
 
-      // ==================== CAR METHODS ====================
-
-      // Fetch all cars with filters
-      fetchCars: async (page = 1, limit = 12) => {
+      fetchUserBookings: async (page = 1, limit = 10) => {
         set({ loading: true, error: null });
 
         try {
           const { filters, sort } = get();
-          const params = new URLSearchParams();
 
-          params.append("page", page);
-          params.append("limit", limit);
-          if (sort) params.append("sort", sort);
+          const query = buildBookingQuery({
+            page,
+            limit,
+            sort,
+            ...filters,
+          });
 
-          if (filters.brand) params.append("brand", filters.brand);
-          if (filters.minPrice) params.append("minPrice", filters.minPrice);
-          if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
-          if (filters.transmission)
-            params.append("transmission", filters.transmission);
-          if (filters.fuelType) params.append("fuelType", filters.fuelType);
-          if (filters.seats) params.append("seats", filters.seats);
-          if (filters.search) params.append("search", filters.search);
-          if (filters.startDate) params.append("startDate", filters.startDate);
-          if (filters.endDate) params.append("endDate", filters.endDate);
-
-          const response = await axiosInstance.get(
-            `/cars?${params.toString()}`,
-          );
+          const res = await getUserBookingsService(query);
 
           set({
-            cars: response.data.data.cars,
-            filteredCars: response.data.data.cars,
-            pagination: {
-              currentPage: response.data.pagination?.currentPage || page,
-              totalPages: response.data.pagination?.totalPages || 1,
-              totalItems:
-                response.data.pagination?.totalItems || response.data.results,
-              itemsPerPage: limit,
-            },
+            userBookings: res.data.data.bookings,
+            pagination: res.data.pagination,
             loading: false,
           });
 
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to fetch cars",
-            loading: false,
-          });
-          throw error;
+          return res.data;
+        } catch (err) {
+          set({ error: err.response?.data?.message, loading: false });
+          throw err;
         }
       },
 
-      // Fetch single car by ID
-      fetchCarById: async (id) => {
-        set({ loading: true, error: null });
-
-        try {
-          const response = await axiosInstance.get(`/cars/${id}`);
-
-          set({
-            selectedCar: response.data.data.car,
-            loading: false,
-          });
-
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to fetch car",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // Fetch unique brands
-      fetchBrands: async () => {
-        set({ loading: true, error: null });
-
-        try {
-          const response = await axiosInstance.get(
-            "/cars/brands?includeCounts=true&includeModels=true",
-          );
-
-          set({
-            brands:
-              response.data.data.brandsWithDetails || response.data.data.brands,
-            loading: false,
-          });
-
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to fetch brands",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // Check car availability
-      checkCarAvailability: async (carId, startDate, endDate) => {
-        set({
-          availability: {
-            ...get().availability,
-            isChecking: true,
-          },
-        });
-
-        try {
-          const response = await axiosInstance.get(
-            `/bookings/check-availability?carId=${carId}&startDate=${startDate}&endDate=${endDate}`,
-          );
-
-          set({
-            availability: {
-              isChecking: false,
-              available: response.data.data.available,
-              availableTimeSlots: response.data.data.availableTimeSlots || [],
-              conflictingBookings: response.data.data.conflictingBookings || [],
-              pricing: response.data.data.pricing,
-            },
-          });
-
-          return response.data;
-        } catch (error) {
-          set({
-            availability: {
-              isChecking: false,
-              available: false,
-              error: error.response?.data?.message,
-            },
-          });
-          throw error;
-        }
-      },
-
-      // Get available time slots
-      getAvailableTimeSlots: async (carId, date) => {
-        set({ loading: true });
-
-        try {
-          const response = await axiosInstance.get(
-            `/bookings/time-slots?carId=${carId}&date=${date}`,
-          );
-
-          set({
-            availability: {
-              ...get().availability,
-              availableTimeSlots: response.data.data.availableSlots,
-            },
-            loading: false,
-          });
-
-          return response.data;
-        } catch (error) {
-          set({ loading: false });
-          throw error;
-        }
-      },
-
-      // ==================== BOOKING METHODS ====================
-
-      // Create booking
-      createBooking: async (bookingData) => {
-        set({ loading: true, error: null });
-
-        try {
-          const response = await axiosInstance.post("/bookings", bookingData);
-
-          // Add to user bookings
-          set((state) => ({
-            userBookings: [response.data.data.booking, ...state.userBookings],
-            selectedBooking: response.data.data.booking,
-            loading: false,
-          }));
-
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to create booking",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // Fetch user bookings
-      fetchUserBookings: async (status = "", page = 1, limit = 10) => {
-        set({ loading: true, error: null });
-
-        try {
-          const params = new URLSearchParams();
-          params.append("page", page);
-          params.append("limit", limit);
-          if (status) params.append("status", status);
-
-          const response = await axiosInstance.get(
-            `/bookings/my-bookings?${params.toString()}`,
-          );
-
-          set({
-            userBookings: response.data.data.bookings,
-            pagination: response.data.pagination,
-            loading: false,
-          });
-
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to fetch bookings",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // Fetch booking by ID
       fetchBookingById: async (id) => {
         set({ loading: true, error: null });
 
         try {
-          const response = await axiosInstance.get(`/bookings/${id}`);
+          const res = await getBookingByIdService(id);
 
           set({
-            selectedBooking: response.data.data.booking,
+            selectedBooking: res.data.data.booking,
             loading: false,
           });
 
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to fetch booking",
-            loading: false,
-          });
-          throw error;
+          return res.data;
+        } catch (err) {
+          set({ error: err.response?.data?.message, loading: false });
+          throw err;
         }
       },
 
-      // Update booking
-      updateBooking: async (id, updateData) => {
+      updateBooking: async (id, data) => {
         set({ loading: true, error: null });
 
         try {
-          const response = await axiosInstance.patch(
-            `/bookings/${id}`,
-            updateData,
-          );
+          const res = await updateBookingService(id, data);
+          const updated = res.data.data.booking;
 
-          // Update in user bookings
-          const updatedBookings = get().userBookings.map((booking) =>
-            booking._id === id ? response.data.data.booking : booking,
-          );
-
-          set({
-            userBookings: updatedBookings,
-            selectedBooking: response.data.data.booking,
+          set((state) => ({
+            userBookings: state.userBookings.map((b) =>
+              b._id === id ? updated : b,
+            ),
+            selectedBooking: updated,
             loading: false,
-          });
+          }));
 
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to update booking",
-            loading: false,
-          });
-          throw error;
+          return res.data;
+        } catch (err) {
+          set({ error: err.response?.data?.message, loading: false });
+          throw err;
         }
       },
 
-      // Cancel booking
-      cancelBooking: async (id, cancellationReason) => {
+      cancelBooking: async (id, reason) => {
         set({ loading: true, error: null });
 
         try {
-          const response = await axiosInstance.patch(`/bookings/${id}/cancel`, {
-            cancellationReason,
+          const res = await cancelBookingService(id, {
+            cancellationReason: reason,
           });
 
-          // Update in user bookings
-          const updatedBookings = get().userBookings.map((booking) =>
-            booking._id === id ? { ...booking, status: "cancelled" } : booking,
-          );
+          const updated = res.data.data.booking;
 
+          set((state) => ({
+            userBookings: state.userBookings.map((b) =>
+              b._id === id ? updated : b,
+            ),
+            selectedBooking: updated,
+            loading: false,
+          }));
+
+          return res.data;
+        } catch (err) {
+          set({ error: err.response?.data?.message, loading: false });
+          throw err;
+        }
+      },
+
+      checkAvailability: async (carId, startDate, endDate) => {
+        set({ loading: true, error: null });
+        try {
+          const query = buildBookingQuery({ carId, startDate, endDate });
+          const res = await checkAvailabilityService(query);
+          set({ loading: false });
+          return res.data;
+        } catch (err) {
           set({
-            userBookings: updatedBookings,
-            selectedBooking: response.data.data.booking,
+            error:
+              err.response?.data?.message || "Failed to check availability",
             loading: false,
           });
+          throw err;
+        }
+      },
 
-          return response.data;
+      getTimeSlots: async (carId, date, duration = 1) => {
+        set({ loading: true, error: null });
+        try {
+          const query = buildBookingQuery({ carId, date, duration });
+          const res = await getTimeSlotsService(query);
+          return res.data;
         } catch (error) {
           set({
-            error: error.response?.data?.message || "Failed to cancel booking",
+            error:
+              error.response?.data?.message || "Failed to check getTimeSlots",
             loading: false,
           });
           throw error;
         }
       },
 
-      // ==================== ADMIN METHODS ====================
+      // ================= ADMIN =================
 
-      // Fetch all bookings (Admin)
-      fetchAllBookings: async (page = 1, limit = 20, filters = {}) => {
+      fetchAllBookings: async (page = 1, limit = 20) => {
         set({ loading: true, error: null });
 
         try {
-          const params = new URLSearchParams();
-          params.append("page", page);
-          params.append("limit", limit);
+          const { filters, sort } = get();
 
-          if (filters.status) params.append("status", filters.status);
-          if (filters.startDate) params.append("startDate", filters.startDate);
-          if (filters.endDate) params.append("endDate", filters.endDate);
+          const query = buildBookingQuery({
+            page,
+            limit,
+            sort,
+            ...filters,
+          });
 
-          const response = await axiosInstance.get(
-            `/bookings?${params.toString()}`,
-          );
+          const res = await getAllBookingsService(query);
 
           set({
-            bookings: response.data.data.bookings,
-            pagination: response.data.pagination,
+            bookings: res.data.data.bookings,
+            pagination: res.data.pagination,
             loading: false,
           });
 
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to fetch bookings",
-            loading: false,
-          });
-          throw error;
+          return res.data;
+        } catch (err) {
+          set({ error: err.response?.data?.message, loading: false });
+          throw err;
         }
       },
 
-      // Update booking status (Admin)
       updateBookingStatus: async (id, status, adminNotes = "") => {
         set({ loading: true, error: null });
 
         try {
-          const response = await axiosInstance.patch(`/bookings/${id}/status`, {
+          const res = await updateBookingStatusService(id, {
             status,
             adminNotes,
           });
 
+          const updated = res.data.data.booking;
+
+          set((state) => ({
+            bookings: state.bookings.map((b) => (b._id === id ? updated : b)),
+            userBookings: state.userBookings.map((b) =>
+              b._id === id ? updated : b,
+            ),
+            selectedBooking: updated,
+            loading: false,
+          }));
+
+          return res.data;
+        } catch (err) {
+          set({ error: err.response?.data?.message, loading: false });
+          throw err;
+        }
+      },
+
+      fetchBookingStatistics: async (
+        period = "month",
+        startDate = null,
+        endDate = null,
+      ) => {
+        set({ loading: true, error: null });
+        try {
+          const query = buildBookingQuery({ period, startDate, endDate });
+          const res = await getBookingStatsService(query);
           set({ loading: false });
-          return response.data;
-        } catch (error) {
+          return res.data;
+        } catch (err) {
           set({
-            error:
-              error.response?.data?.message ||
-              "Failed to update booking status",
+            error: err.response?.data?.message || "Failed to fetch statistics",
             loading: false,
           });
-          throw error;
+          throw err;
         }
       },
 
-      // Create car (Admin)
-      createCar: async (carData) => {
-        set({ loading: true, error: null });
+      // ================= UTILS =================
 
-        try {
-          const response = await axiosInstance.post("/cars", carData);
-
-          // Refresh cars list
-          await get().fetchCars();
-
-          set({ loading: false });
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to create car",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // Update car (Admin)
-      updateCar: async (id, updateData) => {
-        set({ loading: true, error: null });
-
-        try {
-          const response = await axiosInstance.patch(`/cars/${id}`, updateData);
-
-          // Update selected car if it's the same
-          if (get().selectedCar?._id === id) {
-            set({ selectedCar: response.data.data.car });
-          }
-
-          // Refresh cars list
-          await get().fetchCars();
-
-          set({ loading: false });
-          return response.data;
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to update car",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // Toggle car availability (Admin)
-      toggleCarAvailability: async (id, availability, reason = "") => {
-        set({ loading: true, error: null });
-
-        try {
-          const response = await axiosInstance.patch(
-            `/cars/${id}/toggle-availability`,
-            {
-              availability,
-              reason,
-            },
-          );
-
-          // Update car in list
-          const updatedCars = get().cars.map((car) =>
-            car._id === id
-              ? { ...car, availability: response.data.data.car.availability }
-              : car,
-          );
-
-          set({
-            cars: updatedCars,
-            filteredCars: updatedCars,
-            loading: false,
-          });
-
-          return response.data;
-        } catch (error) {
-          set({
-            error:
-              error.response?.data?.message ||
-              "Failed to toggle car availability",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // Delete car (Admin)
-      deleteCar: async (id, permanent = false) => {
-        set({ loading: true, error: null });
-
-        try {
-          const url = permanent ? `/cars/${id}?permanent=true` : `/cars/${id}`;
-          await axiosInstance.delete(url);
-
-          // Remove car from list
-          const updatedCars = get().cars.filter((car) => car._id !== id);
-
-          set({
-            cars: updatedCars,
-            filteredCars: updatedCars,
-            loading: false,
-          });
-
-          return { success: true };
-        } catch (error) {
-          set({
-            error: error.response?.data?.message || "Failed to delete car",
-            loading: false,
-          });
-          throw error;
-        }
-      },
-
-      // ==================== UTILITY METHODS ====================
-
-      // Set filter
-      setFilter: (key, value) => {
+      setFilter: (key, value) =>
         set((state) => ({
-          filters: {
-            ...state.filters,
-            [key]: value,
-          },
-        }));
-      },
+          filters: { ...state.filters, [key]: value },
+        })),
 
-      // Clear all filters
-      clearFilters: () => {
+      clearFilters: () =>
         set({
           filters: {
-            brand: "",
-            minPrice: "",
-            maxPrice: "",
-            transmission: "",
-            fuelType: "",
-            seats: "",
-            search: "",
+            status: "",
             startDate: null,
             endDate: null,
-            status: "",
+            minPrice: "",
+            maxPrice: "",
+            carId: "",
           },
-        });
-      },
+        }),
 
-      // Set sort
-      setSort: (sortValue) => {
-        set({ sort: sortValue });
-      },
+      setSort: (sort) => set({ sort }),
 
-      // Apply filters and refetch
       applyFilters: async () => {
-        await get().fetchCars(1);
+        await get().fetchUserBookings(1);
       },
 
-      // Clear availability check
-      clearAvailabilityCheck: () => {
-        set({
-          availability: {
-            isChecking: false,
-            available: null,
-            availableTimeSlots: [],
-            conflictingBookings: [],
-          },
-        });
-      },
-
-      // Reset store
-      resetStore: () => {
-        set({
-          cars: [],
-          filteredCars: [],
-          brands: [],
-          selectedCar: null,
-          bookings: [],
-          selectedBooking: null,
-          userBookings: [],
-          loading: false,
-          error: null,
-          pagination: {
-            currentPage: 1,
-            totalPages: 1,
-            totalItems: 0,
-            itemsPerPage: 10,
-          },
-          filters: {
-            brand: "",
-            minPrice: "",
-            maxPrice: "",
-            transmission: "",
-            fuelType: "",
-            seats: "",
-            search: "",
-            startDate: null,
-            endDate: null,
-            status: "",
-          },
-          sort: "-createdAt",
-          availability: {
-            isChecking: false,
-            available: null,
-            availableTimeSlots: [],
-            conflictingBookings: [],
-          },
-        });
-      },
+      clearError: () => set({ error: null }),
     }),
     {
-      name: "booking-storage", // unique name for localStorage
+      name: "booking-storage",
       partialize: (state) => ({
-        filters: state.filters,
+        filters: {
+          ...state.filters,
+          startDate: null,
+          endDate: null,
+        },
         sort: state.sort,
-      }), // only persist filters and sort
+      }),
     },
   ),
 );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Eye,
   EyeOff,
@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import useAuthStore from "@/store/authStore";
 import { cn } from "@/lib/utils";
+import { calculatePasswordStrength } from "@/utils/passwordStrength.js";
 
 const ResetPasswordPage = () => {
   const { token } = useParams();
@@ -62,17 +63,6 @@ const ResetPasswordPage = () => {
     }
   }, [isAuthenticated, isSuccess, navigate]);
 
-  // Calculate password strength
-  const calculatePasswordStrength = (pass) => {
-    let strength = 0;
-    if (pass.length >= 8) strength += 25;
-    if (pass.match(/[a-z]/)) strength += 25;
-    if (pass.match(/[A-Z]/)) strength += 25;
-    if (pass.match(/[0-9]/)) strength += 12.5;
-    if (pass.match(/[@$!%*?&#]/)) strength += 12.5;
-    return Math.min(strength, 100);
-  };
-
   const passwordStrength = calculatePasswordStrength(password);
 
   const getStrengthColor = (strength) => {
@@ -105,16 +95,10 @@ const ResetPasswordPage = () => {
       // User is automatically logged in by the backend
       // The auth store will update isAuthenticated
     }
-
-    // If token is invalid/expired, the backend will return an error
-    // This will be caught and displayed via the error state
+    if (result.tokenExpired) setTokenError(true);
   };
 
   // Check if error is token-related
-  const isTokenRelatedError =
-    error?.toLowerCase().includes("token") ||
-    error?.toLowerCase().includes("expired") ||
-    error?.toLowerCase().includes("invalid");
 
   // Show success state (though user will likely be redirected quickly)
   if (isSuccess) {
@@ -145,7 +129,7 @@ const ResetPasswordPage = () => {
   }
 
   // Show token error state
-  if (tokenError || (error && isTokenRelatedError && !isLoading)) {
+  if (tokenError || (error && tokenError && !isLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <motion.div
@@ -210,7 +194,7 @@ const ResetPasswordPage = () => {
           </div>
 
           {/* Server Error Alert (non-token errors) */}
-          {error && !isTokenRelatedError && (
+          {error && !tokenError && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}

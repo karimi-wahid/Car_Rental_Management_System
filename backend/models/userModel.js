@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   photo: String,
   role: {
     type: String,
-    enum: ['admin', 'user', 'lead-guide', 'guide'],
+    enum: ['admin', 'user'],
     default: 'user',
   },
   password: {
@@ -63,22 +63,17 @@ userSchema.pre('save', function () {
   this.passwordChangedAt = Date.now() - 1000;
 });
 
-userSchema.pre('save', async function () {
-  // Only run this function if password was actually modified
-  if (!this.isModified('password')) return;
-
-  this.password = await bcrypt.hash(this.password, 12);
-
-  this.passwordConfirm = undefined;
-
-  // Update the changedPasswordAt property
-  this.passwordChangedAt = Date.now() - 1000;
-});
-
 userSchema.pre(/^find/, function () {
   // this points to the current query
   this.find({ active: { $ne: false } });
 });
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword,
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
@@ -86,7 +81,6 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
       this.passwordChangedAt.getTime() / 1000,
       10,
     );
-    console.log(changedTimestamp, JWTTimestamp);
     return JWTTimestamp < changedTimestamp;
   }
 

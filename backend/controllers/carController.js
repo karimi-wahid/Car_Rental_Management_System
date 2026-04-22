@@ -1,14 +1,13 @@
 import { Car } from '../models/carModel.js';
+import { Booking } from '../models/bookingModel.js';
+import cloudinary from '../config/cloudinary.js';
 import AppError from '../utils/AppError.js';
 import catchAsync from '../utils/catchAsync.js';
+import ApiFetuares from '../utils/apiFeatures.js';
+import mongoose from 'mongoose';
 
 export const createCar = catchAsync(async (req, res, next) => {
-  // Check if user is admin
-  if (req.user.role !== 'admin') {
-    return next(new AppError('Admin access required', 403));
-  }
-
-  const {
+  let {
     name,
     brand,
     carModel,
@@ -25,20 +24,7 @@ export const createCar = catchAsync(async (req, res, next) => {
     availability = true,
   } = req.body;
 
-  // Handle images (could be from file upload or URLs)
-  let images = req.body.images;
-
-  // If files were uploaded via multer
-  if (req.files && req.files.length > 0) {
-    images = req.files.map((file) => file.path);
-  }
-
-  // If single file upload
-  if (req.file) {
-    images = [req.file.path];
-  }
-
-  // Validate required fields
+  // ✅ Validate required fields
   const requiredFields = [
     'name',
     'brand',
@@ -51,13 +37,10 @@ export const createCar = catchAsync(async (req, res, next) => {
     'description',
     'licensePlate',
   ];
-  const missingFields = [];
 
-  for (const field of requiredFields) {
-    if (!req.body[field]) {
-      missingFields.push(field);
-    }
-  }
+  features = JSON.parse(features);
+
+  const missingFields = requiredFields.filter((field) => !req.body[field]);
 
   if (missingFields.length > 0) {
     return next(
@@ -65,77 +48,18 @@ export const createCar = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Validate images
-  if (!images || images.length === 0) {
-    return next(new AppError('At least one car image is required', 400));
-  }
-
-  // Validate numeric fields
-  const parsedYear = parseInt(year);
-  const parsedSeats = parseInt(seats);
-  const parsedPricePerDay = parseFloat(pricePerDay);
-  const parsedMileage = mileage ? parseInt(mileage) : 0;
-
-  if (isNaN(parsedYear)) {
-    return next(new AppError('Year must be a valid number', 400));
-  }
-
-  if (isNaN(parsedSeats)) {
-    return next(new AppError('Seats must be a valid number', 400));
-  }
-
-  if (isNaN(parsedPricePerDay)) {
-    return next(new AppError('Price per day must be a valid number', 400));
-  }
-
-  // Validate year range
+  // ✅ Validate ranges
   const currentYear = new Date().getFullYear();
-  if (parsedYear < 2000 || parsedYear > currentYear + 1) {
+
+  if (year < 2000 || year > currentYear + 1) {
     return next(
       new AppError(`Year must be between 2000 and ${currentYear + 1}`, 400),
     );
   }
 
-  // Validate seats
-  if (parsedSeats < 2 || parsedSeats > 50) {
-    return next(new AppError('Seats must be between 2 and 50', 400));
-  }
-
-  // Validate price
-  if (parsedPricePerDay <= 0) {
-    return next(new AppError('Price per day must be greater than 0', 400));
-  }
-
-  // Validate transmission
-  const validTransmissions = ['manual', 'automatic', 'semi_automatic', 'cvt'];
-  if (!validTransmissions.includes(transmission)) {
-    return next(
-      new AppError(
-        `Invalid transmission. Must be one of: ${validTransmissions.join(', ')}`,
-        400,
-      ),
-    );
-  }
-
-  // Validate fuel type
-  const validFuelTypes = [
-    'petrol',
-    'diesel',
-    'electric',
-    'hybrid',
-    'plugin_hybrid',
-  ];
-  if (!validFuelTypes.includes(fuelType)) {
-    return next(
-      new AppError(
-        `Invalid fuel type. Must be one of: ${validFuelTypes.join(', ')}`,
-        400,
-      ),
-    );
-  }
-
-  // Check if license plate already exists
+  // ✅ Normalize license plate
   const normalizedLicensePlate = licensePlate.toUpperCase().trim();
+
   const existingCar = await Car.findOne({
     licensePlate: normalizedLicensePlate,
   });
@@ -149,64 +73,55 @@ export const createCar = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Process features (can be string array or comma-separated string)
-  let processedFeatures = [];
-  if (features) {
-    if (Array.isArray(features)) {
-      processedFeatures = features;
-    } else if (typeof features === 'string') {
-      processedFeatures = features.split(',').map((f) => f.trim());
-    }
+  // ✅ Upload images to Cloudinary
+
+  // ❗ Require at least one image
+  if (!req.files || req.files.length === 0) {
+    return next(new AppError('At least one car image is required', 400));
   }
 
-  // Create new car
+  const uploadResults = [];
+  for (const file of req.files) {
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: 'cars',
+    });
+    uploadResults.push({
+      url: result.secure_url,
+      public_id: result.public_id,
+    });
+  }
+
+  const images = uploadResults;
+
+  // ✅ Create car
   const newCar = await Car.create({
     name: name.trim(),
     brand: brand.trim(),
     carModel: carModel.trim(),
-    year: parsedYear,
-    seats: parsedSeats,
+    year: year,
+    seats: seats,
     transmission,
     fuelType,
-    pricePerDay: parsedPricePerDay,
-    images,
+    pricePerDay,
+    images: images,
     description: description.trim(),
-    features: processedFeatures,
+    features,
     licensePlate: normalizedLicensePlate,
-    mileage: parsedMileage,
+    mileage,
     color: color ? color.trim() : '',
     availability: availability === true || availability === 'true',
-    createdBy: req.user.id,
+    createdBy: req.user._id,
   });
 
-  // Log the action
   console.log(
-    `Admin ${req.user.email} created new car: ${newCar.name} (${newCar.licensePlate})`,
+    `Admin ${req.user.email} created car: ${newCar.name} (${newCar.licensePlate})`,
   );
 
   res.status(201).json({
     status: 'success',
     message: 'Car created successfully',
     data: {
-      car: {
-        _id: newCar._id,
-        name: newCar.name,
-        brand: newCar.brand,
-        carModel: newCar.carModel,
-        year: newCar.year,
-        seats: newCar.seats,
-        transmission: newCar.transmission,
-        fuelType: newCar.fuelType,
-        pricePerDay: newCar.pricePerDay,
-        images: newCar.images,
-        description: newCar.description,
-        features: newCar.features,
-        licensePlate: newCar.licensePlate,
-        mileage: newCar.mileage,
-        color: newCar.color,
-        availability: newCar.availability,
-        createdAt: newCar.createdAt,
-      },
+      car: newCar,
     },
   });
 });
@@ -485,9 +400,6 @@ export const getCarById = catchAsync(async (req, res, next) => {
     return next(new AppError('No car found with that ID', 404));
   }
 
-  // Get booking statistics for this car
-  const Booking = mongoose.model('Booking');
-
   const [totalBookings, upcomingBookings, averageRating] = await Promise.all([
     Booking.countDocuments({ car: id, status: 'completed' }),
     Booking.countDocuments({
@@ -497,7 +409,10 @@ export const getCarById = catchAsync(async (req, res, next) => {
     }),
     Booking.aggregate([
       {
-        $match: { car: mongoose.Types.ObjectId(id), rating: { $exists: true } },
+        $match: {
+          car: new mongoose.Types.ObjectId(id),
+          rating: { $exists: true },
+        },
       },
       {
         $group: {
@@ -758,30 +673,24 @@ export const toggleCarAvailability = catchAsync(async (req, res, next) => {
   }
 
   const { id } = req.params;
-  const { availability, reason } = req.body;
+  const { availability } = req.body;
 
   // Find the car
   const car = await Car.findById(id);
   if (!car) {
     return next(new AppError('No car found with that ID', 404));
   }
-
-  // Determine new availability status
-  let newAvailability;
-  if (availability !== undefined) {
-    newAvailability = availability === true || availability === 'true';
-  } else {
-    newAvailability = !car.availability;
-  }
+  console.log('car Before', car);
 
   // Check if trying to deactivate car with active bookings
-  if (!newAvailability && car.availability) {
+  if (availability && car.availability) {
     const Booking = mongoose.model('Booking');
     const activeBookings = await Booking.findOne({
       car: id,
       status: { $in: ['confirmed', 'pending', 'in_progress'] },
       startDate: { $gt: new Date() },
     });
+    console.log('Active Booking', activeBookings);
 
     if (activeBookings) {
       return next(
@@ -794,24 +703,10 @@ export const toggleCarAvailability = catchAsync(async (req, res, next) => {
   }
 
   // Update availability
-  car.availability = newAvailability;
-
-  // Add admin notes if reason provided
-  if (reason) {
-    car.adminNotes = reason;
-  }
-
-  // Track availability history
-  if (!car.availabilityHistory) {
-    car.availabilityHistory = [];
-  }
-
-  car.availabilityHistory.push({
-    status: newAvailability,
-    changedBy: req.user.id,
-    changedAt: new Date(),
-    reason: reason || null,
-  });
+  console.log('car Availability Before', car.availability);
+  car.availability = availability;
+  console.log('car Availability After', car.availability);
+  console.log('car After', car);
 
   await car.save();
 
@@ -822,7 +717,7 @@ export const toggleCarAvailability = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    message: `Car ${newAvailability ? 'activated' : 'deactivated'} successfully`,
+    message: `Car ${availability ? 'activated' : 'deactivated'} successfully`,
     data: {
       car: {
         _id: car._id,
@@ -831,7 +726,6 @@ export const toggleCarAvailability = catchAsync(async (req, res, next) => {
         carModel: car.carModel,
         licensePlate: car.licensePlate,
         availability: car.availability,
-        ...(reason && { reason }),
       },
     },
   });

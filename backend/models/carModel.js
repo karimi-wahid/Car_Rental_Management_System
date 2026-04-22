@@ -17,6 +17,11 @@ const FuelType = {
   PLUGIN_HYBRID: 'plugin_hybrid',
 };
 
+const imageSchema = new mongoose.Schema({
+  url: String,
+  public_id: String,
+});
+
 const carSchema = new Schema(
   {
     name: {
@@ -64,7 +69,7 @@ const carSchema = new Schema(
       min: [0, 'Price cannot be negative'],
     },
     images: {
-      type: [String],
+      type: [imageSchema],
       required: [true, 'At least one image is required'],
       validate: {
         validator: function (v) {

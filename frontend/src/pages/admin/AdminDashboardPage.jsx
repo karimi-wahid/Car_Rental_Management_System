@@ -30,8 +30,11 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import { toast } from "react-hot-toast";
+import useBookingStore from "@/store/bookingStore";
+import useCarStore from "@/store/carStore";
+import useUserStore from "@/store/userStore";
 
 const COLORS = [
   "#3b82f6",
@@ -46,7 +49,7 @@ const COLORS = [
 const formatCurrency = (value) => {
   return new Intl.NumberFormat("fa-IR", {
     style: "currency",
-    currency: "IRR",
+    currency: "AFN",
     maximumFractionDigits: 0,
   }).format(value);
 };
@@ -58,141 +61,184 @@ const formatNumber = (value) => {
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const { users, getAllUsers } = useUserStore();
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("week");
   const [stats, setStats] = useState({
     overview: {
-      totalUsers: 1250,
-      totalCars: 48,
-      totalBookings: 342,
-      totalRevenue: 285000000,
-      availableCars: 32,
-      occupancyRate: 68,
-      avgBookingValue: 833000,
-      conversionRate: 12.5,
-      newUsersToday: 24,
-      pendingBookings: 18,
+      totalUsers: 0,
+      totalCars: 0,
+      totalBookings: 0,
+      totalRevenue: 0,
+      availableCars: 0,
+      occupancyRate: 0,
+      avgBookingValue: 0,
+      conversionRate: 0,
+      newUsersToday: 0,
+      pendingBookings: 0,
     },
-    revenueData: [
-      { month: "فروردین", revenue: 45000000 },
-      { month: "اردیبهشت", revenue: 52000000 },
-      { month: "خرداد", revenue: 48000000 },
-      { month: "تیر", revenue: 61000000 },
-      { month: "مرداد", revenue: 58000000 },
-      { month: "شهریور", revenue: 71000000 },
-    ],
-    bookingsByStatus: {
-      pending: { count: 18, revenue: 15000000 },
-      confirmed: { count: 145, revenue: 120000000 },
-      completed: { count: 156, revenue: 130000000 },
-      cancelled: { count: 23, revenue: 20000000 },
-    },
-    popularCars: [
-      {
-        carDetails: {
-          name: "تسلا مدل ۳",
-          brand: "تسلا",
-          model: "۲۰۲۴",
-          images: ["/cars/tesla-model3.jpg"],
-        },
-        bookings: 45,
-        revenue: 37500000,
-        rating: 4.8,
-      },
-      {
-        carDetails: {
-          name: "بی ام و X5",
-          brand: "بی ام و",
-          model: "۲۰۲۴",
-          images: ["/cars/bmw-x5.jpg"],
-        },
-        bookings: 38,
-        revenue: 42000000,
-        rating: 4.9,
-      },
-      {
-        carDetails: {
-          name: "مرسدس بنز E-Class",
-          brand: "مرسدس بنز",
-          model: "۲۰۲۴",
-          images: ["/cars/mercedes-eclass.jpg"],
-        },
-        bookings: 32,
-        revenue: 38000000,
-        rating: 4.7,
-      },
-    ],
-    recentActivities: [
-      {
-        type: "user_created",
-        description: "کاربر جدید ثبت نام کرد: علی محمدی",
-        timestamp: new Date(),
-        amount: null,
-      },
-      {
-        type: "booking_created",
-        description: "رزرو جدید: تسلا مدل ۳ توسط سارا احمدی",
-        timestamp: new Date(Date.now() - 1000 * 60 * 30),
-        amount: 2500000,
-      },
-      {
-        type: "payment_received",
-        description: "پرداخت دریافت شد: رزرو #۱۲۳۴۵",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60),
-        amount: 3500000,
-      },
-      {
-        type: "car_added",
-        description: "موتر جدید اضافه شد: پورشه کاین",
-        timestamp: new Date(Date.now() - 1000 * 60 * 120),
-        amount: null,
-      },
-      {
-        type: "booking_completed",
-        description: "رزرو تکمیل شد: بی ام و X5",
-        timestamp: new Date(Date.now() - 1000 * 60 * 180),
-        amount: 2800000,
-      },
-    ],
+    revenueData: [],
+    bookingsByStatus: {},
+    popularCars: [],
+    recentActivities: [],
   });
 
+  const { fetchAllBookings } = useBookingStore();
+
+  const { fetchCars } = useCarStore();
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    if (!user) return;
+    const loadDashboard = async () => {
       setLoading(true);
       try {
-        // Fetch real data here
-        // const response = await adminService.getDashboardStats({ timeRange });
-        // setStats(response.data);
+        // Fetch data in parallel
+        const [bookingRes, carRes] = await Promise.all([
+          fetchAllBookings(1, 100),
+          fetchCars(1, 100),
+        ]);
 
-        // Simulate loading
-        setTimeout(() => setLoading(false), 1000);
+        const bookingsData = bookingRes?.data?.bookings || [];
+        const carsData = carRes?.data?.cars || [];
+
+        // ======================
+        // 📊 OVERVIEW STATS
+        // ======================
+
+        const totalRevenue = bookingsData.reduce(
+          (sum, b) => sum + (b.totalPrice || 0),
+          0,
+        );
+
+        const pendingBookings = bookingsData.filter(
+          (b) => b.status === "pending",
+        ).length;
+
+        const availableCars = carsData.filter((c) => c.availability).length;
+
+        const occupancyRate =
+          carsData.length > 0
+            ? ((carsData.length - availableCars) / carsData.length) * 100
+            : 0;
+
+        // ======================
+        // 📈 REVENUE CHART
+        // ======================
+
+        const revenueMap = {};
+
+        bookingsData.forEach((b) => {
+          const month = new Date(b.createdAt).toLocaleDateString("fa-IR", {
+            month: "long",
+          });
+
+          if (!revenueMap[month]) {
+            revenueMap[month] = 0;
+          }
+
+          revenueMap[month] += b.totalPrice || 0;
+        });
+
+        const revenueData = Object.entries(revenueMap).map(
+          ([month, revenue]) => ({
+            month,
+            revenue,
+          }),
+        );
+
+        // ======================
+        // 📊 STATUS DISTRIBUTION
+        // ======================
+
+        const statusCounts = {
+          pending: { count: 0, revenue: 0 },
+          confirmed: { count: 0, revenue: 0 },
+          completed: { count: 0, revenue: 0 },
+          cancelled: { count: 0, revenue: 0 },
+        };
+
+        bookingsData.forEach((b) => {
+          if (statusCounts[b.status]) {
+            statusCounts[b.status].count += 1;
+            statusCounts[b.status].revenue += b.totalPrice || 0;
+          }
+        });
+
+        // ======================
+        // 🚗 POPULAR CARS
+        // ======================
+
+        const carMap = {};
+
+        bookingsData.forEach((b) => {
+          const carId = b.car?._id;
+          if (!carId) return;
+
+          if (!carMap[carId]) {
+            carMap[carId] = {
+              carDetails: b.car,
+              bookings: 0,
+              revenue: 0,
+            };
+          }
+
+          carMap[carId].bookings += 1;
+          carMap[carId].revenue += b.totalPrice || 0;
+        });
+
+        const popularCars = Object.values(carMap)
+          .sort((a, b) => b.bookings - a.bookings)
+          .slice(0, 3);
+
+        // ======================
+        // 🧾 FINAL STATE
+        // ======================
+
+        setStats({
+          overview: {
+            totalUsers: users.length, // later connect userStore
+            totalCars: carsData.length,
+            totalBookings: bookingsData.length,
+            totalRevenue,
+            availableCars,
+            occupancyRate: Math.round(occupancyRate),
+            avgBookingValue:
+              bookingsData.length > 0 ? totalRevenue / bookingsData.length : 0,
+            conversionRate: 0,
+            newUsersToday: 0,
+            pendingBookings,
+          },
+          revenueData,
+          bookingsByStatus: statusCounts,
+          popularCars,
+          recentActivities: [],
+        });
       } catch (error) {
-        toast.error("خطا در دریافت اطلاعات داشبورد");
         console.error(error);
+        toast.error("خطا در دریافت اطلاعات داشبورد");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchDashboardData();
-  }, [timeRange]);
+    getAllUsers();
+
+    loadDashboard();
+  }, [timeRange, fetchAllBookings, fetchCars, user, getAllUsers, users.length]);
 
   const statCards = [
     {
       title: "کل کاربران",
-      value: formatNumber(stats.overview.totalUsers),
+      value: formatNumber(stats.overview?.totalUsers),
       icon: Users,
       color: "from-blue-500 to-cyan-500",
-      trend: "+۱۲٪",
-      trendUp: true,
-      subtitle: `${stats.overview.newUsersToday} کاربر جدید امروز`,
+      subtitle: `${stats.overview?.newUsersToday} کاربر جدید امروز`,
     },
     {
       title: "کل موترها",
       value: stats.overview.totalCars,
       icon: Car,
       color: "from-purple-500 to-pink-500",
-      trend: "+۵٪",
-      trendUp: true,
       subtitle: `${stats.overview.availableCars} موتر در دسترس`,
     },
     {
@@ -200,8 +246,6 @@ const AdminDashboardPage = () => {
       value: stats.overview.totalBookings,
       icon: Calendar,
       color: "from-green-500 to-emerald-500",
-      trend: "+۱۸٪",
-      trendUp: true,
       subtitle: `${stats.overview.pendingBookings} در انتظار تایید`,
     },
     {
@@ -209,8 +253,6 @@ const AdminDashboardPage = () => {
       value: formatCurrency(stats.overview.totalRevenue),
       icon: DollarSign,
       color: "from-orange-500 to-red-500",
-      trend: "+۲۳٪",
-      trendUp: true,
       subtitle: `میانگین: ${formatCurrency(stats.overview.avgBookingValue)}`,
     },
   ];
@@ -303,104 +345,7 @@ const AdminDashboardPage = () => {
             مشاهده می‌کنید.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant={timeRange === "week" ? "default" : "outline"}
-            onClick={() => setTimeRange("week")}
-          >
-            هفته
-          </Button>
-          <Button
-            variant={timeRange === "month" ? "default" : "outline"}
-            onClick={() => setTimeRange("month")}
-          >
-            ماه
-          </Button>
-          <Button
-            variant={timeRange === "year" ? "default" : "outline"}
-            onClick={() => setTimeRange("year")}
-          >
-            سال
-          </Button>
-        </div>
       </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-linear-to-br from-blue-500/5 to-cyan-500/5 border-blue-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">نرخ اشغال</p>
-                <p className="text-2xl font-bold">
-                  {stats.overview.occupancyRate}٪
-                </p>
-              </div>
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Car className="w-5 h-5 text-blue-500" />
-              </div>
-            </div>
-            <Progress value={stats.overview.occupancyRate} className="mt-2" />
-          </CardContent>
-        </Card>
-
-        <Card className="bg-linear-to-br from-green-500/5 to-emerald-500/5 border-green-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">نرخ تبدیل</p>
-                <p className="text-2xl font-bold">
-                  {stats.overview.conversionRate}٪
-                </p>
-              </div>
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-green-500" />
-              </div>
-            </div>
-            <Progress value={stats.overview.conversionRate} className="mt-2" />
-          </CardContent>
-        </Card>
-
-        <Card className="bg-linear-to-br from-purple-500/5 to-pink-500/5 border-purple-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">میانگین امتیاز</p>
-                <p className="text-2xl font-bold">۴.۸</p>
-              </div>
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <Star className="w-5 h-5 text-purple-500" />
-              </div>
-            </div>
-            <div className="flex items-center gap-1 mt-2">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className="w-4 h-4 fill-yellow-500 text-yellow-500"
-                />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-linear-to-br from-orange-500/5 to-red-500/5 border-orange-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">رزروهای امروز</p>
-                <p className="text-2xl font-bold">۱۲</p>
-              </div>
-              <div className="p-2 bg-orange-500/10 rounded-lg">
-                <Calendar className="w-5 h-5 text-orange-500" />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              +۳ نسبت به دیروز
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, index) => (
@@ -418,17 +363,6 @@ const AdminDashboardPage = () => {
                   >
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
-                  <Badge
-                    variant={stat.trendUp ? "default" : "destructive"}
-                    className="flex items-center gap-1"
-                  >
-                    {stat.trendUp ? (
-                      <TrendingUp className="w-3 h-3" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3" />
-                    )}
-                    {stat.trend}
-                  </Badge>
                 </div>
                 <h3 className="text-3xl font-bold mb-1">{stat.value}</h3>
                 <p className="text-sm font-medium mb-1">{stat.title}</p>

@@ -12,7 +12,7 @@ import {
   Headphones,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navigation = [

@@ -1,5 +1,6 @@
 import express from 'express';
 import { protect, restrictTo } from '../controllers/authController.js';
+import { upload } from '../middleware/upload.js';
 import {
   createCar,
   getAllCars,
@@ -23,8 +24,14 @@ router.use(protect);
 
 // Admin only routes
 router.use(restrictTo('admin'));
-router.post('/', createCar);
-router.patch('/:id', updateCar);
+router.post(
+  '/',
+  protect,
+  restrictTo('admin'),
+  upload.array('images', 10),
+  createCar,
+);
+router.patch('/:id', upload.array('images', 10), updateCar);
 router.patch('/:id/toggle-availability', toggleCarAvailability);
 router.delete('/:id', deleteCar);
 router.get('/statistics', getCarStatistics);

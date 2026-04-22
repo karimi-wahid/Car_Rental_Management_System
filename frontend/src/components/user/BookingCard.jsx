@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { format, differenceInDays, isWithinInterval } from "date-fns";
-import { fa } from "date-fns-jalali";
 import {
   Calendar,
   MapPin,
@@ -52,7 +51,7 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
 
   // Format date for Persian display
   const formatPersianDate = (date) => {
-    return format(date, "yyyy/MM/dd", { locale: fa });
+    return format(date, "yyyy/MM/dd", "yyyy-MM-dd");
   };
 
   // Get status configuration

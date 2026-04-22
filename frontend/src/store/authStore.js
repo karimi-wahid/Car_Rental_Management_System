@@ -1,221 +1,166 @@
 import { create } from "zustand";
-import axios from "axios";
-
-const API_URL = "http://localhost:3000/api/v1";
-
-// Create axios instance with default config
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+import {
+  signupService,
+  loginService,
+  forgotPasswordService,
+  resetPasswordService,
+  updatePasswordService,
+  logoutService,
+  getMeService,
+} from "@/services/authService";
 
 const authStore = (set) => ({
-  // State
   user: null,
   isLoading: false,
   error: null,
   isAuthenticated: false,
 
-  // Signup
   signup: async (userData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axiosInstance.post("/auth/signup", userData);
-      const { data } = response.data;
+      const res = await signupService(userData);
+      const { data } = res.data;
 
       set({
         user: data.user,
         isAuthenticated: true,
         isLoading: false,
-        error: null,
       });
 
-      return { success: true, data: response.data };
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Signup failed";
-      set({
-        isLoading: false,
-        error: errorMessage,
-        isAuthenticated: false,
-      });
-      return { success: false, error: errorMessage };
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || "Signup failed";
+      set({ isLoading: false, error: message });
+      return { success: false, error: message };
     }
   },
 
-  // Login
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axiosInstance.post("/auth/login", {
-        email,
-        password,
-      });
-      const { data } = response.data;
+      const res = await loginService(email, password);
+      const { data } = res.data;
 
       set({
         user: data.user,
         isAuthenticated: true,
         isLoading: false,
-        error: null,
       });
 
-      return { success: true, data: response.data };
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Login failed";
-      set({
-        isLoading: false,
-        error: errorMessage,
-        isAuthenticated: false,
-      });
-      return { success: false, error: errorMessage };
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || "Login failed";
+      set({ isLoading: false, error: message });
+      return { success: false, error: message };
     }
   },
 
-  // Forgot Password
   forgotPassword: async (email) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axiosInstance.post("/auth/forgotPassword", {
-        email,
-      });
-      set({
-        isLoading: false,
-        error: null,
-      });
-      return { success: true, data: response.data };
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to send reset email";
-      set({
-        isLoading: false,
-        error: errorMessage,
-      });
-      return { success: false, error: errorMessage };
+      await forgotPasswordService(email);
+      set({ isLoading: false });
+      return { success: true };
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Failed to send reset email";
+      set({ isLoading: false, error: message });
+      return { success: false, error: message };
     }
   },
 
-  // Reset Password
   resetPassword: async (token, password, passwordConfirm) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axiosInstance.patch(
-        `/auth/resetPassword/${token}`,
-        {
-          password,
-          passwordConfirm,
-        },
-      );
-      const { data } = response.data;
+      const res = await resetPasswordService(token, {
+        password,
+        passwordConfirm,
+      });
+
+      const { data } = res.data;
 
       set({
         user: data.user,
         isAuthenticated: true,
         isLoading: false,
-        error: null,
       });
 
-      return { success: true, data: response.data };
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to reset password";
+      return { success: true };
+    } catch (err) {
+      const status = err.response?.status;
+      const message = err.response?.data?.message || "Failed to reset password";
+
       set({
         isLoading: false,
-        error: errorMessage,
+        error: message,
+        tokenExpired: status === 400,
       });
-      return { success: false, error: errorMessage };
+
+      return { success: false, error: message };
     }
   },
 
-  // Update Password (Authenticated)
   updatePassword: async (passwordCurrent, password, passwordConfirm) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axiosInstance.patch("/auth/updateMyPassword", {
+      const res = await updatePasswordService({
         passwordCurrent,
         password,
         passwordConfirm,
       });
-      const { data } = response.data;
+
+      const { data } = res.data;
 
       set({
         user: data.user,
+        isAuthenticated: true,
         isLoading: false,
-        error: null,
       });
 
-      return { success: true, data: response.data };
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to update password";
-      set({
-        isLoading: false,
-        error: errorMessage,
-      });
-      return { success: false, error: errorMessage };
+      return { success: true };
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Failed to update password";
+      set({ isLoading: false, error: message });
+      return { success: false, error: message };
     }
   },
 
-  // Logout
   logout: async () => {
     try {
-      await axiosInstance.post("/auth/logout");
-    } catch (error) {
-      console.error("Logout error:", error);
+      await logoutService();
     } finally {
       set({
         user: null,
         isAuthenticated: false,
-        error: null,
       });
     }
   },
 
-  // Clear error
-  clearError: () => {
-    set({ error: null });
-  },
-
-  // Check if user is authenticated (on app load)
   checkAuth: async () => {
     set({ isLoading: true });
     try {
-      const response = await axiosInstance.get("/users/me");
-      const { user } = response.data.data;
+      const res = await getMeService();
+      const { data } = res.data;
 
       set({
-        user,
+        user: data.user,
         isAuthenticated: true,
         isLoading: false,
-        error: null,
       });
 
       return true;
-    } catch (error) {
+    } catch {
       set({
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: null,
       });
-      console.log(error);
       return false;
     }
   },
 
-  // Get current user data
-  getCurrentUser: async () => {
-    try {
-      const response = await axiosInstance.get("/users/me");
-      const { user } = response.data.data;
-      set({ user });
-      return user;
-    } catch (error) {
-      console.error("Failed to get current user:", error);
-      return null;
-    }
-  },
+  clearError: () => set({ error: null }),
 });
 
-const useAuthStore = create(authStore);
-
-export default useAuthStore;
+export const useAuthStore = create(authStore);

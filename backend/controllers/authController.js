@@ -14,13 +14,18 @@ const signToken = (id) =>
 
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
+
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
+    sameSite: 'strict',
   };
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+  }
 
   res.cookie('jwt', token, cookieOptions);
 
@@ -57,10 +62,8 @@ export const login = catchAsync(async (req, res, next) => {
 
   // 2) Check if the user exists && password is correct
   const user = await User.findOne({ email }).select('+password');
-  // const correctPassword = await user.correctPassword(password, user.password);
-  const checkPasswrod = bcrypt.compare(password, user.password);
 
-  if (!user || !checkPasswrod) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
   }
 
@@ -68,10 +71,19 @@ export const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+export const logout = (req, res) => {
+  res.clearCookie('jwt', { httpOnly: true, sameSite: 'strict' });
+  res.status(200).json({ status: 'success', message: 'Logout Successfully' });
+};
+
 export const protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check if it's there
   let token;
-  if (
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  // 2. Authorization header
+  else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
@@ -157,6 +169,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
+    console.log(err);
 
     return next(
       new AppError(
@@ -199,7 +212,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
 
   // 2) Check if POSTed password is correct
-  if (!user.correctPassword(req.body.passwordCurrent, user.password)) {
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
     return next(new AppError('Your current password is wrong.', 401));
   }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Eye,
   EyeOff,
@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { cn } from "@/lib/utils";
 import useAuthStore from "@/store/authStore";
+import { calculatePasswordStrength } from "@/utils/passwordStrength";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -63,17 +64,6 @@ const RegisterPage = () => {
       navigate("/dashboard", { replace: true });
     }
   }, [isAuthenticated, navigate]);
-
-  // Calculate password strength
-  const calculatePasswordStrength = (pass) => {
-    let strength = 0;
-    if (pass.length >= 8) strength += 25;
-    if (pass.match(/[a-z]/)) strength += 25;
-    if (pass.match(/[A-Z]/)) strength += 25;
-    if (pass.match(/[0-9]/)) strength += 12.5;
-    if (pass.match(/[@$!%*?&]/)) strength += 12.5;
-    return Math.min(strength, 100);
-  };
 
   const passwordStrength = calculatePasswordStrength(password);
 

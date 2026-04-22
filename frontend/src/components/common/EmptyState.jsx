@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 export const EmptyState = ({
   title = "No cars found",
   description = "Try adjusting your filters or search criteria",
-  icon = "car",
+  icon: IconComponent, // Accept component directly
+  icon = "car", // Keep string-based icon as fallback
   action,
+  secondaryAction, // Add missing prop
 }) => {
   const icons = {
     car: Car,
@@ -14,7 +16,8 @@ export const EmptyState = ({
     filter: Filter,
   };
 
-  const Icon = icons[icon];
+  // Use provided IconComponent if available, otherwise fall back to string-based icon
+  const Icon = IconComponent || icons[icon] || Car;
 
   return (
     <motion.div
@@ -29,12 +32,19 @@ export const EmptyState = ({
       <p className="text-muted-foreground mb-6 max-w-md mx-auto">
         {description}
       </p>
-      {action && (
-        <Button onClick={action.onClick} className="gap-2">
-          <RefreshCw className="w-4 h-4" />
-          {action.label}
-        </Button>
-      )}
+      <div className="flex gap-3 justify-center">
+        {action && (
+          <Button onClick={action.onClick} className="gap-2">
+            <RefreshCw className="w-4 h-4" />
+            {action.label}
+          </Button>
+        )}
+        {secondaryAction && (
+          <Button variant="outline" onClick={secondaryAction.onClick}>
+            {secondaryAction.label}
+          </Button>
+        )}
+      </div>
     </motion.div>
   );
 };

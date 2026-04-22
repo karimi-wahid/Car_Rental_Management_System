@@ -20,11 +20,19 @@ const ResetPasswordPage = lazy(
 // User pages
 const UserDashboardPage = lazy(() => import("@/pages/user/UserDashboardPage"));
 const MyBookingsPage = lazy(() => import("@/pages/user/MyBookingPage"));
+const BookingHistoryPage = lazy(
+  () => import("@/pages/user/BookingHistoryPage"),
+);
+const BookingDetailsPage = lazy(
+  () => import("@/pages/user/BookingDetailsPage"),
+);
+const ProfilePage = lazy(() => import("@/pages/user/ProfilePage"));
 
 // Admin pages
 const AdminDashboardPage = lazy(
   () => import("@/pages/admin/AdminDashboardPage"),
 );
+const ManageCarsPage = lazy(() => import("@/pages/admin/ManageCarsPage"));
 
 const App = () => {
   return (
@@ -49,6 +57,12 @@ const App = () => {
             <Route element={<UserLayout />}>
               <Route path="/dashboard" element={<UserDashboardPage />} />
               <Route path="/bookings" element={<MyBookingsPage />} />
+              <Route
+                path="/bookings/history"
+                element={<BookingHistoryPage />}
+              />
+              <Route path="/booking/:carId" element={<BookingDetailsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
           </Route>
 
@@ -56,6 +70,7 @@ const App = () => {
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+              <Route path="/admin/cars" element={<ManageCarsPage />} />
             </Route>
           </Route>
         </Routes>

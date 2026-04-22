@@ -1,5 +1,6 @@
 import express from 'express';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -20,6 +21,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+app.use(cookieParser());
 app.use(
   cors({
     origin: 'http://localhost:5173',
@@ -31,12 +33,12 @@ app.use(
 app.use(helmet());
 
 // Limit requests from same API
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many request from this IP, Please try again in an hour!',
-});
-app.use('/api/', limiter);
+// const limiter = rateLimit({
+//   max: 100,
+//   windowMs: 60 * 60 * 1000,
+//   message: 'Too many request from this IP, Please try again in an hour!',
+// });
+// app.use('/api/', limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json());

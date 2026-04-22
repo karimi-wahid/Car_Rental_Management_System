@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 import logo from "../../assets/logo.svg";
 

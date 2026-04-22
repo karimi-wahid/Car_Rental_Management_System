@@ -1,7 +1,9 @@
 import { Booking } from '../models/bookingModel.js';
 import { Car } from '../models/carModel.js';
+import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
+import mongoose from 'mongoose';
 
 // Define BookingStatus if not imported from elsewhere
 const BookingStatus = {
@@ -110,6 +112,12 @@ export const createBooking = catchAsync(async (req, res, next) => {
 });
 
 export const getAllBookings = catchAsync(async (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'You are not logged in. Please log in to access this resource.',
+    });
+  }
   const userId = req.user.id;
   const userRole = req.user.role;
 
@@ -324,6 +332,7 @@ export const updateBooking = catchAsync(async (req, res, next) => {
   }
 
   // Update booking
+
   const updatedBooking = await Booking.findByIdAndUpdate(id, req.body, {
     new: true, // Return updated document
     runValidators: true, // Run schema validators
@@ -763,7 +772,7 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
 
   // Check if user exists (for admin viewing)
   if (targetUserId !== userId) {
-    const targetUser = await mongoose.model('User').findById(targetUserId);
+    const targetUser = await User.findById(targetUserId);
     if (!targetUser) {
       return next(new AppError('User not found', 404));
     }
@@ -822,12 +831,9 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
 
   // Filter by car brand
   if (carBrand) {
-    const carIds = await mongoose
-      .model('Car')
-      .find({
-        brand: { $regex: carBrand, $options: 'i' },
-      })
-      .distinct('_id');
+    const carIds = await Car.find({
+      brand: { $regex: carBrand, $options: 'i' },
+    }).distinct('_id');
     query.car = { $in: carIds };
   }
 
@@ -838,7 +844,7 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
 
   // Calculate detailed statistics
   const stats = await Booking.aggregate([
-    { $match: { user: mongoose.Types.ObjectId(targetUserId) } },
+    { $match: { user: new mongoose.Types.ObjectId(targetUserId) } },
     {
       $facet: {
         // Overall stats
@@ -1089,21 +1095,17 @@ async function getSuggestedCars(userId, topCars) {
   // Find similar cars not booked yet
   const bookedCarIds = await Booking.find({ user: userId }).distinct('car');
 
-  let suggestedCars = await mongoose
-    .model('Car')
-    .find({
-      _id: { $nin: bookedCarIds },
-      isAvailable: true,
-      ...(preferredBrands.length > 0 && { brand: { $in: preferredBrands } }),
-    })
+  let suggestedCars = await Car.find({
+    _id: { $nin: bookedCarIds },
+    isAvailable: true,
+    ...(preferredBrands.length > 0 && { brand: { $in: preferredBrands } }),
+  })
     .limit(3)
     .select('name brand model pricePerDay images');
 
   if (suggestedCars.length === 0) {
     // Fallback to popular cars
-    suggestedCars = await mongoose
-      .model('Car')
-      .find({ isAvailable: true })
+    suggestedCars = await Car.find({ isAvailable: true })
       .limit(3)
       .select('name brand model pricePerDay images');
   }
