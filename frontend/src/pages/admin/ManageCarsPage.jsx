@@ -590,8 +590,7 @@ const ManageCarsPage = () => {
 
   const handleToggleAvailability = async (id, current) => {
     try {
-      console.log(id, current);
-      await toggleAvailability(id, { availability: !current });
+      await toggleAvailability(id);
       toast.success(
         `موتر حالا ${current ? "غیرقابل دسترس" : "قابل دسترس"} است`,
       );
@@ -625,9 +624,12 @@ const ManageCarsPage = () => {
 
   const filteredCars = cars.filter(
     (car) =>
-      car.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      car.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      car.licensePlate.toLowerCase().includes(searchQuery.toLowerCase()),
+      (car.name &&
+        car.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (car.brand &&
+        car.brand.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (car.licensePlate &&
+        car.licensePlate.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   return (

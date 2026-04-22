@@ -667,64 +667,53 @@ export const deleteCar = catchAsync(async (req, res, next) => {
 });
 
 export const toggleCarAvailability = catchAsync(async (req, res, next) => {
-  // Check if user is admin
   if (req.user.role !== 'admin') {
     return next(new AppError('Admin access required', 403));
   }
 
   const { id } = req.params;
-  const { availability } = req.body;
 
-  // Find the car
   const car = await Car.findById(id);
   if (!car) {
     return next(new AppError('No car found with that ID', 404));
   }
-  console.log('car Before', car);
 
-  // Check if trying to deactivate car with active bookings
-  if (availability && car.availability) {
+  const newAvailability = !car.availability;
+
+  // ❗ Prevent deactivation if bookings exist
+  if (!newAvailability && car.availability) {
     const Booking = mongoose.model('Booking');
+
     const activeBookings = await Booking.findOne({
       car: id,
       status: { $in: ['confirmed', 'pending', 'in_progress'] },
       startDate: { $gt: new Date() },
     });
-    console.log('Active Booking', activeBookings);
 
     if (activeBookings) {
       return next(
-        new AppError(
-          'Cannot deactivate car with active future bookings. Please cancel or reschedule bookings first.',
-          400,
-        ),
+        new AppError('Cannot deactivate car with active future bookings.', 400),
       );
     }
   }
 
-  // Update availability
-  console.log('car Availability Before', car.availability);
-  car.availability = availability;
-  console.log('car Availability After', car.availability);
-  console.log('car After', car);
-
+  car.availability = newAvailability;
   await car.save();
 
-  // Log the action
   console.log(
-    `Admin ${req.user.email} ${newAvailability ? 'activated' : 'deactivated'} car: ${car.name} (${car.licensePlate})`,
+    `Admin ${req.user.email} ${
+      newAvailability ? 'activated' : 'deactivated'
+    } car: ${car.name}`,
   );
 
   res.status(200).json({
     status: 'success',
-    message: `Car ${availability ? 'activated' : 'deactivated'} successfully`,
+    message: `Car ${
+      newAvailability ? 'activated' : 'deactivated'
+    } successfully`,
     data: {
       car: {
         _id: car._id,
-        name: car.name,
-        brand: car.brand,
-        carModel: car.carModel,
-        licensePlate: car.licensePlate,
         availability: car.availability,
       },
     },

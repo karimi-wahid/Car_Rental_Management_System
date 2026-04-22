@@ -186,17 +186,21 @@ const useCarStore = create(
         set({ loading: true, error: null });
         try {
           console.log("Toggle", id, data);
-          const res = await toggleAvailabilityService(id, data);
+          const res = await toggleAvailabilityService(id);
           console.log("Toggle Res", res);
           const updated = res.data.data.car;
 
           set((state) => ({
-            cars: state.cars.map((c) => (c._id === id ? updated : c)),
+            cars: state.cars.map((c) =>
+              c._id === id ? { ...c, ...updated } : c,
+            ),
             filteredCars: state.filteredCars.map((c) =>
-              c._id === id ? updated : c,
+              c._id === id ? { ...c, ...updated } : c,
             ),
             selectedCar:
-              state.selectedCar?._id === id ? updated : state.selectedCar,
+              state.selectedCar?._id === id
+                ? { ...state.selectedCar, ...updated }
+                : state.selectedCar,
             loading: false,
           }));
 

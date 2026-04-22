@@ -41,8 +41,8 @@ export const updateCarService = (id, data) =>
 export const deleteCarService = (id, permanent) =>
   axiosInstance.delete(`/cars/${id}${permanent ? "?permanent=true" : ""}`);
 
-export const toggleAvailabilityService = (id, data) =>
-  axiosInstance.patch(`/cars/${id}/toggle-availability`, data);
+export const toggleAvailabilityService = (id) =>
+  axiosInstance.patch(`/cars/${id}/toggle-availability`);
 
 export const getCarStatsService = (period, carId) =>
   axiosInstance.get(
