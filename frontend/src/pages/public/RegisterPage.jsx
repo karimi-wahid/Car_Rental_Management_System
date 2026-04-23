@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { cn } from "@/lib/utils";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import { calculatePasswordStrength } from "@/utils/passwordStrength";
 
 const RegisterPage = () => {

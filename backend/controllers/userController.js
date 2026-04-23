@@ -139,3 +139,90 @@ export const deleteUser = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
+export const updateUserRole = catchAsync(async (req, res, next) => {
+  // 1) Only admin can change roles
+  if (req.user.role !== 'admin') {
+    return next(new AppError('Only admins can update user roles', 403));
+  }
+
+  const { id } = req.params;
+  const { role } = req.body;
+
+  // 2) Validate role
+  const allowedRoles = ['user', 'admin'];
+  if (!role || !allowedRoles.includes(role)) {
+    return next(
+      new AppError(`Role must be one of: ${allowedRoles.join(', ')}`, 400),
+    );
+  }
+
+  // 3) Prevent admin from changing their own role (IMPORTANT)
+  if (req.user._id.toString() === id) {
+    return next(new AppError('You cannot change your own role', 400));
+  }
+
+  // 4) Find user
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    { role },
+    { returnDocument: 'after', runValidators: true },
+  );
+
+  if (!updatedUser) {
+    return next(new AppError('No user found with that ID', 404));
+  }
+
+  // 6) Response
+  res.status(200).json({
+    status: 'success',
+    message: `User role updated to ${role}`,
+    data: {
+      updatedUser,
+    },
+  });
+});
+
+export const toggleUserStatus = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  const { isVerified } = req.body;
+  console.log(userId, isVerified);
+
+  // ✅ 1. Only admin
+  if (req.user.role !== 'admin') {
+    return next(new AppError('Only admins can update user status', 403));
+  }
+
+  // ✅ 2. Validate boolean
+  const parsedStatus = isVerified === true || isVerified === 'true';
+
+  // ✅ 3. Find user
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { isVerified },
+    { returnDocument: 'after', runValidators: true },
+  );
+
+  // ✅ 4. Prevent self-update
+  if (userId === req.user._id.toString()) {
+    return next(
+      new AppError('You cannot change your own verification status', 403),
+    );
+  }
+
+  // ✅ 5. Log
+  console.log(
+    `Admin ${req.user.email} set verification of ${user.email} to ${parsedStatus}`,
+  );
+
+  // ✅ 7. Response
+  res.status(200).json({
+    status: 'success',
+    message: `User verification ${
+      parsedStatus ? 'enabled' : 'disabled'
+    } successfully`,
+    data: {
+      user,
+    },
+  });
+});

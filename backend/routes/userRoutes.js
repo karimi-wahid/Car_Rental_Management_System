@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../controllers/authController.js';
+import { protect, restrictTo } from '../controllers/authController.js';
 import {
   createUser,
   deleteMe,
@@ -7,8 +7,10 @@ import {
   getAllUsers,
   getMe,
   getUser,
+  toggleUserStatus,
   updateMe,
   updateUser,
+  updateUserRole,
 } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -19,6 +21,13 @@ router.delete('/deleteMe', protect, deleteMe);
 
 router.route('/').get(getAllUsers).post(createUser);
 
-router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+router
+  .route('/:id')
+  .get(protect, getUser)
+  .patch(protect, restrictTo('admin'), updateUser)
+  .delete(protect, restrictTo('admin'), deleteUser);
+
+router.patch('/:id/role', protect, restrictTo('admin'), updateUserRole);
+router.patch('/:userId/status', protect, restrictTo('admin'), toggleUserStatus);
 
 export default router;

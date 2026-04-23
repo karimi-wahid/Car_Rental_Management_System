@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/common/PageHeader";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 //import { formatCurrency } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import { formatDate } from "@/lib/utils";

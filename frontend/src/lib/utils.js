@@ -16,7 +16,7 @@ export function getInitials(name) {
 }
 
 export function formatDate(date) {
-  return new Date(date).toLocaleDateString("fa-IR", {
+  return new Date(date).toLocaleDateString("fa-AF", {
     year: "numeric",
     month: "long",
     day: "numeric",

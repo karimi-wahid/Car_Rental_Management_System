@@ -20,3 +20,10 @@ export const updateUserService = (id, data) =>
   axiosInstance.patch(`/users/${id}`, data);
 
 export const deleteUserService = (id) => axiosInstance.delete(`/users/${id}`);
+
+export const updateUserRoleService = (id, data) =>
+  axiosInstance.patch(`/users/${id}/role`, data);
+
+export const toggleUserStatusService = (userId, data) => {
+  return axiosInstance.patch(`/users/${userId}/status`, data);
+};

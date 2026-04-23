@@ -26,6 +26,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -575,19 +586,6 @@ const ManageCarsPage = () => {
     }
   };
 
-  const handleDeleteCar = async (id) => {
-    if (!window.confirm("آیا مطمئن هستید که می‌خواهید این موتر را حذف کنید؟"))
-      return;
-
-    try {
-      await deleteCar(id, true);
-      toast.success("موتر موفقانه حذف شد");
-    } catch (error) {
-      toast.error("حذف موتر ناموفق بود");
-      console.log(error);
-    }
-  };
-
   const handleToggleAvailability = async (id, current) => {
     try {
       await toggleAvailability(id);
@@ -832,9 +830,7 @@ const ManageCarsPage = () => {
                               ویرایش
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() =>
-                                window.open(`/cars/${car._id}`, "_blank")
-                              }
+                              onClick={() => window.open(`/cars/${car._id}`)}
                               className="flex-row-reverse"
                             >
                               <Eye className="w-4 h-4 ml-2" />
@@ -862,13 +858,48 @@ const ManageCarsPage = () => {
                                 </>
                               )}
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-red-600 flex-row-reverse"
-                              onClick={() => handleDeleteCar(car._id)}
-                            >
-                              <Trash2 className="w-4 h-4 ml-2" />
-                              حذف
-                            </DropdownMenuItem>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                  className="text-red-600 flex-row-reverse"
+                                  onSelect={(e) => e.preventDefault()} // prevent dropdown close bug
+                                >
+                                  <Trash2 className="w-4 h-4 ml-2" />
+                                  حذف
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+
+                              <AlertDialogContent dir="rtl">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-right">
+                                    آیا مطمئن هستید؟
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription className="text-right">
+                                    این عمل قابل بازگشت نیست. این موتر به‌طور
+                                    دائمی حذف خواهد شد.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+
+                                <AlertDialogFooter className="flex-row-reverse">
+                                  <AlertDialogCancel>لغو</AlertDialogCancel>
+
+                                  <AlertDialogAction
+                                    className="bg-red-600 hover:bg-red-700"
+                                    onClick={async () => {
+                                      try {
+                                        await deleteCar(car._id);
+                                        toast.success("موتر موفقانه حذف شد");
+                                      } catch (error) {
+                                        toast.error("حذف موتر ناموفق بود");
+                                        console.log(error);
+                                      }
+                                    }}
+                                  >
+                                    حذف
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

@@ -14,7 +14,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { BookingCard } from "@/components/user/BookingCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
 

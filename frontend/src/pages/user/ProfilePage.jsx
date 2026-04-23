@@ -34,7 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { useThemeStore } from "@/store/themeStore";
 import useUserStore from "@/store/userStore";
 import axios from "axios";
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 const profileSchema = z.object({
   name: z.string().min(2, "نام باید حداقل ۲ حرف باشد"),

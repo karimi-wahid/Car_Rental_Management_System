@@ -10,6 +10,8 @@ import {
   createUserService,
   updateUserService,
   deleteUserService,
+  updateUserRoleService,
+  toggleUserStatusService, // Make sure to import this
 } from "@/services/userService";
 
 const useUserStore = create(
@@ -194,6 +196,54 @@ const useUserStore = create(
         } catch (err) {
           set({
             error: err.response?.data?.message,
+            loading: false,
+          });
+          throw err;
+        }
+      },
+
+      updateUserRole: async (id, role) => {
+        set({ loading: true, error: null });
+
+        try {
+          const res = await updateUserRoleService(id, { role });
+
+          const updatedUser = res.data.data.user;
+
+          set((state) => ({
+            users: state.users.map((u) => (u._id === id ? updatedUser : u)),
+            loading: false,
+          }));
+
+          return res.data;
+        } catch (err) {
+          set({
+            error: err.response?.data?.message || "Failed to update role",
+            loading: false,
+          });
+          throw err;
+        }
+      },
+      toggleUserStatus: async (userId, isVerified) => {
+        set({ loading: true, error: null });
+
+        try {
+          const res = await toggleUserStatusService(userId, {
+            isVerified,
+          });
+
+          const updatedUser = res.data.data.user;
+
+          set((state) => ({
+            users: state.users.map((u) => (u._id === userId ? updatedUser : u)),
+            loading: false,
+          }));
+
+          return res.data;
+        } catch (err) {
+          set({
+            error:
+              err.response?.data?.message || "Failed to update user status",
             loading: false,
           });
           throw err;
