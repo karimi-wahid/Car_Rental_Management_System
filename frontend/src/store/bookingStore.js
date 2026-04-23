@@ -209,13 +209,16 @@ const useBookingStore = create(
 
           set({
             bookings: res.data.data.bookings,
-            pagination: res.data.pagination,
+            pagination: res.data.data.pagination, // ✅ FIXED
             loading: false,
           });
 
           return res.data;
         } catch (err) {
-          set({ error: err.response?.data?.message, loading: false });
+          set({
+            error: err.response?.data?.message,
+            loading: false,
+          });
           throw err;
         }
       },

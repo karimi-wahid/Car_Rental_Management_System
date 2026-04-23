@@ -34,6 +34,9 @@ const AdminDashboardPage = lazy(
 );
 const ManageCarsPage = lazy(() => import("@/pages/admin/ManageCarsPage"));
 const ManageUsersPage = lazy(() => import("@/pages/admin/ManageUsersPage"));
+const ManageBookingsPage = lazy(
+  () => import("@/pages/admin/ManageBookingsPage"),
+);
 
 const App = () => {
   return (
@@ -73,6 +76,7 @@ const App = () => {
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/admin/cars" element={<ManageCarsPage />} />
               <Route path="/admin/users" element={<ManageUsersPage />} />
+              <Route path="/admin/bookings" element={<ManageBookingsPage />} />
             </Route>
           </Route>
         </Routes>
