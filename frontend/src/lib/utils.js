@@ -27,6 +27,10 @@ export function formatCurrency(amount) {
   return new Intl.NumberFormat("AFN", {
     style: "currency",
     currency: "AFN",
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
   }).format(amount);
+}
+
+export function formatNumber(value) {
+  return new Intl.NumberFormat("fa-IR").format(value);
 }

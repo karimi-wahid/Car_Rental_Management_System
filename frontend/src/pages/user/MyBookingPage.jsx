@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { Filter, Search, X, Calendar, Car, AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -84,12 +84,12 @@ const MyBookingsPage = () => {
   }, [bookings, searchQuery]);
 
   const tabs = [
-    { value: "all", label: "همه رزروها" },
-    { value: "pending", label: "در انتظار" },
-    { value: "confirmed", label: "تایید شده" },
-    { value: "active", label: "فعال" },
-    { value: "completed", label: "تکمیل شده" },
     { value: "cancelled", label: "لغو شده" },
+    { value: "completed", label: "تکمیل شده" },
+    { value: "active", label: "فعال" },
+    { value: "confirmed", label: "تایید شده" },
+    { value: "pending", label: "در انتظار" },
+    { value: "all", label: "همه رزروها" },
   ];
 
   const getStatusCount = (status) => {
@@ -182,7 +182,7 @@ const MyBookingsPage = () => {
               >
                 {tab.label}
                 {getStatusCount(tab.value) > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 text-xs bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                  <span className="absolute -top-3 -right-2 h-5 w-5 text-xs bg-primary text-primary-foreground rounded-full flex items-center justify-center">
                     {getStatusCount(tab.value)}
                   </span>
                 )}

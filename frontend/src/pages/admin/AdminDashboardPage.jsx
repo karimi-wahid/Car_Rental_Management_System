@@ -35,6 +35,7 @@ import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
 import useCarStore from "@/store/carStore";
 import useUserStore from "@/store/userStore";
+import { formatCurrency, formatNumber } from "@/lib/utils";
 
 const COLORS = [
   "#3b82f6",
@@ -44,19 +45,6 @@ const COLORS = [
   "#8b5cf6",
   "#ec4899",
 ];
-
-// Helper functions
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat("fa-IR", {
-    style: "currency",
-    currency: "AFN",
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-const formatNumber = (value) => {
-  return new Intl.NumberFormat("fa-IR").format(value);
-};
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -97,7 +85,7 @@ const AdminDashboardPage = () => {
           fetchAllBookings(1, 100),
           fetchCars(1, 100),
         ]);
-
+        console.log("Car Data", carRes, "Booking Data", bookingRes);
         const bookingsData = bookingRes?.data?.bookings || [];
         const carsData = carRes?.data?.cars || [];
 
@@ -128,7 +116,7 @@ const AdminDashboardPage = () => {
         const revenueMap = {};
 
         bookingsData.forEach((b) => {
-          const month = new Date(b.createdAt).toLocaleDateString("fa-IR", {
+          const month = new Date(b.createdAt).toLocaleDateString("fa-AF", {
             month: "long",
           });
 
@@ -196,7 +184,7 @@ const AdminDashboardPage = () => {
 
         setStats({
           overview: {
-            totalUsers: users.length, // later connect userStore
+            totalUsers: users.length,
             totalCars: carsData.length,
             totalBookings: bookingsData.length,
             totalRevenue,
@@ -236,14 +224,14 @@ const AdminDashboardPage = () => {
     },
     {
       title: "کل موترها",
-      value: stats.overview.totalCars,
+      value: formatNumber(stats.overview.totalCars),
       icon: Car,
       color: "from-purple-500 to-pink-500",
       subtitle: `${stats.overview.availableCars} موتر در دسترس`,
     },
     {
       title: "کل رزروها",
-      value: stats.overview.totalBookings,
+      value: formatNumber(stats.overview.totalBookings),
       icon: Calendar,
       color: "from-green-500 to-emerald-500",
       subtitle: `${stats.overview.pendingBookings} در انتظار تایید`,
@@ -364,7 +352,7 @@ const AdminDashboardPage = () => {
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
                 </div>
-                <h3 className="text-3xl font-bold mb-1">{stat.value}</h3>
+                <h3 className="text-2xl font-bold mb-1">{stat.value}</h3>
                 <p className="text-sm font-medium mb-1">{stat.title}</p>
                 <p className="text-xs text-muted-foreground">{stat.subtitle}</p>
               </CardContent>
@@ -458,6 +446,7 @@ const AdminDashboardPage = () => {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
+                    className="absolute top-20 right-5"
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -507,7 +496,7 @@ const AdminDashboardPage = () => {
                 <div className="flex gap-4">
                   <div className="relative w-28 h-28 rounded-lg overflow-hidden">
                     <img
-                      src={car.carDetails.images[0]}
+                      src={car.carDetails.images[0].url}
                       alt={car.carDetails.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
@@ -522,7 +511,7 @@ const AdminDashboardPage = () => {
                       {car.carDetails.name}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-2">
-                      {car.carDetails.brand} {car.carDetails.model}
+                      {car.carDetails.brand} {car.carDetails.carModel}
                     </p>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex items-center">

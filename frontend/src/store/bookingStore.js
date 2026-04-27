@@ -82,7 +82,6 @@ const useBookingStore = create(
           });
 
           const res = await getUserBookingsService(query);
-          console.log(res.data.data.currentBookings);
 
           set({
             userBookings: res.data.data.currentBookings,

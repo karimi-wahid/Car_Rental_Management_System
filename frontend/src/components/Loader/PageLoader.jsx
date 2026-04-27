@@ -1,9 +1,9 @@
 import { motion } from "motion/react";
-import { Car } from "lucide-react";
+import { LoaderPinwheel } from "lucide-react";
 
-export const PageLoader = ({ text = "Loading..." }) => {
+export const PageLoader = ({ text = "در حال بارگذاری" }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center text-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -29,7 +29,7 @@ export const PageLoader = ({ text = "Loading..." }) => {
           }}
           className="mb-6"
         >
-          <Car className="w-16 h-16 text-primary" />
+          <LoaderPinwheel className="w-16 h-16 text-primary my-2" />
         </motion.div>
 
         <h2 className="text-2xl font-display font-bold mb-2 gradient-text">

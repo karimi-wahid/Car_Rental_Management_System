@@ -19,8 +19,9 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { useAuthStore } from "@/store/authStore";
 //import { formatCurrency } from "@/lib/utils";
 import { toast } from "react-hot-toast";
-import { formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import useBookingStore from "@/store/bookingStore";
+import { BookingCard } from "@/components/user/BookingCard";
 
 // Helper function to get status badge variant
 const getStatusBadge = (status) => {
@@ -42,7 +43,11 @@ const UserDashboardPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
-  const { userBookings, fetchUserBookings, loading } = useBookingStore();
+  const {
+    userBookings: bookings,
+    fetchUserBookings,
+    loading,
+  } = useBookingStore();
 
   const [upcomingBookings, setUpcomingBookings] = useState([]);
   const [recentBookings, setRecentBookings] = useState([]);
@@ -60,37 +65,26 @@ const UserDashboardPage = () => {
         // Fetch all user bookings
         const res = await fetchUserBookings("", 1, 50);
 
-        const bookings = res?.data?.bookings || [];
-
         // ===== Split bookings =====
-        const now = new Date();
-
-        const upcoming = bookings.filter(
-          (b) => b.status === "confirmed" && new Date(b.startDate) > now,
-        );
 
         const recent = [...bookings]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5);
 
         // ===== Stats =====
-        const totalSpent = bookings.reduce(
-          (sum, b) => sum + (b.totalPrice || 0),
-          0,
-        );
 
         const completed = bookings.filter(
           (b) => b.status === "completed",
         ).length;
 
-        setUpcomingBookings(upcoming.slice(0, 3));
+        setUpcomingBookings(res.data.upcomingBookings.slice(0, 3));
         setRecentBookings(recent);
 
         setStats((prev) => ({
           ...prev,
-          totalBookings: bookings.length,
-          totalSpent,
-          upcomingTrips: upcoming.length,
+          totalBookings: res.data.summary.totalBookings,
+          totalSpent: res.data.summary.totalSpent,
+          upcomingTrips: res.data.upcomingBookings.length,
           completedTrips: completed,
         }));
       } catch (error) {
@@ -154,7 +148,9 @@ const UserDashboardPage = () => {
                 </div>
                 <Badge variant="outline">هزینه</Badge>
               </div>
-              <h3 className="text-3xl font-bold">{stats.totalSpent}</h3>
+              <h3 className="text-xl font-bold">
+                {formatCurrency(stats.totalSpent)}
+              </h3>
               <p className="text-sm text-muted-foreground mt-1">کل هزینه‌ها</p>
             </CardContent>
           </Card>
@@ -283,7 +279,8 @@ const UserDashboardPage = () => {
                         <div className="w-20 h-20 rounded-lg overflow-hidden">
                           <img
                             src={
-                              booking.car?.images?.[0] || "/placeholder-car.jpg"
+                              booking.car?.images?.[0].url ||
+                              "/placeholder-car.jpg"
                             }
                             alt={booking.car?.name || "موتر"}
                             className="w-full h-full object-cover"
@@ -308,7 +305,7 @@ const UserDashboardPage = () => {
                           {statusInfo.label}
                         </Badge>
                         <p className="text-lg font-bold text-primary">
-                          {booking.totalPrice}
+                          {formatCurrency(booking.totalPrice)}
                         </p>
                       </div>
                     </div>

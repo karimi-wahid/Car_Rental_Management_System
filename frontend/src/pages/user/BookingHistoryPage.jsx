@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { format } from "date-fns";
-import { faIR } from "date-fns/locale";
 import { Calendar, Car, Download, Eye, Filter, Search, X } from "lucide-react";
 import {
   Table,
@@ -24,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
 
@@ -81,10 +79,7 @@ const BookingHistoryPage = () => {
         }
 
         const response = await fetchUserBookings(params);
-
-        // Fix: Access pagination correctly
-        // The response structure from your store is { data: { bookings: [] }, pagination: {} }
-        setBookings(response?.data?.bookings || []);
+        setBookings(response?.data?.currentBookings || []);
 
         // Set pagination with fallback values
         if (response?.pagination) {
@@ -168,11 +163,6 @@ const BookingHistoryPage = () => {
       default:
         return status;
     }
-  };
-
-  // Format date in Persian
-  const formatPersianDate = (date) => {
-    return format(date, "d MMMM yyyy", { locale: faIR });
   };
 
   return (
@@ -300,7 +290,7 @@ const BookingHistoryPage = () => {
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-lg overflow-hidden">
                               <img
-                                src={booking.car.images[0]}
+                                src={booking.car.images[0].url}
                                 alt={booking.car.name}
                                 className="w-full h-full object-cover"
                               />
@@ -317,10 +307,10 @@ const BookingHistoryPage = () => {
                         </TableCell>
                         <TableCell>
                           <p className="font-medium text-right">
-                            {formatPersianDate(start)}
+                            {formatDate(start)}
                           </p>
                           <p className="text-sm text-muted-foreground text-right">
-                            تا {formatPersianDate(end)}
+                            تا {formatDate(end)}
                           </p>
                         </TableCell>
                         <TableCell>
