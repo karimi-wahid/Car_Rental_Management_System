@@ -136,11 +136,11 @@ const ProfilePage = () => {
   const onPasswordSubmit = async (data) => {
     setIsPasswordLoading(true);
     try {
-      await updatePassword({
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
-        passwordConfirm: data.confirmPassword,
-      });
+      await updatePassword(
+        data.currentPassword,
+        data.newPassword,
+        data.confirmPassword,
+      );
       toast.success("رمز عبور موفقانه تغییر کرد");
       resetPassword();
     } catch (error) {

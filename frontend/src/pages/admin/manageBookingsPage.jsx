@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Search, Filter, Eye, Calendar } from "lucide-react";
 import {
@@ -69,6 +69,7 @@ const ManageBookingsPage = () => {
       await updateBookingStatus(selectedBooking._id, newStatus, statusNote);
 
       toast.success(`وضعیت رزرو به ${getStatusText(newStatus)} تغییر کرد`);
+      console.log(bookings);
 
       setIsStatusDialogOpen(false);
       setStatusNote("");
@@ -87,10 +88,6 @@ const ManageBookingsPage = () => {
         return "bg-yellow-500/10 text-yellow-600 border-yellow-200";
       case "cancelled":
         return "bg-red-500/10 text-red-600 border-red-200";
-      case "completed":
-        return "bg-blue-500/10 text-blue-600 border-blue-200";
-      case "in_progress":
-        return "bg-purple-500/10 text-purple-600 border-purple-200";
       default:
         return "bg-gray-500/10 text-gray-600 border-gray-200";
     }
@@ -104,10 +101,6 @@ const ManageBookingsPage = () => {
         return "در انتظار";
       case "cancelled":
         return "لغو شده";
-      case "completed":
-        return "تکمیل شده";
-      case "in_progress":
-        return "در حال انجام";
       default:
         return status;
     }
@@ -129,8 +122,6 @@ const ManageBookingsPage = () => {
   const statusOptions = [
     { value: "pending", label: "در انتظار" },
     { value: "confirmed", label: "تایید شده" },
-    { value: "in_progress", label: "در حال انجام" },
-    { value: "completed", label: "تکمیل شده" },
     { value: "cancelled", label: "لغو شده" },
   ];
 
@@ -174,12 +165,6 @@ const ManageBookingsPage = () => {
                 </SelectItem>
                 <SelectItem value="confirmed" className="text-right">
                   تایید شده
-                </SelectItem>
-                <SelectItem value="in_progress" className="text-right">
-                  در حال انجام
-                </SelectItem>
-                <SelectItem value="completed" className="text-right">
-                  تکمیل شده
                 </SelectItem>
                 <SelectItem value="cancelled" className="text-right">
                   لغو شده
@@ -251,7 +236,10 @@ const ManageBookingsPage = () => {
                           <div className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-lg overflow-hidden">
                               <img
-                                src={booking.car.images[0]}
+                                src={
+                                  booking.car.images?.[0]?.url ||
+                                  "/placeholder-car.jpg"
+                                }
                                 alt={booking.car.name}
                                 className="w-full h-full object-cover"
                               />
@@ -293,10 +281,7 @@ const ManageBookingsPage = () => {
                               variant="ghost"
                               size="icon"
                               onClick={() =>
-                                window.open(
-                                  `/bookings/${booking._id}`,
-                                  "_blank",
-                                )
+                                window.open(`/bookings/${booking._id}`)
                               }
                             >
                               <Eye className="w-4 h-4" />

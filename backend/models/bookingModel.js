@@ -48,14 +48,6 @@ const bookingSchema = new mongoose.Schema(
       default: BookingStatus.PENDING,
       index: true,
     },
-    pickupLocation: {
-      type: String,
-      trim: true,
-    },
-    dropoffLocation: {
-      type: String,
-      trim: true,
-    },
     cancellationReason: {
       type: String,
       maxlength: [500, 'Cancellation reason cannot exceed 500 characters'],
@@ -125,13 +117,11 @@ bookingSchema.statics.findAvailableCars = async function (startDate, endDate) {
 // Pre-save middleware to validate no overlap
 bookingSchema.pre('save', async function (next) {
   // Only check when dates actually changed
-  if (!this.isModified('startDate') && !this.isModified('endDate'))
-    return next();
+  if (!this.isModified('startDate') && !this.isModified('endDate')) return;
 
   const isOverlapping = await this.isOverlapping(this.startDate, this.endDate);
   if (isOverlapping)
     return next(new Error('Booking dates overlap with an existing booking'));
-  next();
 });
 
 // Pre-update middleware for findOneAndUpdate

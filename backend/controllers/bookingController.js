@@ -15,15 +15,9 @@ const BookingStatus = {
 };
 
 export const createBooking = catchAsync(async (req, res, next) => {
-  const {
-    carId,
-    startDate,
-    endDate,
-    pickupLocation,
-    dropoffLocation,
-    specialRequests,
-  } = req.body;
-  const userId = req.user.id; // Assuming user is attached to req after authentication
+  const { carId, startDate, endDate } = req.body;
+  console.log(carId, startDate, endDate);
+  const userId = req.user.id;
 
   // Validate required fields
   if (!carId || !startDate || !endDate) {
@@ -52,7 +46,7 @@ export const createBooking = catchAsync(async (req, res, next) => {
   }
 
   // Check if car is available for booking
-  if (!car.isAvailable) {
+  if (!car.availability) {
     return next(new AppError('This car is not available for booking', 400));
   }
 
@@ -92,9 +86,6 @@ export const createBooking = catchAsync(async (req, res, next) => {
     endDate: end,
     totalPrice,
     status: BookingStatus.PENDING,
-    pickupLocation: pickupLocation || car.location,
-    dropoffLocation: dropoffLocation || car.location,
-    specialRequests: specialRequests || '',
   });
 
   // Populate user and car details for response
@@ -355,6 +346,9 @@ export const cancelBooking = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const userRole = req.user.role;
   const { cancellationReason } = req.body;
+  console.log(
+    `Cancelling booking ${id} by user ${userId} with role ${userRole}. Reason: ${cancellationReason}`,
+  );
 
   // Find the booking
   const booking = await Booking.findById(id);
@@ -364,7 +358,7 @@ export const cancelBooking = catchAsync(async (req, res, next) => {
   }
 
   // Check authorization
-  const isOwner = booking.user.toString() === userId;
+  const isOwner = booking.user._id.toString() === userId;
   const isAdmin = userRole === 'admin';
 
   if (!isOwner && !isAdmin) {
@@ -460,7 +454,7 @@ export const cancelBooking = catchAsync(async (req, res, next) => {
         eligible: refundAmount > 0,
         amount: refundAmount,
         percentage: refundPercentage,
-        currency: 'USD',
+        currency: 'AFN',
         message:
           refundAmount > 0
             ? `$${refundAmount} will be refunded to your original payment method within 5-7 business days`

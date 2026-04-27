@@ -1,13 +1,21 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { PageLoader } from "./components/Loader/PageLoader";
-import PublicLayout from "./components/Layouts/PublicLayout";
 import { Toaster } from "react-hot-toast";
+
+// Layouts
+import PublicLayout from "./components/Layouts/PublicLayout";
 import UserLayout from "./components/Layouts/UserLayout";
 import AdminLayout from "./components/Layouts/AdminLayout";
+
+// Public
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import UnauthorizedPage from "./pages/public/UnauthorizedPage";
 const LandingPage = lazy(() => import("@/pages/public/LandingPage"));
+const CarsPage = lazy(() => import("@/pages/public/CarsPage"));
+const CarDetailsPage = lazy(() => import("@/pages/public/CarDetailsPage"));
+
+// Auth Pages
 const LoginPage = lazy(() => import("@/pages/public/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/public/RegisterPage"));
 const ForgotPasswordPage = lazy(
@@ -46,6 +54,8 @@ const App = () => {
         <Routes>
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/cars" element={<CarsPage />} />
+            <Route path="/cars/:id" element={<CarDetailsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />

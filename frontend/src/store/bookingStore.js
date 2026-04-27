@@ -52,19 +52,22 @@ const useBookingStore = create(
           const res = await createBookingService(data);
 
           set((state) => ({
-            userBookings: [res.data.data.booking, ...state.userBookings],
+            userBookings: [
+              res.data.data.booking,
+              ...(state.userBookings || []),
+            ],
             selectedBooking: res.data.data.booking,
             loading: false,
           }));
 
-          return res.data;
+          return res.data.data;
         } catch (err) {
           set({ error: err.response?.data?.message, loading: false });
           throw err;
         }
       },
 
-      fetchUserBookings: async (page = 1, limit = 10) => {
+      fetchUserBookings: async ({ status = "", page = 1, limit = 10 } = {}) => {
         set({ loading: true, error: null });
 
         try {
@@ -75,13 +78,15 @@ const useBookingStore = create(
             limit,
             sort,
             ...filters,
+            status, // ✅ add this
           });
 
           const res = await getUserBookingsService(query);
+          console.log(res.data.data.currentBookings);
 
           set({
-            userBookings: res.data.data.bookings,
-            pagination: res.data.pagination,
+            userBookings: res.data.data.currentBookings,
+            pagination: res.data.data.pagination,
             loading: false,
           });
 
@@ -292,7 +297,10 @@ const useBookingStore = create(
       setSort: (sort) => set({ sort }),
 
       applyFilters: async () => {
-        await get().fetchUserBookings(1);
+        const { pagination } = get();
+        await get().fetchUserBookings({
+          page: pagination.currentPage,
+        });
       },
 
       clearError: () => set({ error: null }),

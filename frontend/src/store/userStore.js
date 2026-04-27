@@ -224,6 +224,7 @@ const useUserStore = create(
           throw err;
         }
       },
+
       toggleUserStatus: async (userId, isVerified) => {
         set({ loading: true, error: null });
 

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { format, differenceInDays, isWithinInterval } from "date-fns";
+import { differenceInDays, isWithinInterval } from "date-fns";
 import {
   Calendar,
   MapPin,
@@ -34,7 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatDate } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 
 export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
@@ -48,11 +48,6 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
   const isUpcoming = daysUntilStart > 0;
   const isOngoing = isWithinInterval(today, { start: startDate, end: endDate });
   const isPast = today > endDate;
-
-  // Format date for Persian display
-  const formatPersianDate = (date) => {
-    return format(date, "yyyy/MM/dd", "yyyy-MM-dd");
-  };
 
   // Get status configuration
   const getStatusConfig = (status) => {
@@ -148,7 +143,7 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
         {/* Image Section */}
         <div className="relative h-40 overflow-hidden">
           <img
-            src={booking.car?.images?.[0] || "/placeholder-car.jpg"}
+            src={booking.car?.images?.[0].url || "/placeholder-car.jpg"}
             alt={booking.car?.name || "موتر"}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
@@ -181,7 +176,7 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
               {booking.car?.name || "نام موتر"}
             </h3>
             <p className="text-sm opacity-90">
-              {booking.car?.brand} {booking.car?.model} • {booking.car?.year}
+              {booking.car?.brand} {booking.car?.carModel} • {booking.car?.year}
             </p>
           </div>
         </div>
@@ -192,7 +187,7 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
             <div className="flex items-center text-sm">
               <Calendar className="w-4 h-4 ml-2 text-muted-foreground" />
               <span>
-                {formatPersianDate(startDate)} - {formatPersianDate(endDate)}
+                {formatDate(startDate)} - {formatDate(endDate)}
               </span>
             </div>
 
@@ -221,28 +216,6 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
               {booking.days || differenceInDays(endDate, startDate)} روز
             </span>
           </div>
-
-          {/* Pickup Location */}
-          {booking.pickupLocation && (
-            <div className="flex items-start gap-2 mb-2">
-              <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-              <div className="text-sm flex-1">
-                <span className="text-muted-foreground">تحویل: </span>
-                <span className="font-medium">{booking.pickupLocation}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Dropoff Location */}
-          {booking.dropoffLocation && (
-            <div className="flex items-start gap-2 mb-3">
-              <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-              <div className="text-sm flex-1">
-                <span className="text-muted-foreground">بازگشت: </span>
-                <span className="font-medium">{booking.dropoffLocation}</span>
-              </div>
-            </div>
-          )}
 
           {/* Payment Status */}
           {booking.paymentStatus && (

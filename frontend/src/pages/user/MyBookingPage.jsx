@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { Filter, Search, X, Calendar, Car, AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,91 +17,71 @@ import { Pagination } from "@/components/ui/Pagination";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
+import { useNavigate } from "react-router-dom";
 
 const MyBookingsPage = () => {
   const user = useAuthStore((state) => state.user);
-  const { fetchUserBookings, cancelBooking } = useBookingStore(
-    (state) => state,
-  );
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    fetchUserBookings,
+    cancelBooking,
+    loading,
+    pagination = {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      itemsPerPage: 10,
+    },
+    setSort,
+    setPagination,
+  } = useBookingStore();
+  const bookings = useBookingStore((state) => state.userBookings) || [];
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 9,
-    total: 0,
-    pages: 0,
-  });
-
-  const fetchBookings = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Fix: Pass parameters correctly according to store method signature
-      const response = await fetchUserBookings(
-        activeTab !== "all" ? activeTab : "",
-        pagination.page,
-        pagination.limit,
-      );
-
-      // Add defensive checks
-      setBookings(response?.data?.bookings || []);
-
-      // Ensure pagination object exists with defaults
-      if (response?.pagination) {
-        setPagination({
-          page: response.pagination.currentPage || 1,
-          limit: response.pagination.itemsPerPage || 9,
-          total: response.pagination.totalItems || 0,
-          pages: response.pagination.totalPages || 0,
-        });
-      }
-    } catch (error) {
-      toast.error("خطا در دریافت رزروها");
-      console.log(error);
-      // Reset to default state on error
-      setBookings([]);
-      setPagination({
-        page: 1,
-        limit: 9,
-        total: 0,
-        pages: 0,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, activeTab, fetchUserBookings]);
+  const navigate = useNavigate();
+  console.log(bookings);
 
   useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+    fetchUserBookings({
+      status: activeTab !== "all" ? activeTab : "",
+      page: pagination.currentPage,
+      limit: pagination.itemsPerPage,
+    });
+    // eslint-disable-next-line
+  }, [activeTab, pagination.currentPage, pagination.itemsPerPage]);
 
-  const handleCancelBooking = async (bookingId) => {
+  useEffect(() => {
+    const sortMap = {
+      newest: "-createdAt",
+      oldest: "createdAt",
+      upcoming: "startDate",
+    };
+    setSort(sortMap[sortBy] || "-createdAt");
+  }, [sortBy, activeTab, pagination.currentPage, setSort]);
+
+  const handleCancelBooking = async (id) => {
     try {
-      await cancelBooking(bookingId, "لغو توسط کاربر");
-      toast.success("رزرو با موفقیت لغو شد");
-      fetchBookings();
+      await cancelBooking(id, "لغو توسط کاربر");
+      toast.success("رزرو لغو شد");
     } catch (error) {
       toast.error("خطا در لغو رزرو");
       console.log(error);
     }
   };
 
-  const handleModifyBooking = (bookingId) => {
-    window.location.href = `/bookings/${bookingId}/modify`;
-  };
+  const handleModifyBooking = (bookingId) =>
+    navigate(`/bookings/${bookingId}/modify`);
 
-  const handleViewDetails = (bookingId) => {
-    window.location.href = `/bookings/${bookingId}`;
-  };
+  const handleViewDetails = (bookingId) => navigate(`/bookings/${bookingId}`);
 
-  const filteredBookings = bookings.filter(
-    (booking) =>
-      booking.car?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.car?.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking._id?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredBookings = useMemo(() => {
+    return (bookings || []).filter(
+      (booking) =>
+        booking.car?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.car?.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking._id?.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [bookings, searchQuery]);
 
   const tabs = [
     { value: "all", label: "همه رزروها" },
@@ -273,14 +253,12 @@ const MyBookingsPage = () => {
           </div>
 
           {/* Pagination */}
-          {pagination.pages > 1 && (
+          {pagination.totalPages > 1 && (
             <div className="mt-8">
               <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.pages}
-                onPageChange={(page) =>
-                  setPagination((prev) => ({ ...prev, page }))
-                }
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => setPagination({ currentPage: page })}
               />
             </div>
           )}
