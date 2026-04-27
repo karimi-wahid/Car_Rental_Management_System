@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { SlidersHorizontal, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+import useCarStore from "@/store/carStore";
 
 const FilterContent = ({
   filters,
@@ -87,20 +88,20 @@ const FilterContent = ({
       <div className="flex items-center justify-between mb-2">
         <Label className="text-sm font-medium">محدوده قیمت (فی روز)</Label>
         <span className="text-sm text-muted-foreground">
-          ${priceRange[0]} - ${priceRange[1]}
+          {formatCurrency(priceRange[0])} - {formatCurrency(priceRange[1])}
         </span>
       </div>
       <Slider
         min={0}
-        max={200}
-        step={10}
+        max={10000}
+        step={1}
         value={priceRange}
         onValueChange={handlePriceChange}
         className="mt-2"
       />
       <div className="flex justify-between mt-3 text-xs text-muted-foreground">
-        <span>$200</span>
-        <span>$0</span>
+        <span>{formatCurrency(1000)}</span>
+        <span>{formatCurrency(0)}</span>
       </div>
     </div>
 
@@ -220,76 +221,46 @@ const FilterContent = ({
   </div>
 );
 
-export const CarFilters = ({
-  onFilterChange,
-  initialFilters = {},
-  brands,
-  className,
-}) => {
-  const [filters, setFilters] = useState({
-    search: "",
-    brand: "all",
-    minPrice: 0,
-    maxPrice: 1000,
-    transmission: "all",
-    fuelType: "all",
-    seats: "all",
-    sortBy: "createdAt",
-    sortOrder: "desc",
-    ...initialFilters,
-  });
+export const CarFilters = ({ onFilterChange, brands, className }) => {
+  const filters = useCarStore((state) => state.filters);
+  const setFilters = useCarStore((state) => state.setFilters);
+  const clearFilters = useCarStore((state) => state.clearFilters);
 
   const [priceRange, setPriceRange] = useState([
-    filters.minPrice,
-    filters.maxPrice,
+    filters.minPrice || 0,
+    filters.maxPrice || 10000,
   ]);
 
-  const activeFiltersCount = useMemo(() => {
-    return Object.entries(filters).filter(([key, value]) => {
-      if (key === "search") return value && value !== "";
-      if (key === "brand") return value && value !== "all";
-      if (key === "minPrice") return value !== 0;
-      if (key === "maxPrice") return value !== 1000;
-      if (key === "transmission") return value && value !== "all";
-      if (key === "fuelType") return value && value !== "all";
-      if (key === "seats") return value && value !== "all";
-      return false;
-    }).length;
-  }, [filters]);
-
   const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
+    const clean = value === "all" ? "" : value;
+    setFilters(key, clean);
+    onFilterChange?.(key, clean); // pass key and value to parent
   };
 
   const handlePriceChange = (value) => {
     setPriceRange(value);
-    const newFilters = {
-      ...filters,
-      minPrice: value[0],
-      maxPrice: value[1],
-    };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
+    setFilters("minPrice", value[0]);
+    setFilters("maxPrice", value[1]);
+    onFilterChange?.("minPrice", value[0]);
+    onFilterChange?.("maxPrice", value[1]);
   };
 
-  const clearFilters = () => {
-    const resetFilters = {
-      search: "",
-      brand: "all",
-      minPrice: 0,
-      maxPrice: 1000,
-      transmission: "all",
-      fuelType: "all",
-      seats: "all",
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    };
-    setFilters(resetFilters);
-    setPriceRange([0, 1000]);
-    onFilterChange(resetFilters);
-  };
+  // Count active filters (excluding empty, 'all', or default values)
+  const activeFiltersCount = Object.entries(filters).reduce(
+    (count, [key, value]) => {
+      if (
+        key === "availability" ||
+        value === undefined ||
+        value === null ||
+        value === "" ||
+        value === "all"
+      ) {
+        return count;
+      }
+      return count + 1;
+    },
+    0,
+  );
 
   return (
     <>

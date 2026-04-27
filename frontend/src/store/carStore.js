@@ -267,9 +267,9 @@ const useCarStore = create(
 
       // ================= UTILS =================
 
-      setFilter: (key, value) =>
+      setFilters: (newFilters) =>
         set((state) => ({
-          filters: { ...state.filters, [key]: value },
+          filters: { ...state.filters, ...newFilters },
         })),
 
       clearFilters: () =>

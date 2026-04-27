@@ -6,153 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import useCarStore from "@/store/carStore";
 
 const FeaturedCars = () => {
-  const [cars, setCars] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { fetchCars, cars, loading } = useCarStore();
   const navigate = useNavigate();
 
-  // Dummy data
-  const dummyCars = [
-    {
-      _id: "1",
-      name: "Model S",
-      brand: "Tesla",
-      model: "Plaid",
-      pricePerDay: 299,
-      transmission: "Automatic",
-      fuelType: "Electric",
-      seats: 5,
-      mileage: "0 mi",
-      images: [
-        "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800",
-      ],
-      features: [
-        "Autopilot",
-        "Glass Roof",
-        '21" Wheels',
-        "Premium Sound",
-        "Heated Seats",
-      ],
-    },
-    {
-      _id: "2",
-      name: "M4 Competition",
-      brand: "BMW",
-      model: "G82",
-      pricePerDay: 249,
-      transmission: "Automatic",
-      fuelType: "Petrol",
-      seats: 4,
-      mileage: "0 mi",
-      images: [
-        "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800",
-      ],
-      features: [
-        "M Sport Package",
-        "Carbon Fiber",
-        "Laser Lights",
-        "Harman Kardon",
-        "M Seats",
-      ],
-    },
-    {
-      _id: "3",
-      name: "AMG GT",
-      brand: "Mercedes",
-      model: "63 S",
-      pricePerDay: 399,
-      transmission: "Automatic",
-      fuelType: "Petrol",
-      seats: 4,
-      mileage: "0 mi",
-      images: [
-        "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=800",
-      ],
-      features: [
-        "V8 Biturbo",
-        "AMG Performance",
-        "Burmester Sound",
-        "Night Package",
-        "Carbon Ceramic Brakes",
-      ],
-    },
-    {
-      _id: "4",
-      name: "Urus",
-      brand: "Lamborghini",
-      model: "S",
-      pricePerDay: 599,
-      transmission: "Automatic",
-      fuelType: "Petrol",
-      seats: 5,
-      mileage: "0 mi",
-      images: [
-        "https://images.unsplash.com/photo-1617654112368-307821291f42?w=800",
-      ],
-      features: [
-        "4.0L V8",
-        "AWD",
-        "Adaptive Suspension",
-        "Panoramic Roof",
-        "Bang & Olufsen",
-      ],
-    },
-    {
-      _id: "5",
-      name: "Taycan",
-      brand: "Porsche",
-      model: "Turbo",
-      pricePerDay: 349,
-      transmission: "Automatic",
-      fuelType: "Electric",
-      seats: 4,
-      mileage: "0 mi",
-      images: [
-        "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800",
-      ],
-      features: [
-        "Performance Battery",
-        "Sport Chrono",
-        "Bose Sound",
-        "Ambient Lighting",
-        "Matrix LED",
-      ],
-    },
-    {
-      _id: "6",
-      name: "R8",
-      brand: "Audi",
-      model: "V10 Performance",
-      pricePerDay: 449,
-      transmission: "Automatic",
-      fuelType: "Petrol",
-      seats: 2,
-      mileage: "0 mi",
-      images: [
-        "https://images.unsplash.com/photo-1614179689701-3552a4b2a8f7?w=800",
-      ],
-      features: [
-        "5.2L V10",
-        "Quattro AWD",
-        "Carbon Fiber",
-        "Bang & Olufsen",
-        "Sport Exhaust",
-      ],
-    },
-  ];
-
   useEffect(() => {
-    // Simulate API call with dummy data
-    const loadCars = () => {
-      setTimeout(() => {
-        setCars(dummyCars);
-        setLoading(false);
-      }, 1000);
-    };
-
-    loadCars();
-  }, []);
+    fetchCars();
+  }, [fetchCars]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -230,7 +92,7 @@ const FeaturedCars = () => {
                 {/* Image Container */}
                 <div className="relative h-64 overflow-hidden">
                   <img
-                    src={car.images[0]}
+                    src={car.images[0].url}
                     alt={car.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -262,7 +124,7 @@ const FeaturedCars = () => {
                   <div className="mb-4">
                     <h3 className="text-2xl font-bold mb-1">{car.name}</h3>
                     <p className="text-muted-foreground">
-                      {car.brand} {car.model}
+                      {car.brand} {car.carModel}
                     </p>
                   </div>
 

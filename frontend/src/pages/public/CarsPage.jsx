@@ -14,52 +14,38 @@ const CarsPage = () => {
     cars,
     loading,
     pagination,
-    filters,
     fetchCars,
     setFilters,
     brands,
     fetchBrands,
   } = useCarStore();
+  const { currentPage, itemsPerPage } = useCarStore(
+    (state) => state.pagination,
+  );
+  const filters = useCarStore((state) => state.filters);
+  const sort = useCarStore((state) => state.sort);
+  const setSort = useCarStore((state) => state.setSort);
+  const clearFilters = useCarStore((state) => state.clearFilters);
 
   useEffect(() => {
-    fetchCars(pagination.currentPage, pagination.itemsPerPage);
-  }, [filters, pagination.currentPage, fetchCars, pagination.itemsPerPage]);
+    fetchCars(currentPage, itemsPerPage);
+  }, [filters, sort, currentPage, itemsPerPage, fetchCars]);
 
   useEffect(() => {
     fetchBrands();
   }, [fetchBrands]);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handlePageChange = (page) => {
-    handleFilterChange({ ...filters, page });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handlePageSizeChange = (limit) => {
-    handleFilterChange({ ...filters, limit, page: 1 });
+  const handleFilterChange = (key, value) => {
+    setFilters({ [key]: value });
   };
 
   const handleSortChange = (sortBy, sortOrder) => {
-    handleFilterChange({ ...filters, sortBy, sortOrder });
+    setSort(sortOrder === "desc" ? `-${sortBy}` : sortBy);
   };
 
   const resetFilters = () => {
-    handleFilterChange({
-      page: 1,
-      limit: 10,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-      search: "",
-      brand: "all",
-      minPrice: 0,
-      maxPrice: 1000,
-      transmission: "all",
-      fuelType: "all",
-      seats: "all",
-    });
+    clearFilters();
+    fetchCars(1, itemsPerPage);
   };
 
   return (
@@ -129,17 +115,14 @@ const CarsPage = () => {
           </AnimatePresence>
 
           {/* Pagination */}
-          {pagination.pages > 1 && (
-            <div className="mt-8">
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.pages}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-                pageSize={pagination.limit}
-                totalItems={pagination.total}
-              />
-            </div>
+          {pagination.totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              pageSize={itemsPerPage}
+              totalItems={pagination.totalItems}
+              onPageChange={(page) => fetchCars(page, itemsPerPage)}
+            />
           )}
         </div>
       </div>

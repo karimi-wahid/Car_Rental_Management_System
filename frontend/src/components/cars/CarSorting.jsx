@@ -8,6 +8,18 @@ import {
 import { Label } from "@/components/ui/label";
 
 export const CarSorting = ({ value, order, onSortChange }) => {
+  // Convert store format (-createdAt) to component format (createdAt-desc)
+  const getSelectValue = () => {
+    const sortValue = value || "createdAt";
+    const sortOrder = order || "desc";
+
+    // Remove leading dash if present
+    const cleanValue = sortValue.startsWith("-")
+      ? sortValue.substring(1)
+      : sortValue;
+    return `${cleanValue}-${sortOrder}`;
+  };
+
   const handleSortChange = (newValue) => {
     const [sortBy, sortOrder] = newValue.split("-");
     onSortChange(sortBy, sortOrder);
@@ -21,7 +33,7 @@ export const CarSorting = ({ value, order, onSortChange }) => {
       >
         مرتب‌سازی :
       </Label>
-      <Select value={`${value}-${order}`} onValueChange={handleSortChange}>
+      <Select value={getSelectValue()} onValueChange={handleSortChange}>
         <SelectTrigger id="sort" className="w-50 text-right">
           <SelectValue placeholder="مرتب‌سازی" />
         </SelectTrigger>
