@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Calendar, Car, Download, Eye, Filter, Search, X } from "lucide-react";
+import { Car, Download, Eye, Filter, Search, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,25 +25,24 @@ import { Pagination } from "@/components/ui/Pagination";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
+import { useNavigate } from "react-router-dom";
 
 const BookingHistoryPage = () => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [dateRange, setDateRange] = useState("all");
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
     total: 0,
     pages: 0,
   });
-  const { fetchUserBookings } = useBookingStore((state) => state);
+  const { fetchUserBookings, loading } = useBookingStore((state) => state);
 
   // Update the useEffect in BookingHistoryPage
   useEffect(() => {
     const fetchBookingHistory = async () => {
-      setLoading(true);
       try {
         const params = {
           page: pagination.page,
@@ -56,32 +55,9 @@ const BookingHistoryPage = () => {
           params.status = statusFilter;
         }
 
-        if (dateRange !== "all") {
-          const now = new Date();
-          const startDate = new Date();
-
-          switch (dateRange) {
-            case "month":
-              startDate.setMonth(now.getMonth() - 1);
-              break;
-            case "quarter":
-              startDate.setMonth(now.getMonth() - 3);
-              break;
-            case "year":
-              startDate.setFullYear(now.getFullYear() - 1);
-              break;
-            default:
-              break;
-          }
-
-          params.startDateFrom = startDate.toISOString();
-          params.startDateTo = now.toISOString();
-        }
-
         const response = await fetchUserBookings(params);
         setBookings(response?.data?.currentBookings || []);
 
-        // Set pagination with fallback values
         if (response?.pagination) {
           setPagination({
             page: response.pagination.currentPage || 1,
@@ -90,7 +66,6 @@ const BookingHistoryPage = () => {
             pages: response.pagination.totalPages || 0,
           });
         } else {
-          // Fallback if pagination is missing
           setPagination({
             page: 1,
             limit: 10,
@@ -102,7 +77,6 @@ const BookingHistoryPage = () => {
         toast.error("بارگذاری تاریخچه رزرو ناموفق بود");
         console.log(error);
 
-        // Reset on error
         setBookings([]);
         setPagination({
           page: 1,
@@ -110,19 +84,11 @@ const BookingHistoryPage = () => {
           total: 0,
           pages: 0,
         });
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchBookingHistory();
-  }, [
-    pagination.page,
-    statusFilter,
-    dateRange,
-    pagination.limit,
-    fetchUserBookings,
-  ]);
+  }, [pagination.page, statusFilter, pagination.limit, fetchUserBookings]);
 
   const handleExport = () => {
     // Generate CSV
@@ -228,27 +194,6 @@ const BookingHistoryPage = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-
-            <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger className="w-37.5">
-                <Calendar className="w-4 h-4 ml-2" />
-                <SelectValue placeholder="محدوده زمانی" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-right">
-                  همه زمان‌ها
-                </SelectItem>
-                <SelectItem value="month" className="text-right">
-                  ماه گذشته
-                </SelectItem>
-                <SelectItem value="quarter" className="text-right">
-                  ۳ ماه گذشته
-                </SelectItem>
-                <SelectItem value="year" className="text-right">
-                  سال گذشته
-                </SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>
@@ -300,7 +245,7 @@ const BookingHistoryPage = () => {
                                 {booking.car.name}
                               </p>
                               <p className="text-sm text-muted-foreground text-right">
-                                {booking.car.brand} {booking.car.model}
+                                {booking.car.brand} {booking.car.carModel}
                               </p>
                             </div>
                           </div>
@@ -328,9 +273,7 @@ const BookingHistoryPage = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              (window.location.href = `/bookings/${booking._id}`)
-                            }
+                            onClick={() => navigate(`/bookings/${booking._id}`)}
                           >
                             <Eye className="w-4 h-4 ml-2" />
                             مشاهده
@@ -363,9 +306,7 @@ const BookingHistoryPage = () => {
                   ? `نتیجه‌ای برای "${searchQuery}" یافت نشد`
                   : "شما هنوز هیچ رزروی انجام نداده‌اید."}
               </p>
-              <Button onClick={() => (window.location.href = "/cars")}>
-                مشاهده موترها
-              </Button>
+              <Button onClick={() => navigate("/cars")}>مشاهده موترها</Button>
             </div>
           )}
         </CardContent>

@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { format } from "date-fns";
 import {
-  ArrowLeft,
+  ArrowRight,
   Calendar,
   MapPin,
   Clock,
@@ -31,44 +31,47 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatDate } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
 
 const BookingDetailsPage = () => {
-  const { id } = useParams();
+  const { carId } = useParams();
   const navigate = useNavigate();
-  const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const booking = useBookingStore((state) => state.selectedBooking);
+  const loading = useBookingStore((state) => state.loading);
+  const { fetchBookingById, cancelBooking } = useBookingStore();
   const [cancellationReason, setCancellationReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
-  const { fetchBookingById, cancelBooking } = useBookingStore((state) => state);
 
   const fetchBookingDetails = useCallback(async () => {
-    if (!id) return;
+    if (!carId) return;
 
     try {
-      const response = await fetchBookingById(id);
-      setBooking(response.data.booking);
+      await fetchBookingById(carId);
     } catch (error) {
-      toast.error("Failed to load booking details");
+      toast.error("بارگذاری جزئیات رزرو ناموفق بود");
       console.log(error);
       navigate("/bookings");
-    } finally {
-      setLoading(false);
     }
-  }, [id, navigate, fetchBookingById]);
+  }, [carId, navigate, fetchBookingById]);
+
+  console.log("Booking details page - booking:", booking);
+
+  useEffect(() => {
+    fetchBookingDetails();
+  }, [fetchBookingDetails]);
 
   const handleCancelBooking = async () => {
-    if (!id || !cancellationReason) return;
+    if (!carId || !cancellationReason) return;
 
     setIsCancelling(true);
     try {
-      await cancelBooking(id, cancellationReason);
-      toast.success("Booking cancelled successfully");
+      await cancelBooking(carId, cancellationReason);
+      toast.success("رزرو موفقانه لغو شد");
       fetchBookingDetails();
     } catch (error) {
-      toast.error("Failed to cancel booking");
+      toast.error("لغو رزرو ناموفق بود");
       console.log(error);
     } finally {
       setIsCancelling(false);
@@ -77,19 +80,36 @@ const BookingDetailsPage = () => {
 
   const handleDownloadInvoice = () => {
     // Generate PDF invoice
-    toast.success("Invoice downloaded");
+    toast.success("فاکتور دانلود شد");
   };
 
   const handleContactSupport = () => {
-    navigate("/contact", { state: { bookingId: id } });
+    navigate("/contact", { state: { bookingId: carId } });
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "confirmed":
+        return "تایید شده";
+      case "pending":
+        return "در انتظار";
+      case "cancelled":
+        return "لغو شده";
+      case "completed":
+        return "تکمیل شده";
+      default:
+        return status;
+    }
   };
 
   if (loading) {
     return (
-      <div className="min-h-100 flex items-center justify-center">
+      <div className="min-h-100 flex items-center justify-center" dir="rtl">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading booking details...</p>
+          <p className="text-muted-foreground">
+            در حال بارگذاری جزئیات رزرو...
+          </p>
         </div>
       </div>
     );
@@ -97,15 +117,15 @@ const BookingDetailsPage = () => {
 
   if (!booking) {
     return (
-      <div className="min-h-100 flex items-center justify-center">
+      <div className="min-h-100 flex items-center justify-center" dir="rtl">
         <Card className="p-8 text-center">
           <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Booking Not Found</h2>
+          <h2 className="text-2xl font-bold mb-2">رزرو یافت نشد</h2>
           <p className="text-muted-foreground mb-4">
-            The booking you're looking for doesn't exist or has been removed.
+            رزرو مورد نظر شما وجود ندارد یا حذف شده است.
           </p>
           <Button onClick={() => navigate("/bookings")}>
-            Back to Bookings
+            بازگشت به رزروها
           </Button>
         </Card>
       </div>
@@ -123,6 +143,7 @@ const BookingDetailsPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      dir="rtl"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -131,18 +152,18 @@ const BookingDetailsPage = () => {
           onClick={() => navigate("/bookings")}
           className="gap-2"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Bookings
+          <ArrowRight className="w-4 h-4" />
+          بازگشت به رزروها
         </Button>
 
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleDownloadInvoice}>
-            <Download className="w-4 h-4 mr-2" />
-            Invoice
+            <Download className="w-4 h-4 ml-2" />
+            فاکتور
           </Button>
           <Button variant="outline" size="sm" onClick={handleContactSupport}>
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Support
+            <MessageCircle className="w-4 h-4 ml-2" />
+            پشتیبانی
           </Button>
         </div>
       </div>
@@ -153,21 +174,21 @@ const BookingDetailsPage = () => {
           {/* Status Banner */}
           <Card
             className={cn(
-              "border-l-4",
-              booking.status === "confirmed" && "border-l-green-500",
-              booking.status === "pending" && "border-l-yellow-500",
-              booking.status === "cancelled" && "border-l-red-500",
-              booking.status === "completed" && "border-l-blue-500",
+              "border-r-4",
+              booking.status === "confirmed" && "border-r-green-500",
+              booking.status === "pending" && "border-r-yellow-500",
+              booking.status === "cancelled" && "border-r-red-500",
+              booking.status === "completed" && "border-r-blue-500",
             )}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="text-right">
                   <p className="text-sm text-muted-foreground mb-1">
-                    Booking Status
+                    وضعیت رزرو
                   </p>
-                  <h2 className="text-2xl font-bold capitalize">
-                    {booking.status}
+                  <h2 className="text-2xl font-bold">
+                    {getStatusText(booking.status)}
                   </h2>
                 </div>
                 <Badge
@@ -179,7 +200,7 @@ const BookingDetailsPage = () => {
                     booking.status === "completed" && "bg-blue-500",
                   )}
                 >
-                  Booking #{booking._id.slice(-6).toUpperCase()}
+                  رزرو شماره #{booking._id.slice(-6).toUpperCase()}
                 </Badge>
               </div>
             </CardContent>
@@ -189,30 +210,45 @@ const BookingDetailsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Car className="w-5 h-5" />
-                Car Details
+                <Car className="w-5 h-5 ml-2" />
+                جزئیات موتر
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex gap-6">
                 <div className="w-48 h-32 rounded-lg overflow-hidden">
                   <img
-                    src={booking.car.images[0]}
+                    src={booking.car.images[0]?.url}
                     alt={booking.car.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div>
+                <div className="text-right">
                   <h3 className="text-2xl font-bold mb-1">
                     {booking.car.name}
                   </h3>
                   <p className="text-muted-foreground mb-2">
-                    {booking.car.brand} {booking.car.model} • {booking.car.year}
+                    {booking.car.brand} {booking.car.carModel} •{" "}
+                    {booking.car.year}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">{booking.car.transmission}</Badge>
-                    <Badge variant="outline">{booking.car.fuelType}</Badge>
-                    <Badge variant="outline">{booking.car.seats} seats</Badge>
+                  <div className="flex flex-wrap gap-2 justify-end">
+                    <Badge variant="outline">
+                      {booking.car.transmission === "automatic"
+                        ? "اتوماتیک"
+                        : "گیر"}
+                    </Badge>
+                    <Badge variant="outline">
+                      {booking.car.fuelType === "petrol"
+                        ? "پطرول"
+                        : booking.car.fuelType === "diesel"
+                          ? "دیزل"
+                          : booking.car.fuelType === "electric"
+                            ? "برقی"
+                            : booking.car.fuelType === "hybrid"
+                              ? "هایبرید"
+                              : booking.car.fuelType}
+                    </Badge>
+                    <Badge variant="outline">{booking.car.seats} چوکی</Badge>
                   </div>
                 </div>
               </div>
@@ -223,71 +259,31 @@ const BookingDetailsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Rental Details
+                <Calendar className="w-5 h-5 ml-2" />
+                جزئیات کرایه
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="text-right">
                   <p className="text-sm text-muted-foreground mb-1">
-                    Pickup Date
+                    تاریخ شروع
                   </p>
-                  <p className="font-semibold">{format(startDate, "PPPP")}</p>
+                  <p className="font-semibold">{formatDate(startDate)}</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(startDate, "p")}
+                    {format(startDate, "HH:mm")}
                   </p>
                 </div>
-                <div>
+                <div className="text-right">
                   <p className="text-sm text-muted-foreground mb-1">
-                    Return Date
+                    تاریخ ختم
                   </p>
-                  <p className="font-semibold">{format(endDate, "PPPP")}</p>
+                  <p className="font-semibold">{formatDate(endDate)}</p>
                   <p className="text-sm text-muted-foreground">
-                    {format(endDate, "p")}
+                    {format(endDate, "HH:mm")}
                   </p>
                 </div>
               </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-2 gap-4">
-                {booking.pickupLocation && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Pickup Location
-                    </p>
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <p className="font-medium">{booking.pickupLocation}</p>
-                    </div>
-                  </div>
-                )}
-
-                {booking.dropoffLocation && (
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Dropoff Location
-                    </p>
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <p className="font-medium">{booking.dropoffLocation}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {booking.specialRequests && (
-                <>
-                  <Separator />
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Special Requests
-                    </p>
-                    <p className="text-sm">{booking.specialRequests}</p>
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -298,45 +294,27 @@ const BookingDetailsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Price Summary
+                <CreditCard className="w-5 h-5 ml-2" />
+                خلاصه قیمت
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  {formatCurrency(booking.car.pricePerDay)} x {daysCount} days
-                </span>
                 <span>
                   {formatCurrency(booking.car.pricePerDay * daysCount)}
                 </span>
+                <span className="text-muted-foreground">
+                  {formatCurrency(booking.car.pricePerDay)} × {daysCount} روز
+                </span>
               </div>
-
-              {daysCount >= 7 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Weekly discount (10%)</span>
-                  <span>
-                    -{formatCurrency(booking.car.pricePerDay * daysCount * 0.1)}
-                  </span>
-                </div>
-              )}
-
-              {daysCount >= 30 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Monthly discount (20%)</span>
-                  <span>
-                    -{formatCurrency(booking.car.pricePerDay * daysCount * 0.2)}
-                  </span>
-                </div>
-              )}
 
               <Separator />
 
               <div className="flex justify-between font-bold">
-                <span>Total</span>
                 <span className="text-primary">
                   {formatCurrency(booking.totalPrice)}
                 </span>
+                <span>مجموع</span>
               </div>
             </CardContent>
           </Card>
@@ -345,26 +323,28 @@ const BookingDetailsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Cancellation Policy
+                <FileText className="w-5 h-5 ml-2" />
+                شرایط لغو
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start gap-2">
                   <Clock className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                  <span>Free cancellation up to 48 hours before pickup</span>
+                  <span className="text-right">
+                    لغو رایگان تا ۱ روز قبل از تحویل
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                  <span>
-                    50% refund for cancellations 24-48 hours before pickup
+                  <span className="text-right">
+                    ۵۰٪ بازپرداخت برای لغو ۲۴ تا ۴۸ ساعت قبل از تحویل
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <XCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                  <span>
-                    No refund for cancellations less than 24 hours before pickup
+                  <span className="text-right">
+                    عدم بازپرداخت برای لغو کمتر از ۲۴ ساعت قبل از تحویل
                   </span>
                 </li>
               </ul>
@@ -373,36 +353,34 @@ const BookingDetailsPage = () => {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" className="w-full mt-4">
-                      Cancel Booking
+                      لغو رزرو
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent dir="rtl">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you sure you want to cancel?
+                      <AlertDialogTitle className="text-right">
+                        آیا مطمئن هستید که می‌خواهید لغو کنید؟
                       </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Please provide a reason for cancellation. This action
-                        cannot be undone.
+                      <AlertDialogDescription className="text-right">
+                        لطفاً دلیل لغو را وارد کنید. این اقدام قابل بازگشت نیست.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="py-4">
                       <Textarea
-                        placeholder="Reason for cancellation..."
+                        placeholder="دلیل لغو..."
                         value={cancellationReason}
                         onChange={(e) => setCancellationReason(e.target.value)}
+                        className="text-right"
                       />
                     </div>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+                    <AlertDialogFooter className="flex-row-reverse sm:flex-row-reverse">
+                      <AlertDialogCancel>حفظ رزرو</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleCancelBooking}
                         disabled={!cancellationReason || isCancelling}
-                        className="bg-destructive hover:bg-destructive/90"
+                        className="bg-destructive hover:bg-destructive/90 mr-2 sm:mr-0 sm:ml-2"
                       >
-                        {isCancelling
-                          ? "Cancelling..."
-                          : "Confirm Cancellation"}
+                        {isCancelling ? "در حال لغو..." : "تایید لغو"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

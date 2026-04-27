@@ -101,6 +101,7 @@ const useBookingStore = create(
 
         try {
           const res = await getBookingByIdService(id);
+          console.log("Fetched booking details:", res);
 
           set({
             selectedBooking: res.data.data.booking,

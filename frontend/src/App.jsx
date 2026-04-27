@@ -75,7 +75,7 @@ const App = () => {
                 path="/bookings/history"
                 element={<BookingHistoryPage />}
               />
-              <Route path="/booking/:carId" element={<BookingDetailsPage />} />
+              <Route path="/bookings/:carId" element={<BookingDetailsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Route>
           </Route>

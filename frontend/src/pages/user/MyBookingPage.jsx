@@ -31,15 +31,12 @@ const MyBookingsPage = () => {
       totalItems: 0,
       itemsPerPage: 10,
     },
-    setSort,
     setPagination,
   } = useBookingStore();
   const bookings = useBookingStore((state) => state.userBookings) || [];
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
   const navigate = useNavigate();
-  console.log(bookings);
 
   useEffect(() => {
     fetchUserBookings({
@@ -49,15 +46,6 @@ const MyBookingsPage = () => {
     });
     // eslint-disable-next-line
   }, [activeTab, pagination.currentPage, pagination.itemsPerPage]);
-
-  useEffect(() => {
-    const sortMap = {
-      newest: "-createdAt",
-      oldest: "createdAt",
-      upcoming: "startDate",
-    };
-    setSort(sortMap[sortBy] || "-createdAt");
-  }, [sortBy, activeTab, pagination.currentPage, setSort]);
 
   const handleCancelBooking = async (id) => {
     try {
@@ -192,13 +180,13 @@ const MyBookingsPage = () => {
         </Tabs>
 
         <div className="flex items-center gap-3 w-full lg:w-auto">
-          <div className="relative flex-1 lg:flex-initial">
+          <div className="relative w-full lg:w-64 xl:w-80">
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="جستجوی موتر..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-9 w-full lg:w-64"
+              className="pr-9 w-full"
             />
             {searchQuery && (
               <button
@@ -209,18 +197,6 @@ const MyBookingsPage = () => {
               </button>
             )}
           </div>
-
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40">
-              <Filter className="w-4 h-4 ml-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="newest">جدیدترین</SelectItem>
-              <SelectItem value="oldest">قدیمی‌ترین</SelectItem>
-              <SelectItem value="upcoming">نزدیک‌ترین</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
