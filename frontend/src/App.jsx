@@ -35,6 +35,7 @@ const BookingDetailsPage = lazy(
   () => import("@/pages/user/BookingDetailsPage"),
 );
 const ProfilePage = lazy(() => import("@/pages/user/ProfilePage"));
+const FavoritesPage = lazy(() => import("@/pages/user/FavoritesPage"));
 
 // Admin pages
 const AdminDashboardPage = lazy(
@@ -77,6 +78,7 @@ const App = () => {
               />
               <Route path="/bookings/:carId" element={<BookingDetailsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
             </Route>
           </Route>
 

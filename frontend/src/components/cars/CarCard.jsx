@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
+import FavoriteButton from "./FavoriteButton";
 
 export const CarCard = ({ car, index }) => {
   const navigate = useNavigate();
@@ -69,13 +70,12 @@ export const CarCard = ({ car, index }) => {
           </div>
 
           {/* Favorite Button */}
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute top-4 left-4 bg-background/50 hover:bg-background/80 backdrop-blur-sm"
-          >
-            <Heart className="w-4 h-4" />
-          </Button>
+          <FavoriteButton
+            carId={car._id}
+            classCode={
+              "absolute top-4 left-4 bg-background/50 hover:bg-background/80 backdrop-blur-sm"
+            }
+          />
 
           {/* Price Badge */}
           <div className="absolute bottom-4 left-4">

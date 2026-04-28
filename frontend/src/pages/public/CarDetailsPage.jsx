@@ -16,13 +16,13 @@ import { formatCurrency } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import useCarStore from "@/store/carStore";
 import useBookingStore from "@/store/bookingStore";
+import FavoriteButton from "@/components/cars/FavoriteButton";
 
 const CarDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const { selectedCar: car, loading, fetchCarById } = useCarStore();
   const { createBooking } = useBookingStore();
 
@@ -81,13 +81,6 @@ const CarDetailsPage = () => {
     }
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    toast.success(
-      isFavorite ? "از علاقه‌مندی‌ها حذف شد" : "به علاقه‌مندی‌ها اضافه شد",
-    );
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" dir="rtl">
@@ -133,17 +126,7 @@ const CarDetailsPage = () => {
           <Button variant="ghost" size="icon" onClick={handleShare}>
             <Share2 className="w-4 h-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleFavorite}
-            className={isFavorite ? "text-red-500" : ""}
-          >
-            <Heart
-              className="w-4 h-4"
-              fill={isFavorite ? "currentColor" : "none"}
-            />
-          </Button>
+          <FavoriteButton carId={car._id} />
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import userRouter from './routes/userRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import carRouter from './routes/carRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
+import favoriteRouter from './routes/favoriteRoutes.js';
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.use(
 // Set security HTTP headers
 app.use(helmet());
 
-// Limit requests from same API
+//Limit requests from same API
 // const limiter = rateLimit({
 //   max: 100,
 //   windowMs: 60 * 60 * 1000,
@@ -77,6 +78,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/cars', carRouter);
 app.use('/api/v1/bookings', bookingRouter);
+app.use('/api/v1/favorites', favoriteRouter);
 
 app.all(/(.*)/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
