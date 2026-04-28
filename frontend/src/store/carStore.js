@@ -182,10 +182,10 @@ const useCarStore = create(
         }
       },
 
-      toggleAvailability: async (id, data) => {
+      toggleAvailability: async (id) => {
         set({ loading: true, error: null });
         try {
-          console.log("Toggle", id, data);
+          console.log("Toggle", id);
           const res = await toggleAvailabilityService(id);
           console.log("Toggle Res", res);
           const updated = res.data.data.car;

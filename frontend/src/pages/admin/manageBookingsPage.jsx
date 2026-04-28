@@ -36,6 +36,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
+import { useNavigate } from "react-router-dom";
 
 const ManageBookingsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,9 +45,11 @@ const ManageBookingsPage = () => {
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState("");
   const [statusNote, setStatusNote] = useState("");
+  const navigate = useNavigate();
   const {
     bookings,
     loading,
+    error,
     pagination,
     fetchAllBookings,
     updateBookingStatus,
@@ -63,19 +66,19 @@ const ManageBookingsPage = () => {
   }, [fetchAllBookings, currentPage, itemsPerPage]);
 
   const handleStatusUpdate = async () => {
+    console.log(selectedBooking._id, newStatus, statusNote);
     if (!selectedBooking || !newStatus) return;
 
     try {
       await updateBookingStatus(selectedBooking._id, newStatus, statusNote);
 
       toast.success(`وضعیت رزرو به ${getStatusText(newStatus)} تغییر کرد`);
-      console.log(bookings);
 
       setIsStatusDialogOpen(false);
       setStatusNote("");
       setNewStatus("");
-    } catch (error) {
-      toast.error("به‌روزرسانی وضعیت رزرو ناموفق بود");
+    } catch (err) {
+      toast.error(error);
       console.log(error);
     }
   };
@@ -281,7 +284,7 @@ const ManageBookingsPage = () => {
                               variant="ghost"
                               size="icon"
                               onClick={() =>
-                                window.open(`/bookings/${booking._id}`)
+                                navigate(`/bookings/${booking._id}`)
                               }
                             >
                               <Eye className="w-4 h-4" />

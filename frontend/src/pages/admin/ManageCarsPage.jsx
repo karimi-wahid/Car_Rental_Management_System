@@ -73,6 +73,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useCarStore from "@/store/carStore";
+import { useNavigate } from "react-router-dom";
 
 const CarForm = ({ formData, setFormData }) => {
   const [dragActive, setDragActive] = useState(false);
@@ -483,7 +484,8 @@ const ManageCarsPage = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
-  const { setFilter } = useCarStore();
+  const { setFilters } = useCarStore();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     brand: "",
@@ -505,6 +507,7 @@ const ManageCarsPage = () => {
   const {
     cars,
     loading,
+    error,
     pagination,
     fetchCars,
     createCar,
@@ -515,9 +518,9 @@ const ManageCarsPage = () => {
 
   useEffect(() => {
     if (statusFilter === "all") {
-      setFilter("availability", "");
+      setFilters("availability", "");
     } else {
-      setFilter("availability", statusFilter === "available");
+      setFilters("availability", statusFilter === "available");
     }
     fetchCars(pagination.currentPage, pagination.itemsPerPage);
   }, [
@@ -525,7 +528,7 @@ const ManageCarsPage = () => {
     pagination.currentPage,
     pagination.itemsPerPage,
     fetchCars,
-    setFilter,
+    setFilters,
   ]);
 
   const handleAddCar = async () => {
@@ -580,8 +583,8 @@ const ManageCarsPage = () => {
       await updateCar(selectedCar._id, formData);
       toast.success("موتر موفقانه ویرایش شد");
       setIsEditDialogOpen(false);
-    } catch (error) {
-      toast.error("ویرایش موتر ناموفق بود");
+    } catch (err) {
+      toast.error(error);
       console.log(error);
     }
   };
@@ -592,8 +595,9 @@ const ManageCarsPage = () => {
       toast.success(
         `موتر حالا ${current ? "غیرقابل دسترس" : "قابل دسترس"} است`,
       );
-    } catch (error) {
-      toast.error("تغییر وضعیت دسترسی ناموفق بود");
+    } catch (err) {
+      //toast.error("تغییر وضعیت دسترسی ناموفق بود");
+      toast.error(error);
       console.log(error);
     }
   };
@@ -830,7 +834,7 @@ const ManageCarsPage = () => {
                               ویرایش
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => window.open(`/cars/${car._id}`)}
+                              onClick={() => navigate(`/cars/${car._id}`)}
                               className="flex-row-reverse"
                             >
                               <Eye className="w-4 h-4 ml-2" />

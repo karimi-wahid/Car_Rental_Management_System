@@ -236,6 +236,7 @@ const useBookingStore = create(
             status,
             adminNotes,
           });
+          console.log(res);
 
           const updated = res.data.data.booking;
 
@@ -250,6 +251,7 @@ const useBookingStore = create(
 
           return res.data;
         } catch (err) {
+          console.log(err.response?.data?.message);
           set({ error: err.response?.data?.message, loading: false });
           throw err;
         }
