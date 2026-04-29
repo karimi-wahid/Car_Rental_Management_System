@@ -91,7 +91,7 @@ export const createBooking = catchAsync(async (req, res, next) => {
   // Populate user and car details for response
   await booking.populate([
     { path: 'user', select: 'name email avatar' },
-    { path: 'car', select: 'name brand model images pricePerDay' },
+    { path: 'car', select: 'name brand carModel images pricePerDay' },
   ]);
 
   res.status(201).json({
@@ -154,7 +154,7 @@ export const getAllBookings = catchAsync(async (req, res, next) => {
     .skip(skip)
     .limit(parseInt(limit))
     .populate('user', 'name email avatar phone')
-    .populate('car', 'name brand model images pricePerDay year');
+    .populate('car', 'name brand carModel images pricePerDay year');
 
   // Get total count for pagination
   const total = await Booking.countDocuments(query);
@@ -181,8 +181,11 @@ export const getBookingById = catchAsync(async (req, res, next) => {
 
   // Find booking by ID with populated fields
   const booking = await Booking.findById(id)
-    .populate('user', 'name email avatar phone address')
-    .populate('car', 'name brand model images pricePerDay year location');
+    .populate('user', 'name email +role avatar phone address')
+    .populate(
+      'car',
+      'name brand carModel images pricePerDay year seats transmission location',
+    );
 
   // Check if booking exists
   if (!booking) {
@@ -196,10 +199,13 @@ export const getBookingById = catchAsync(async (req, res, next) => {
     );
   }
 
+  console.log(booking.user);
+
   res.status(200).json({
     status: 'success',
     data: {
       booking,
+      userRole,
     },
   });
 });
@@ -330,7 +336,7 @@ export const updateBooking = catchAsync(async (req, res, next) => {
     context: 'query', // For validation context
   })
     .populate('user', 'name email avatar')
-    .populate('car', 'name brand model images pricePerDay');
+    .populate('car', 'name brand carModel images pricePerDay');
 
   res.status(200).json({
     status: 'success',
@@ -442,7 +448,7 @@ export const cancelBooking = catchAsync(async (req, res, next) => {
   // Populate for response
   await booking.populate([
     { path: 'user', select: 'name email avatar phone' },
-    { path: 'car', select: 'name brand model images pricePerDay' },
+    { path: 'car', select: 'name brand carModel images pricePerDay' },
   ]);
 
   res.status(200).json({
@@ -537,7 +543,7 @@ export const checkCarAvailability = catchAsync(async (req, res, next) => {
         endDate: { $gt: start },
       },
     ],
-  }).populate('car', 'name brand model images');
+  }).populate('car', 'name brand carModel images');
 
   const isAvailable = overlappingBookings.length === 0;
 
@@ -819,9 +825,9 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
     .limit(parseInt(limit))
     .populate(
       'car',
-      'name brand model images pricePerDay year location transmission seats',
+      'name brand carModel images pricePerDay year location transmission seats',
     )
-    .populate('user', 'name email avatar phone');
+    .populate('user', 'name email role avatar phone');
 
   // Filter by car brand
   if (carBrand) {
@@ -944,7 +950,7 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
   })
     .sort('startDate')
     .limit(5)
-    .populate('car', 'name brand model images');
+    .populate('car', 'name brand carModel images');
 
   // Get past bookings
   const pastBookings = await Booking.find({
@@ -953,7 +959,7 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
   })
     .sort('-endDate')
     .limit(5)
-    .populate('car', 'name brand model');
+    .populate('car', 'name brand carModel');
 
   // Get cancelled bookings with reasons
   const cancelledBookings = await Booking.find({
@@ -965,26 +971,6 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
     .limit(10)
     .select('cancellationReason cancelledAt totalPrice car')
     .populate('car', 'name brand');
-
-  // Calculate loyalty tier based on total spent
-  const totalSpent = stats[0]?.overall[0]?.totalSpent || 0;
-  let loyaltyTier = 'Bronze';
-  let nextTier = 'Silver';
-  let amountToNextTier = 500 - totalSpent;
-
-  if (totalSpent >= 2000) {
-    loyaltyTier = 'Platinum';
-    nextTier = null;
-    amountToNextTier = 0;
-  } else if (totalSpent >= 1000) {
-    loyaltyTier = 'Gold';
-    nextTier = 'Platinum';
-    amountToNextTier = 2000 - totalSpent;
-  } else if (totalSpent >= 500) {
-    loyaltyTier = 'Silver';
-    nextTier = 'Gold';
-    amountToNextTier = 1000 - totalSpent;
-  }
 
   // Calculate average days between bookings
   const bookingDates = await Booking.find({ user: targetUserId })
@@ -1041,9 +1027,6 @@ export const getUserBookingHistory = catchAsync(async (req, res, next) => {
         averageBookingValue: stats[0]?.overall[0]?.averageBookingValue || 0,
         totalDays: Math.round(stats[0]?.overall[0]?.totalDays || 0),
         averageDaysBetween: Math.round(avgDaysBetween * 10) / 10,
-        loyaltyTier,
-        nextTier,
-        amountToNextTier,
       },
       statusBreakdown: stats[0]?.byStatus || [],
       timeline: {
@@ -1657,7 +1640,7 @@ export const updateBookingStatus = catchAsync(async (req, res, next) => {
   // Find the booking
   const booking = await Booking.findById(id)
     .populate('user', 'name email phone')
-    .populate('car', 'name brand model pricePerDay');
+    .populate('car', 'name brand carModel pricePerDay');
 
   if (!booking) {
     return next(new AppError('No booking found with that ID', 404));
@@ -1755,7 +1738,7 @@ export const updateBookingStatus = catchAsync(async (req, res, next) => {
   // Populate for response
   await booking.populate([
     { path: 'user', select: 'name email avatar phone' },
-    { path: 'car', select: 'name brand model images pricePerDay' },
+    { path: 'car', select: 'name brand carModel images pricePerDay' },
   ]);
 
   res.status(200).json({

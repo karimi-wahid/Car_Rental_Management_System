@@ -36,7 +36,9 @@ export const createCarService = (data) =>
   });
 
 export const updateCarService = (id, data) =>
-  axiosInstance.patch(`/cars/${id}`, data);
+  axiosInstance.patch(`/cars/${id}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 
 export const deleteCarService = (id, permanent) =>
   axiosInstance.delete(`/cars/${id}${permanent ? "?permanent=true" : ""}`);

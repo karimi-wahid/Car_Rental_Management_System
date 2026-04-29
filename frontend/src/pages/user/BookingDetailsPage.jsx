@@ -34,15 +34,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency, cn, formatDate } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
+import { BookingInvoice } from "@/components/common/BookingInvoice";
+import { useAuthStore } from "@/store/authStore";
 
 const BookingDetailsPage = () => {
   const { carId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const booking = useBookingStore((state) => state.selectedBooking);
   const loading = useBookingStore((state) => state.loading);
   const { fetchBookingById, cancelBooking } = useBookingStore();
   const [cancellationReason, setCancellationReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   const fetchBookingDetails = useCallback(async () => {
     if (!carId) return;
@@ -55,8 +59,6 @@ const BookingDetailsPage = () => {
       navigate("/bookings");
     }
   }, [carId, navigate, fetchBookingById]);
-
-  console.log("Booking details page - booking:", booking);
 
   useEffect(() => {
     fetchBookingDetails();
@@ -76,11 +78,6 @@ const BookingDetailsPage = () => {
     } finally {
       setIsCancelling(false);
     }
-  };
-
-  const handleDownloadInvoice = () => {
-    // Generate PDF invoice
-    toast.success("فاکتور دانلود شد");
   };
 
   const handleContactSupport = () => {
@@ -157,10 +154,18 @@ const BookingDetailsPage = () => {
         </Button>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleDownloadInvoice}>
-            <Download className="w-4 h-4 ml-2" />
-            فاکتور
-          </Button>
+          {booking.status === "confirmed" && user.role === "admin" && (
+            <Button onClick={() => setShowInvoice(true)}>
+              <Download className="w-4 h-4 ml-2" />
+              دانلود فاکتور
+            </Button>
+          )}
+          {showInvoice && (
+            <BookingInvoice
+              booking={booking}
+              onClose={() => setShowInvoice(false)}
+            />
+          )}
           <Button variant="outline" size="sm" onClick={handleContactSupport}>
             <MessageCircle className="w-4 h-4 ml-2" />
             پشتیبانی

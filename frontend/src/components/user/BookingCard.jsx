@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { differenceInDays, isWithinInterval } from "date-fns";
 import {
   Calendar,
-  MapPin,
   MoreVertical,
   Clock,
   CreditCard,
@@ -11,7 +10,6 @@ import {
   XCircle,
   Edit,
   Phone,
-  FileText,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +33,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { formatCurrency, cn, formatDate } from "@/lib/utils";
-import { toast } from "react-hot-toast";
 
 export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
   const navigate = useNavigate();
@@ -125,12 +122,6 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
       onCancel(booking._id);
     }
     setShowCancelDialog(false);
-  };
-
-  const handleDownloadInvoice = () => {
-    // Navigate to invoice or trigger download
-    navigate(`/bookings/${booking._id}/invoice`);
-    toast.success("در حال دریافت فاکتور...");
   };
 
   const handleContactSupport = () => {
@@ -261,13 +252,6 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
                       <DropdownMenuItem onClick={handleModify}>
                         <Edit className="w-4 h-4 ml-2" />
                         ویرایش رزرو
-                      </DropdownMenuItem>
-                    )}
-
-                    {canViewInvoice && (
-                      <DropdownMenuItem onClick={handleDownloadInvoice}>
-                        <FileText className="w-4 h-4 ml-2" />
-                        دانلود فاکتور
                       </DropdownMenuItem>
                     )}
 

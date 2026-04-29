@@ -353,6 +353,47 @@ const CarForm = ({ formData, setFormData }) => {
                 onChange={(e) => handleFileChange(e.target.files)}
               />
 
+              {/* ✅ Existing images from server */}
+              {formData.existingImages?.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">
+                    تصاویر فعلی
+                  </Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {formData.existingImages.map((item) => (
+                      <div
+                        key={item.id}
+                        className="relative rounded-lg overflow-hidden border"
+                      >
+                        <img
+                          src={item.preview}
+                          className="w-full h-32 object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // ✅ Remove from preview + add to deletedImages list
+                            setFormData((prev) => ({
+                              ...prev,
+                              existingImages: prev.existingImages.filter(
+                                (i) => i.id !== item.id,
+                              ),
+                              deletedImages: [
+                                ...(prev.deletedImages || []),
+                                item.id,
+                              ],
+                            }));
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col items-center gap-2">
                 <Upload className="w-8 h-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
@@ -580,12 +621,40 @@ const ManageCarsPage = () => {
     if (!selectedCar) return;
 
     try {
-      await updateCar(selectedCar._id, formData);
+      const form = new FormData();
+
+      form.append("name", formData.name);
+      form.append("brand", formData.brand);
+      form.append("carModel", formData.carModel);
+      form.append("year", formData.year);
+      form.append("seats", formData.seats);
+      form.append("transmission", formData.transmission);
+      form.append("fuelType", formData.fuelType);
+      form.append("pricePerDay", formData.pricePerDay);
+      form.append("description", formData.description);
+      form.append("licensePlate", formData.licensePlate);
+      form.append("mileage", formData.mileage);
+      form.append("color", formData.color);
+      form.append("availability", JSON.stringify(formData.availability));
+      form.append("features", JSON.stringify(formData.features));
+
+      // ✅ Tell backend which images to delete
+      form.append(
+        "deletedImages",
+        JSON.stringify(formData.deletedImages || []),
+      );
+
+      // ✅ New file uploads
+      formData.imageFiles.forEach((item) => {
+        form.append("images", item.file);
+      });
+
+      await updateCar(selectedCar._id, form); // make sure updateCar sends as FormData
       toast.success("موتر موفقانه ویرایش شد");
       setIsEditDialogOpen(false);
     } catch (err) {
-      toast.error(error);
-      console.log(error);
+      toast.error("ویرایش موتر ناموفق بود");
+      console.log(err);
     }
   };
 
@@ -613,13 +682,21 @@ const ManageCarsPage = () => {
       transmission: car.transmission,
       fuelType: car.fuelType,
       pricePerDay: car.pricePerDay,
-      images: car.images,
       description: car.description,
       features: car.features,
       licensePlate: car.licensePlate,
       mileage: car.mileage || 0,
       color: car.color || "",
       availability: car.availability,
+      images: car.images.map((img) => img.url), // existing URL strings
+      imageFiles: [], // new file uploads (empty)
+      // ✅ existing images shown as previews with their server IDs
+      existingImages: car.images.map((img) => ({
+        id: img._id || img.public_id || img.url, // whatever your backend uses
+        url: img.url,
+        preview: img.url,
+      })),
+      deletedImages: [], // ✅ track which to delete
     });
     setIsEditDialogOpen(true);
   };
