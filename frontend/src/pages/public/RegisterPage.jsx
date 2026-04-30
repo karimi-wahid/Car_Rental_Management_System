@@ -20,6 +20,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { calculatePasswordStrength } from "@/utils/passwordStrength";
+import toast from "react-hot-toast";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -90,7 +91,13 @@ const RegisterPage = () => {
     });
 
     if (result.success) {
-      navigate("/dashboard", { replace: true });
+      // ✅ store email for OTP page
+      localStorage.setItem("email", data.email);
+
+      toast.success("ایمیل خود را بررسی کنید و کد تایید را وارد کنید");
+
+      // ✅ navigate to verify page (WITHOUT token)
+      navigate("/verify-email");
     } else {
       setServerError(result.error);
     }

@@ -7,6 +7,9 @@ import {
   updatePasswordService,
   logoutService,
   getMeService,
+  verifyEmailService,
+  verifyOTPService,
+  resendVerificationService,
 } from "@/services/authService";
 
 const authStore = (set) => ({
@@ -19,19 +22,14 @@ const authStore = (set) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await signupService(userData);
-      const { data } = res.data;
+      // ✅ No longer returns a user — just a message
+      set({ isLoading: false, error: null });
 
-      set({
-        user: data.user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      return { success: true };
-    } catch (err) {
-      const message = err.response?.data?.message || "Signup failed";
-      set({ isLoading: false, error: message });
-      return { success: false, error: message };
+      return { success: true, message: res.data.message };
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Signup failed";
+      set({ isLoading: false, error: errorMessage, isAuthenticated: false });
+      return { success: false, error: errorMessage };
     }
   },
 
@@ -51,6 +49,73 @@ const authStore = (set) => ({
     } catch (err) {
       const message = err.response?.data?.message || "Login failed";
       set({ isLoading: false, error: message });
+      return { success: false, error: message };
+    }
+  },
+
+  verifyEmail: async (token) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const res = await verifyEmailService(token);
+
+      const { data } = res.data;
+
+      set({
+        user: data.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true, message: res.data.message };
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Email verification failed";
+
+      set({ isLoading: false, error: message });
+
+      return { success: false, error: message };
+    }
+  },
+
+  verifyOTP: async (email, otp) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const res = await verifyOTPService({ email, otp });
+
+      const { data } = res.data;
+
+      set({
+        user: data.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || "Invalid or expired OTP";
+
+      set({ isLoading: false, error: message });
+
+      return { success: false, error: message };
+    }
+  },
+
+  resendVerification: async (email) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const res = await resendVerificationService({ email });
+
+      set({ isLoading: false });
+
+      return { success: true, message: res.data.message };
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to resend email";
+
+      set({ isLoading: false, error: message });
+
       return { success: false, error: message };
     }
   },
@@ -160,7 +225,7 @@ const authStore = (set) => ({
     }
   },
 
-  clearError: () => set({ error: null }),
+  clearError: () => set({ error: null, tokenExpired: false }),
 });
 
 export const useAuthStore = create(authStore);

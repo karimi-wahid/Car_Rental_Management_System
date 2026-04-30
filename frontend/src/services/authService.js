@@ -8,6 +8,18 @@ export const signupService = (userData) =>
 export const loginService = (email, password) =>
   axiosInstance.post("/auth/login", { email, password });
 
+// Verify via EMAIL LINK
+export const verifyEmailService = (token) =>
+  axiosInstance.get(`/auth/verify-email/${token}`);
+
+// Verify via OTP
+export const verifyOTPService = (data) =>
+  axiosInstance.post("/auth/verify-otp", data);
+
+// Resend verification (OTP + link)
+export const resendVerificationService = (data) =>
+  axiosInstance.post("/auth/resend-verification", data);
+
 // Forgot Password
 export const forgotPasswordService = (email) =>
   axiosInstance.post("/auth/forgotPassword", { email });

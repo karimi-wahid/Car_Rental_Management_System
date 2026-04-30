@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { CarCard } from "@/components/cars/CarCard";
 import useFavoriteStore from "@/store/favoriteStore";
-import { formatNumber } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { PageHeader } from "@/components/common/PageHeader";
 
@@ -18,8 +17,6 @@ const FavoritesPage = () => {
     // eslint-disable-next-line
   }, []);
 
-  const favoriteCount = favorites.length;
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64" dir="rtl">
@@ -31,8 +28,8 @@ const FavoritesPage = () => {
   return (
     <div className="container mx-auto px-4 py-8" dir="rtl">
       <PageHeader
-        title="رزروهای من"
-        description={`${user?.name || "کاربر"} عزیز، رزروهای خود را مشاهده و مدیریت کنید`}
+        title="موترهای مورد علاقه من"
+        description={`${user?.name || "کاربر"} عزیز، موترهای مورد علاقه خود را مشاهده و مدیریت کنید`}
       />
 
       {error && (
@@ -43,17 +40,6 @@ const FavoritesPage = () => {
           </button>
         </div>
       )}
-
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-right">
-            موترهای مورد علاقه من
-          </h1>
-          <p className="text-gray-600 text-right">
-            {formatNumber(favoriteCount)} موتر ذخیره شده
-          </p>
-        </div>
-      </div>
 
       {favorites.length === 0 ? (
         <div className="text-center py-12">

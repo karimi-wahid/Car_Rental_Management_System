@@ -12,10 +12,10 @@ const sendEmail = async (options) => {
   });
   // 2) Define the email options
   const mailOptions = {
-    from: `Karimi ${process.env.EMAIL_FROM}`,
+    from: `Karimi <${process.env.EMAIL_FROM}>`,
     to: options.email,
     subject: options.subject,
-    text: options.message,
+    html: options.html,
   };
   // 3) Actually send the email
   await transporter.sendMail(mailOptions);

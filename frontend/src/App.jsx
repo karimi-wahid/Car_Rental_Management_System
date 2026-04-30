@@ -24,6 +24,10 @@ const ForgotPasswordPage = lazy(
 const ResetPasswordPage = lazy(
   () => import("@/pages/public/ResetPasswordPage"),
 );
+const VerifyEmailPage = lazy(() => import("@/pages/public/VerifyEmailPage"));
+const VerifyEmailCallbackPage = lazy(
+  () => import("@/pages/public/VerifyEmailCallbackPage"),
+);
 
 // User pages
 const UserDashboardPage = lazy(() => import("@/pages/user/UserDashboardPage"));
@@ -64,6 +68,13 @@ const App = () => {
               path="/reset-password/:token"
               element={<ResetPasswordPage />}
             />
+            <Route
+              path="/verify-email/callback"
+              element={<VerifyEmailCallbackPage />}
+            />
+
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
           </Route>
 

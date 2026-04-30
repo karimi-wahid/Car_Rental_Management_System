@@ -6,6 +6,7 @@ import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import sendEmail from '../utils/email.js';
 import bcrypt from 'bcryptjs';
+import emailTemplates from '../template/EmailTemplate.js';
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -49,7 +50,39 @@ export const signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  createSendToken(newUser, 201, res);
+  // Generate email verification token
+  const verifyToken = newUser.createEmailVerificationToken();
+  const otp = newUser.createEmailOTP();
+  await newUser.save({ validateBeforeSave: false });
+
+  // Build verification URL
+  const verifyURL = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email/${verifyToken}`;
+
+  const template = emailTemplates.verification({
+    name: newUser.name,
+    link: verifyURL,
+    otp: otp,
+  });
+
+  try {
+    await sendEmail({
+      email: newUser.email,
+      subject: template.subject,
+      html: template.html,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'User created. Verification email sent.',
+    });
+  } catch (err) {
+    newUser.emailVerificationToken = undefined;
+    newUser.emailVerificationExpires = undefined;
+    await newUser.save({ validateBeforeSave: false });
+    return next(
+      new AppError('Failed to send verification email. Try again later.', 500),
+    );
+  }
 });
 
 export const login = catchAsync(async (req, res, next) => {
@@ -67,8 +100,137 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password', 401));
   }
 
+  if (!user.isEmailVerified) {
+    return next(
+      new AppError('Please verify your email address before logging in.', 403),
+    );
+  }
+
   // 3) If everything ok, send token to client
   createSendToken(user, 200, res);
+});
+
+// Verify OTP
+export const verifyOTP = catchAsync(async (req, res, next) => {
+  const hashedOTP = crypto
+    .createHash('sha256')
+    .update(req.body.otp)
+    .digest('hex');
+
+  const user = await User.findOne({
+    email: req.body.email,
+    emailOTP: hashedOTP,
+    emailOTPExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new AppError('Invalid or expired OTP', 400));
+  }
+
+  user.isEmailVerified = true;
+  user.emailOTP = undefined;
+  user.emailOTPExpires = undefined;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpires = undefined;
+
+  await user.save({ validateBeforeSave: false });
+
+  createSendToken(user, 200, res);
+});
+
+// Verify email from link
+export const verifyEmail = catchAsync(async (req, res, next) => {
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired.', 400));
+  }
+
+  user.isEmailVerified = true;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  const template = emailTemplates.welcome({
+    name: user.name,
+    loginLink: `${req.protocol}://${req.get('host')}/login`,
+  });
+
+  sendEmail({
+    email: user.email,
+    subject: template.subject,
+    html: template.html,
+  }).catch((err) => console.error('Welcome email failed:', err));
+
+  const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
+    httpOnly: true,
+    sameSite: 'strict',
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+  }
+
+  // Set the cookie
+  res.cookie('jwt', token, cookieOptions);
+
+  res.redirect(
+    `${process.env.FRONTEND_URL}/verify-email/callback?verified=true`,
+  );
+});
+
+// Resend verification email
+export const resendVerificationEmail = catchAsync(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user)
+    return next(new AppError('No account found with that email address.', 404));
+
+  if (user.isEmailVerified)
+    return next(new AppError('This email is already verified.', 400));
+
+  const verifyToken = user.createEmailVerificationToken();
+  const otp = user.createEmailOTP();
+  await user.save({ validateBeforeSave: false });
+
+  const verifyURL = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email/${verifyToken}`;
+
+  const template = emailTemplates.verification({
+    name: user.name,
+    link: verifyURL,
+    otp: otp,
+  });
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: template.subject,
+      html: template.html,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Verification email resent.',
+    });
+  } catch (err) {
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(new AppError('Failed to send email. Try again later.', 500));
+  }
 });
 
 export const logout = (req, res) => {
@@ -152,13 +314,16 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     'host',
   )}/api/v1/users/reset-password/${resetToken}`;
 
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+  const template = emailTemplates.passwordReset({
+    name: user.name,
+    link: resetURL,
+  });
 
   try {
     await sendEmail({
       email: user.email,
-      subject: 'Your password reset token (valid for 10 min)',
-      message,
+      subject: template.subject,
+      html: template.html,
     });
 
     res.status(200).json({

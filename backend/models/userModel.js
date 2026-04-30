@@ -51,6 +51,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    emailVerificationToken: String,
+    emailVerificationExpires: Date,
+    emailOTP: { type: String, select: false },
+    emailOTPExpires: { type: Date, select: false },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     favorites: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -77,6 +85,28 @@ userSchema.pre('save', function () {
 
   this.passwordChangedAt = Date.now() - 1000;
 });
+
+userSchema.methods.createEmailVerificationToken = function () {
+  const verifyToken = crypto.randomBytes(32).toString('hex');
+
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(verifyToken)
+    .digest('hex');
+
+  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+  return verifyToken;
+};
+
+userSchema.methods.createEmailOTP = function () {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  this.emailOTP = crypto.createHash('sha256').update(otp).digest('hex');
+  this.emailOTPExpires = Date.now() + 10 * 60 * 1000; // 10 min
+
+  return otp; // send plain OTP in email
+};
 
 userSchema.pre(/^find/, function () {
   // this points to the current query
