@@ -14,6 +14,9 @@ import authRouter from './routes/authRoutes.js';
 import carRouter from './routes/carRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import favoriteRouter from './routes/favoriteRoutes.js';
+import feedbackRouter from './routes/feedbackRoutes.js';
+import commentRouter from './routes/commentRoutes.js';
+import contactRouter from './routes/contactRoutes.js';
 
 const app = express();
 
@@ -79,6 +82,9 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/cars', carRouter);
 app.use('/api/v1/bookings', bookingRouter);
 app.use('/api/v1/favorites', favoriteRouter);
+app.use('/api/v1/feedback', feedbackRouter);
+app.use('/api/v1/comments', commentRouter);
+app.use('/api/v1/contact', contactRouter);
 
 app.all(/(.*)/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
