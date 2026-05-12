@@ -8,7 +8,7 @@ const AdminLayout = () => {
       <AdminNavbar />
       <div className="flex">
         <AdminSidebar />
-        <main className="flex-1 p-4 md:p-6 pr-24 md:pr-6 lg:pr-6 transition-all duration-300">
+        <main className="flex-1 p-4 md:p-6 lg:pr-4  md:pr-24 pr-24 transition-all duration-300">
           <Outlet />
         </main>
       </div>

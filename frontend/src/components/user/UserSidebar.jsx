@@ -1,15 +1,14 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Calendar,
   History,
-  User,
   Settings,
-  CreditCard,
   Heart,
   Bell,
   ChevronLeft,
   Headphones,
+  MessageSquare,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
@@ -19,11 +18,10 @@ const navigation = [
   { name: "داشبورد", href: "/dashboard", icon: LayoutDashboard },
   { name: "رزروهای من", href: "/bookings", icon: Calendar },
   { name: "تاریخچه رزروها", href: "/bookings/history", icon: History },
-  { name: "پروفایل", href: "/profile", icon: User },
   { name: "علاقه‌مندی‌ها", href: "/favorites", icon: Heart },
-  { name: "اعلان‌ها", href: "/notifications", icon: Bell },
-  { name: "روش‌های پرداخت", href: "/payment-methods", icon: CreditCard },
   { name: "تنظیمات", href: "/settings", icon: Settings },
+  { name: "اعلان‌ها", href: "/notifications", icon: Bell },
+  { name: "پیشنهادها", href: "/feedbacks", icon: MessageSquare },
 ];
 
 // Helper function to get role display text
@@ -40,6 +38,7 @@ const getRoleDisplay = (role) => {
 
 const UserSidebar = () => {
   const user = useAuthStore((state) => state.user);
+  const navigate = useNavigate();
 
   return (
     <aside className="flex flex-col w-80 border-l bg-card">
@@ -125,7 +124,7 @@ const UserSidebar = () => {
           </p>
           <button
             className="w-full text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-            onClick={() => (window.location.href = "/support")}
+            onClick={() => navigate("/support")}
           >
             دریافت پشتیبانی
           </button>

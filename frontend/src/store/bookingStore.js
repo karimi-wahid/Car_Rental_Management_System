@@ -78,7 +78,7 @@ const useBookingStore = create(
             limit,
             sort,
             ...filters,
-            status, // ✅ add this
+            status,
           });
 
           const res = await getUserBookingsService(query);

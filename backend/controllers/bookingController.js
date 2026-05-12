@@ -762,304 +762,56 @@ function formatTime(hour, minute) {
 
 export const getUserBookingHistory = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const userRole = req.user.role;
 
-  // Admin can view any user's history
-  let targetUserId = userId;
-  if (userRole === 'admin' && req.params.userId) {
-    targetUserId = req.params.userId;
-  }
-
-  // Check if user exists (for admin viewing)
-  if (targetUserId !== userId) {
-    const targetUser = await User.findById(targetUserId);
-    if (!targetUser) {
-      return next(new AppError('User not found', 404));
-    }
-  }
-
-  // Parse query parameters
-  const {
-    status,
-    limit = 20,
-    page = 1,
-    sort = '-createdAt',
-    startDate,
-    endDate,
-    carBrand,
-    minPrice,
-    maxPrice,
-    groupBy = 'month', // month, year, car
-  } = req.query;
-
-  // Build query
-  let query = { user: targetUserId };
-
-  // Filter by status
-  if (status) {
-    const statuses = status.split(',');
-    query.status = { $in: statuses };
-  }
-
-  // Filter by date range
-  if (startDate || endDate) {
-    query.createdAt = {};
-    if (startDate) query.createdAt.$gte = new Date(startDate);
-    if (endDate) query.createdAt.$lte = new Date(endDate);
-  }
-
-  // Filter by price range
-  if (minPrice || maxPrice) {
-    query.totalPrice = {};
-    if (minPrice) query.totalPrice.$gte = parseFloat(minPrice);
-    if (maxPrice) query.totalPrice.$lte = parseFloat(maxPrice);
-  }
-
-  // Pagination
-  const skip = (parseInt(page) - 1) * parseInt(limit);
-
-  // Get bookings with car details
-  let bookingsQuery = Booking.find(query)
-    .sort(sort)
-    .skip(skip)
-    .limit(parseInt(limit))
-    .populate(
-      'car',
-      'name brand carModel images pricePerDay year location transmission seats',
-    )
-    .populate('user', 'name email role avatar phone');
-
-  // Filter by car brand
-  if (carBrand) {
-    const carIds = await Car.find({
-      brand: { $regex: carBrand, $options: 'i' },
-    }).distinct('_id');
-    query.car = { $in: carIds };
-  }
-
-  const bookings = await bookingsQuery;
-
-  // Get total count
-  const total = await Booking.countDocuments(query);
-
-  // Calculate detailed statistics
+  // Core stats aggregation
   const stats = await Booking.aggregate([
-    { $match: { user: new mongoose.Types.ObjectId(targetUserId) } },
+    { $match: { user: new mongoose.Types.ObjectId(userId) } },
     {
-      $facet: {
-        // Overall stats
-        overall: [
-          {
-            $group: {
-              _id: null,
-              totalSpent: { $sum: '$totalPrice' },
-              averageBookingValue: { $avg: '$totalPrice' },
-              totalBookings: { $sum: 1 },
-              totalDays: {
-                $sum: {
-                  $divide: [
-                    { $subtract: ['$endDate', '$startDate'] },
-                    86400000,
-                  ],
-                },
-              },
-            },
-          },
-        ],
-        // Status breakdown
-        byStatus: [
-          {
-            $group: {
-              _id: '$status',
-              count: { $sum: 1 },
-              totalAmount: { $sum: '$totalPrice' },
-            },
-          },
-        ],
-        // Monthly breakdown
-        byMonth: [
-          {
-            $group: {
-              _id: {
-                year: { $year: '$createdAt' },
-                month: { $month: '$createdAt' },
-              },
-              count: { $sum: 1 },
-              totalAmount: { $sum: '$totalPrice' },
-              monthName: {
-                $first: {
-                  $dateToString: { format: '%B', date: '$createdAt' },
-                },
-              },
-            },
-          },
-          { $sort: { '_id.year': -1, '_id.month': -1 } },
-          { $limit: 12 },
-        ],
-        // Yearly breakdown
-        byYear: [
-          {
-            $group: {
-              _id: { year: { $year: '$createdAt' } },
-              count: { $sum: 1 },
-              totalAmount: { $sum: '$totalPrice' },
-            },
-          },
-          { $sort: { '_id.year': -1 } },
-        ],
-        // Most booked cars
-        topCars: [
-          {
-            $group: {
-              _id: '$car',
-              count: { $sum: 1 },
-              totalSpent: { $sum: '$totalPrice' },
-            },
-          },
-          { $sort: { count: -1 } },
-          { $limit: 5 },
-          {
-            $lookup: {
-              from: 'cars',
-              localField: '_id',
-              foreignField: '_id',
-              as: 'carDetails',
-            },
-          },
-          { $unwind: '$carDetails' },
-          {
-            $project: {
-              car: '$carDetails.name',
-              brand: '$carDetails.brand',
-              model: '$carDetails.model',
-              count: 1,
-              totalSpent: 1,
-            },
-          },
-        ],
+      $group: {
+        _id: null,
+        totalBookings: { $sum: 1 },
+        totalSpent: { $sum: '$totalPrice' },
+        completedTrips: {
+          $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },
+        },
       },
     },
   ]);
 
-  // Get upcoming bookings
+  // Upcoming bookings
   const now = new Date();
   const upcomingBookings = await Booking.find({
-    user: targetUserId,
+    user: userId,
     status: { $in: ['confirmed', 'pending'] },
     startDate: { $gt: now },
   })
     .sort('startDate')
     .limit(5)
-    .populate('car', 'name brand carModel images');
+    .populate('car', 'name brand carModel images pricePerDay year');
 
-  // Get past bookings
-  const pastBookings = await Booking.find({
-    user: targetUserId,
-    status: { $in: ['completed', 'cancelled'] },
-  })
-    .sort('-endDate')
+  // Recent bookings
+  const recentBookings = await Booking.find({ user: userId })
+    .sort('-createdAt')
     .limit(5)
-    .populate('car', 'name brand carModel');
+    .populate('car', 'name brand carModel images pricePerDay year');
 
-  // Get cancelled bookings with reasons
-  const cancelledBookings = await Booking.find({
-    user: targetUserId,
-    status: 'cancelled',
-    cancellationReason: { $exists: true, $ne: null },
-  })
-    .sort('-cancelledAt')
-    .limit(10)
-    .select('cancellationReason cancelledAt totalPrice car')
-    .populate('car', 'name brand');
-
-  // Calculate average days between bookings
-  const bookingDates = await Booking.find({ user: targetUserId })
-    .sort('createdAt')
-    .select('createdAt');
-
-  let avgDaysBetween = 0;
-  if (bookingDates.length > 1) {
-    let totalDays = 0;
-    for (let i = 1; i < bookingDates.length; i++) {
-      const daysDiff =
-        (bookingDates[i].createdAt - bookingDates[i - 1].createdAt) /
-        (1000 * 60 * 60 * 24);
-      totalDays += daysDiff;
-    }
-    avgDaysBetween = totalDays / (bookingDates.length - 1);
-  }
-
-  // Group bookings by period if requested
-  let groupedBookings = null;
-  if (groupBy === 'month') {
-    groupedBookings = {};
-    bookings.forEach((booking) => {
-      const monthYear = booking.createdAt.toLocaleString('default', {
-        month: 'long',
-        year: 'numeric',
-      });
-      if (!groupedBookings[monthYear]) {
-        groupedBookings[monthYear] = [];
-      }
-      groupedBookings[monthYear].push(booking);
-    });
-  } else if (groupBy === 'car') {
-    groupedBookings = {};
-    bookings.forEach((booking) => {
-      const carName = booking.car?.name || 'Unknown Car';
-      if (!groupedBookings[carName]) {
-        groupedBookings[carName] = [];
-      }
-      groupedBookings[carName].push(booking);
-    });
-  }
+  const overall = stats[0] || {
+    totalBookings: 0,
+    totalSpent: 0,
+    completedTrips: 0,
+  };
 
   res.status(200).json({
     status: 'success',
     data: {
-      user: {
-        id: targetUserId,
-        ...(targetUserId !== userId && { isAdminView: true }),
-      },
       summary: {
-        totalBookings: stats[0]?.overall[0]?.totalBookings || 0,
-        totalSpent: totalSpent,
-        averageBookingValue: stats[0]?.overall[0]?.averageBookingValue || 0,
-        totalDays: Math.round(stats[0]?.overall[0]?.totalDays || 0),
-        averageDaysBetween: Math.round(avgDaysBetween * 10) / 10,
+        totalBookings: overall.totalBookings,
+        totalSpent: overall.totalSpent,
+        upcomingTrips: upcomingBookings.length,
+        completedTrips: overall.completedTrips,
       },
-      statusBreakdown: stats[0]?.byStatus || [],
-      timeline: {
-        monthly: stats[0]?.byMonth || [],
-        yearly: stats[0]?.byYear || [],
-      },
-      topCars: stats[0]?.topCars || [],
       upcomingBookings,
-      pastBookings,
-      cancelledBookings: cancelledBookings.map((booking) => ({
-        car: booking.car,
-        totalPrice: booking.totalPrice,
-        cancelledAt: booking.cancelledAt,
-        reason: booking.cancellationReason,
-      })),
-      currentBookings: bookings,
-      ...(groupedBookings && { groupedBookings }),
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / parseInt(limit)),
-        totalItems: total,
-        itemsPerPage: parseInt(limit),
-      },
-      recommendations: {
-        basedOnHistory:
-          totalSpent > 0
-            ? 'Premium cars recommended'
-            : 'Welcome! Check out our popular cars',
-        suggestedCars: await getSuggestedCars(
-          targetUserId,
-          stats[0]?.topCars || [],
-        ),
-      },
+      recentBookings,
     },
   });
 });

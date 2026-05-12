@@ -112,6 +112,16 @@ const carSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    numRatings: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

@@ -33,80 +33,75 @@ const navigation = [
     name: "داشبورد",
     href: "/admin/dashboard",
     icon: LayoutDashboard,
-    badge: null,
   },
   {
     name: "مدیریت موترها",
     href: "/admin/cars",
     icon: Car,
-    badge: null,
   },
   {
     name: "مدیریت کاربران",
     href: "/admin/users",
     icon: Users,
-    badge: null,
   },
   {
     name: "رزروها",
     href: "/admin/bookings",
     icon: Calendar,
-    badge: { count: 5, variant: "destructive" },
+  },
+  // {
+  //   name: "تحلیل و آمار",
+  //   href: "/admin/analytics",
+  //   icon: BarChart3,
+  //   badge: null,
+  // },
+  // {
+  //   name: "گزارشات",
+  //   href: "/admin/reports",
+  //   icon: FileText,
+  //   badge: null,
+  // },
+  // {
+  //   name: "درآمد",
+  //   href: "/admin/revenue",
+  //   icon: TrendingUp,
+  //   badge: { count: "+۱۲٪", variant: "success" },
+  // },
+  // {
+  //   name: "پرداخت‌ها",
+  //   href: "/admin/payments",
+  //   icon: CreditCard,
+  //   badge: null,
+  // },
+  {
+    name: "نظرات",
+    href: "/admin/comments",
+    icon: MessageSquare,
   },
   {
-    name: "تحلیل و آمار",
-    href: "/admin/analytics",
-    icon: BarChart3,
-    badge: null,
-  },
-  {
-    name: "گزارشات",
-    href: "/admin/reports",
-    icon: FileText,
-    badge: null,
-  },
-  {
-    name: "درآمد",
-    href: "/admin/revenue",
-    icon: TrendingUp,
-    badge: { count: "+۱۲٪", variant: "success" },
-  },
-  {
-    name: "پرداخت‌ها",
-    href: "/admin/payments",
-    icon: CreditCard,
-    badge: null,
-  },
-  {
-    name: "اعلان‌ها",
-    href: "/admin/notifications",
+    name: "پیام ها",
+    href: "/admin/contacts",
     icon: Bell,
     badge: { count: 3, variant: "default" },
   },
-  {
-    name: "نظرات",
-    href: "/admin/reviews",
-    icon: MessageSquare,
-    badge: { count: 8, variant: "secondary" },
-  },
-  {
-    name: "تخفیف‌ها",
-    href: "/admin/promotions",
-    icon: Tag,
-    badge: null,
-  },
-  {
-    name: "امنیت",
-    href: "/admin/security",
-    icon: Shield,
-    badge: null,
-  },
-  {
-    name: "تنظیمات",
-    href: "/admin/settings",
-    icon: Settings,
-    badge: null,
-  },
+  // {
+  //   name: "تخفیف‌ها",
+  //   href: "/admin/promotions",
+  //   icon: Tag,
+  //   badge: null,
+  // },
+  // {
+  //   name: "امنیت",
+  //   href: "/admin/security",
+  //   icon: Shield,
+  //   badge: null,
+  // },
+  // {
+  //   name: "تنظیمات",
+  //   href: "/admin/settings",
+  //   icon: Settings,
+  //   badge: null,
+  // },
 ];
 
 const bottomNavigation = [
@@ -145,12 +140,12 @@ const AdminSidebar = () => {
   return (
     <motion.aside
       initial={false}
-      animate={{ width: shouldCollapse ? 80 : 280 }}
+      animate={{ width: shouldCollapse ? 60 : 280 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className={cn(
-        "relative bg-card border-l",
+        "relative bg-card border-l h-145",
         "flex flex-col",
-        "fixed lg:relative inset-y-1.5 lg:inset-y-1.5 right-0 z-40", // Fixed on mobile, relative on desktop
+        "fixed lg:relative inset-y-1.5 lg:inset-y-1.5 right-0 z-40",
       )}
     >
       {/* Toggle Button - Only show on desktop */}
@@ -237,27 +232,6 @@ const AdminSidebar = () => {
                     >
                       {item.name}
                     </motion.span>
-                  )}
-
-                  {/* Badge */}
-                  {item.badge && (
-                    <Badge
-                      variant={
-                        item.badge.variant === "success"
-                          ? "default"
-                          : item.badge.variant
-                      }
-                      className={cn(
-                        "text-xs",
-                        shouldCollapse
-                          ? "absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center"
-                          : "ml-auto",
-                        item.badge.variant === "success" &&
-                          "bg-green-500 hover:bg-green-600",
-                      )}
-                    >
-                      {item.badge.count}
-                    </Badge>
                   )}
 
                   {/* Tooltip for collapsed/mobile state */}

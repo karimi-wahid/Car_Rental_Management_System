@@ -14,6 +14,8 @@ import UnauthorizedPage from "./pages/public/UnauthorizedPage";
 const LandingPage = lazy(() => import("@/pages/public/LandingPage"));
 const CarsPage = lazy(() => import("@/pages/public/CarsPage"));
 const CarDetailsPage = lazy(() => import("@/pages/public/CarDetailsPage"));
+const AboutPage = lazy(() => import("@/pages/public/AboutPage"));
+const ContactPage = lazy(() => import("@/pages/public/ContactPage"));
 
 // Auth Pages
 const LoginPage = lazy(() => import("@/pages/public/LoginPage"));
@@ -50,6 +52,12 @@ const ManageUsersPage = lazy(() => import("@/pages/admin/ManageUsersPage"));
 const ManageBookingsPage = lazy(
   () => import("@/pages/admin/ManageBookingsPage"),
 );
+const ManageCommentsPage = lazy(
+  () => import("@/pages/admin/ManageCommentsPage"),
+);
+const ManageContactsPage = lazy(
+  () => import("@/pages/admin/ManageContactsPage"),
+);
 
 const App = () => {
   return (
@@ -61,6 +69,8 @@ const App = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/cars" element={<CarsPage />} />
             <Route path="/cars/:id" element={<CarDetailsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -88,7 +98,7 @@ const App = () => {
                 element={<BookingHistoryPage />}
               />
               <Route path="/bookings/:carId" element={<BookingDetailsPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/settings" element={<ProfilePage />} />
               <Route path="/favorites" element={<FavoritesPage />} />
             </Route>
           </Route>
@@ -100,6 +110,8 @@ const App = () => {
               <Route path="/admin/cars" element={<ManageCarsPage />} />
               <Route path="/admin/users" element={<ManageUsersPage />} />
               <Route path="/admin/bookings" element={<ManageBookingsPage />} />
+              <Route path="/admin/comments" element={<ManageCommentsPage />} />
+              <Route path="/admin/contacts" element={<ManageContactsPage />} />
             </Route>
           </Route>
         </Routes>

@@ -17,6 +17,8 @@ import { useAuthStore } from "@/store/authStore";
 import useCarStore from "@/store/carStore";
 import useBookingStore from "@/store/bookingStore";
 import FavoriteButton from "@/components/cars/FavoriteButton";
+import { CarReviews } from "@/components/cars/CarReviews";
+import { CarComments } from "@/components/cars/CarComments";
 
 const CarDetailsPage = () => {
   const { id } = useParams();
@@ -24,13 +26,23 @@ const CarDetailsPage = () => {
   const { isAuthenticated } = useAuthStore();
   const [bookingLoading, setBookingLoading] = useState(false);
   const { selectedCar: car, loading, fetchCarById } = useCarStore();
-  const { createBooking } = useBookingStore();
+  const { createBooking, userBookings, error } = useBookingStore();
+  const [completedBookingId, setCompletedBookingId] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchCarById(id);
     }
   }, [id, fetchCarById]);
+
+  useEffect(() => {
+    if (!userBookings || !id) return;
+
+    const completed = userBookings.find(
+      (b) => b.car?._id === id && b.status === "completed",
+    );
+    setCompletedBookingId(completed?._id || null);
+  }, [userBookings, id]);
 
   const handleBooking = async (startDate, endDate) => {
     if (!isAuthenticated) {
@@ -54,9 +66,9 @@ const CarDetailsPage = () => {
 
       toast.success("رزرو موفقانه انجام شد!");
       navigate("/bookings");
-    } catch (error) {
+    } catch (err) {
       console.log("Booking error:", error);
-      toast.error(error.response?.data?.message || "رزرو ناموفق بود");
+      toast.error(error || "رزرو ناموفق بود");
     } finally {
       setBookingLoading(false);
     }
@@ -114,7 +126,6 @@ const CarDetailsPage = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="container-custom py-8 px-2.5"
-      dir="rtl"
     >
       {/* Navigation */}
       <div className="flex items-center justify-between mb-6">
@@ -220,6 +231,8 @@ const CarDetailsPage = () => {
         </div>
       </div>
 
+      <CarReviews carId={car._id} bookingId={completedBookingId} />
+      <CarComments carId={car._id} />
       {/* Related Cars */}
       {/* <RelatedCars currentCarId={car._id} /> */}
     </motion.div>

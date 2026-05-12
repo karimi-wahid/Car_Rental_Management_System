@@ -47,6 +47,7 @@ const UserDashboardPage = () => {
     userBookings: bookings,
     fetchUserBookings,
     loading,
+    error,
   } = useBookingStore();
 
   const [upcomingBookings, setUpcomingBookings] = useState([]);
@@ -62,34 +63,19 @@ const UserDashboardPage = () => {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        // Fetch all user bookings
-        const res = await fetchUserBookings("", 1, 50);
+        const res = await fetchUserBookings({ page: 1, limit: 5 });
+        const { summary, upcomingBookings, recentBookings } = res.data;
 
-        // ===== Split bookings =====
-
-        const recent = [...bookings]
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 5);
-
-        // ===== Stats =====
-
-        const completed = bookings.filter(
-          (b) => b.status === "completed",
-        ).length;
-
-        setUpcomingBookings(res.data.upcomingBookings.slice(0, 3));
-        setRecentBookings(recent);
-
-        setStats((prev) => ({
-          ...prev,
-          totalBookings: res.data.summary.totalBookings,
-          totalSpent: res.data.summary.totalSpent,
-          upcomingTrips: res.data.upcomingBookings.length,
-          completedTrips: completed,
-        }));
-      } catch (error) {
+        setUpcomingBookings(upcomingBookings);
+        setRecentBookings(recentBookings);
+        setStats({
+          totalBookings: summary.totalBookings,
+          totalSpent: summary.totalSpent,
+          upcomingTrips: summary.upcomingTrips,
+          completedTrips: summary.completedTrips,
+        });
+      } catch {
         toast.error("خطا در دریافت اطلاعات داشبورد");
-        console.error(error);
       }
     };
 

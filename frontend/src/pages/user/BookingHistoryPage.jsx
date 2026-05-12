@@ -38,7 +38,9 @@ const BookingHistoryPage = () => {
     total: 0,
     pages: 0,
   });
-  const { fetchUserBookings, loading } = useBookingStore((state) => state);
+  const { fetchUserBookings, loading, error } = useBookingStore(
+    (state) => state,
+  );
 
   // Update the useEffect in BookingHistoryPage
   useEffect(() => {
@@ -73,8 +75,9 @@ const BookingHistoryPage = () => {
             pages: 1,
           });
         }
-      } catch (error) {
+      } catch (err) {
         toast.error("بارگذاری تاریخچه رزرو ناموفق بود");
+        toast.error(error);
         console.log(error);
 
         setBookings([]);
@@ -136,7 +139,6 @@ const BookingHistoryPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      dir="rtl"
     >
       <PageHeader
         title="تاریخچه رزروها"

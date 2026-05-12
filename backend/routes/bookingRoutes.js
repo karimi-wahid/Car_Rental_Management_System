@@ -15,22 +15,18 @@ import {
 
 const router = express.Router();
 
-// Protect all routes after this middleware
-router.use(protect);
-
 // Public routes (authenticated users)
-router.get('/check-availability', checkCarAvailability);
-router.get('/time-slots', getAvailableTimeSlots);
-router.get('/my-bookings', getUserBookingHistory);
-router.post('/', createBooking);
+router.get('/check-availability', protect, checkCarAvailability);
+router.get('/time-slots', protect, getAvailableTimeSlots);
+router.get('/my-bookings', protect, getUserBookingHistory);
+router.post('/', protect, createBooking);
 router.get('/:id', getBookingById);
-router.patch('/:id', updateBooking);
-router.patch('/:id/cancel', cancelBooking);
+router.patch('/:id', protect, updateBooking);
+router.patch('/:id/cancel', protect, cancelBooking);
 
 // Admin only routes
-router.use(restrictTo('admin'));
-router.get('/', getAllBookings);
-router.get('/statistics', getBookingStatistics);
-router.patch('/:id/status', updateBookingStatus);
+router.get('/', protect, restrictTo('admin'), getAllBookings);
+router.get('/statistics', protect, restrictTo('admin'), getBookingStatistics);
+router.patch('/:id/status', protect, restrictTo('admin'), updateBookingStatus);
 
 export default router;

@@ -17,6 +17,9 @@ import {
   XCircle,
   Upload,
   Image as ImageIcon,
+  Info,
+  Settings2,
+  ImagePlus,
 } from "lucide-react";
 import {
   Table,
@@ -79,6 +82,7 @@ const CarForm = ({ formData, setFormData }) => {
   const [dragActive, setDragActive] = useState(false);
   const [imageUrls, setImageUrls] = useState("");
   const [uploadMethod, setUploadMethod] = useState("file");
+  const [featureInput, setFeatureInput] = useState("");
 
   // Handle file upload
   const handleFileChange = (files) => {
@@ -476,20 +480,76 @@ const CarForm = ({ formData, setFormData }) => {
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="features">ویژگی‌ها (یک ویژگی در هر خط)</Label>
-        <Textarea
-          id="features"
-          value={formData.features.join("\n")}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              features: e.target.value.split("\n").filter((f) => f.trim()),
-            })
-          }
-          rows={3}
-          className="text-right"
-        />
+      {/* Features Tags Input */}
+      <div className="space-y-3">
+        <Label>ویژگی‌های موتر</Label>
+
+        <div className="min-h-14 w-full rounded-2xl border bg-background px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary">
+          {/* Tags */}
+          {formData.features.map((feature, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1 rounded-xl text-sm"
+            >
+              <span>{feature}</span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    ...formData,
+                    features: formData.features.filter((_, i) => i !== index),
+                  });
+                }}
+                className="hover:text-red-300 transition"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+
+          {/* Input */}
+          <input
+            type="text"
+            value={featureInput}
+            onChange={(e) => setFeatureInput(e.target.value)}
+            placeholder={featureInput.length > 0 ? "" : "ویژگی اضافه کنید..."}
+            className="flex-1 min-w-30 bg-transparent outline-none text-sm"
+            onKeyDown={(e) => {
+              if ((e.key === "Enter" || e.key === ",") && featureInput.trim()) {
+                e.preventDefault();
+
+                const newFeature = featureInput.trim();
+
+                // جلوگیری از تکرار
+                if (!formData.features.includes(newFeature)) {
+                  setFormData({
+                    ...formData,
+                    features: [...formData.features, newFeature],
+                  });
+                }
+
+                setFeatureInput("");
+              }
+
+              // Backspace remove last tag
+              if (
+                e.key === "Backspace" &&
+                !featureInput &&
+                formData.features.length > 0
+              ) {
+                setFormData({
+                  ...formData,
+                  features: formData.features.slice(0, -1),
+                });
+              }
+            }}
+          />
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          با Enter یا , ویژگی را اضافه کنید
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -729,7 +789,7 @@ const ManageCarsPage = () => {
                 اضافه کردن موتر جدید
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-right">
                   اضافه کردن موتر جدید

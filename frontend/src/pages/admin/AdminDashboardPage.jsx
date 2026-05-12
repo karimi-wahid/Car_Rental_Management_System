@@ -85,7 +85,6 @@ const AdminDashboardPage = () => {
           fetchAllBookings(1, 100),
           fetchCars(1, 100),
         ]);
-        console.log("Car Data", carRes, "Booking Data", bookingRes);
         const bookingsData = bookingRes?.data?.bookings || [];
         const carsData = carRes?.data?.cars || [];
 
@@ -486,50 +485,64 @@ const AdminDashboardPage = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stats.popularCars.map((car, index) => (
-            <Card
-              key={index}
-              className="hover:shadow-lg transition-shadow group cursor-pointer"
-            >
-              <CardContent className="p-4">
-                <div className="flex gap-4">
-                  <div className="relative w-28 h-28 rounded-lg overflow-hidden">
-                    <img
-                      src={car.carDetails.images[0].url}
-                      alt={car.carDetails.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <Badge className="bg-black/50 backdrop-blur text-white border-0">
-                        #{index + 1}
+
+        {stats.popularCars.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {stats.popularCars.map((car, index) => (
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-shadow group cursor-pointer"
+              >
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <div className="relative w-28 h-28 rounded-lg overflow-hidden shrink-0">
+                      <img
+                        src={
+                          car.carDetails.images?.[0] || "/placeholder-car.jpg"
+                        }
+                        alt={car.carDetails.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-black/50 backdrop-blur text-white border-0">
+                          #{index + 1}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1">
+                        {car.carDetails.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {car.carDetails.brand} {car.carDetails.carModel}
+                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm">{car.bookings} رزرو</span>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="w-full justify-center"
+                      >
+                        {formatCurrency(car.revenue)}
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-1">
-                      {car.carDetails.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {car.carDetails.brand} {car.carDetails.carModel}
-                    </p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex items-center">
-                        <Star className="w-3 h-3 fill-yellow-500 text-yellow-500 ml-1" />
-                        <span className="text-sm">{car.rating}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">•</span>
-                      <span className="text-sm">{car.bookings} رزرو</span>
-                    </div>
-                    <Badge variant="outline" className="w-full justify-center">
-                      {formatCurrency(car.revenue)}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="p-12 text-center">
+            <Car className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">هنوز رزروی ثبت نشده</h3>
+            <p className="text-muted-foreground mb-6">
+              پس از ثبت اولین رزرو، محبوب‌ترین موترها اینجا نمایش داده می‌شوند.
+            </p>
+            <Button variant="outline" onClick={() => navigate("/admin/cars")}>
+              مدیریت موترها
+            </Button>
+          </Card>
+        )}
       </div>
 
       {/* Recent Activities */}
@@ -541,34 +554,45 @@ const AdminDashboardPage = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
           </Button>
         </div>
-        <Card>
-          <CardContent className="p-0">
-            {stats.recentActivities.map((activity, index) => {
-              const { icon: Icon, color } = getActivityIcon(activity.type);
-              return (
-                <div
-                  key={index}
-                  className="flex items-center gap-4 p-4 border-b last:border-0 hover:bg-muted/50 transition-colors"
-                >
-                  <div className={`p-2 rounded-full ${color}`}>
-                    <Icon className="w-4 h-4" />
+
+        {stats.recentActivities.length > 0 ? (
+          <Card>
+            <CardContent className="p-0">
+              {stats.recentActivities.map((activity, index) => {
+                const { icon: Icon, color } = getActivityIcon(activity.type);
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 p-4 border-b last:border-0 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className={`p-2 rounded-full ${color}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{activity.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(activity.timestamp).toLocaleString("fa-IR")}
+                      </p>
+                    </div>
+                    {activity.amount && (
+                      <Badge variant="outline" className="font-mono">
+                        {formatCurrency(activity.amount)}
+                      </Badge>
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{activity.description}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(activity.timestamp).toLocaleString("fa-IR")}
-                    </p>
-                  </div>
-                  {activity.amount && (
-                    <Badge variant="outline" className="font-mono">
-                      {formatCurrency(activity.amount)}
-                    </Badge>
-                  )}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+                );
+              })}
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="p-12 text-center">
+            <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">هیچ فعالیتی ثبت نشده</h3>
+            <p className="text-muted-foreground">
+              فعالیت‌های سیستم به محض وقوع اینجا نمایش داده می‌شوند.
+            </p>
+          </Card>
+        )}
       </div>
     </motion.div>
   );
