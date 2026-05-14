@@ -1,5 +1,11 @@
 import { useState } from "react";
+
 import { motion } from "motion/react";
+
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   MessageSquare,
   Send,
@@ -10,39 +16,91 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
+
 import { Textarea } from "@/components/ui/textarea";
 
-const FeedbackPage = () => {
-  const [rating, setRating] = useState(0);
+// Zod Schema
+const feedbackSchema = z.object({
+  name: z
+    .string()
+    .min(2, "نام باید حداقل ۲ حرف باشد")
+    .max(50, "نام نباید بیشتر از ۵۰ حرف باشد"),
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
+  email: z.string().min(1, "ایمیل الزامی است").email("ایمیل نامعتبر است"),
+
+  message: z
+    .string()
+    .min(10, "پیام باید حداقل ۱۰ کاراکتر باشد")
+    .max(1000, "پیام نباید بیشتر از ۱۰۰۰ کاراکتر باشد"),
+
+  rating: z.number().min(1, "لطفاً امتیاز بدهید").max(5),
+});
+
+const FeedbackPage = () => {
+  const [submitted, setSubmitted] = useState(false);
+
+  // React Hook Form + Zod
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(feedbackSchema),
+
+    defaultValues: {
+      name: "",
+      email: "",
+      message: "",
+      rating: 0,
+    },
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const rating = watch("rating");
 
-    console.log({
-      ...formData,
-      rating,
+  // Submit
+  const onSubmit = async (data) => {
+    console.log(data);
+
+    // API Request
+
+    setSubmitted(true);
+
+    reset({
+      name: "",
+      email: "",
+      message: "",
+      rating: 0,
     });
 
-    // ارسال به API
+    setTimeout(() => {
+      setSubmitted(false);
+    }, 3000);
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-background to-muted/20 py-10 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-linear-to-b from-background to-muted/20 px-4 py-10">
+      <div className="mx-auto max-w-3xl">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-10"
+          initial={{
+            opacity: 0,
+            y: 30,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          className="mb-10 text-center"
         >
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10">
             <MessageSquare className="h-10 w-10 text-primary" />
@@ -50,62 +108,89 @@ const FeedbackPage = () => {
 
           <h1 className="text-4xl font-bold">ارسال نظریه</h1>
 
-          <p className="mt-3 text-muted-foreground text-lg">
+          <p className="mt-3 text-lg text-muted-foreground">
             نظریات، پیشنهادات و انتقادات شما برای ما مهم است
           </p>
         </motion.div>
 
+        {/* Success */}
+        {submitted && (
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -20,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            className="mb-6 rounded-2xl border border-green-500/20 bg-green-500/10 p-4 text-center text-green-600"
+          >
+            نظریه شما با موفقیت ارسال شد
+          </motion.div>
+        )}
+
         {/* Form */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          initial={{
+            opacity: 0,
+            y: 40,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            delay: 0.1,
+          }}
         >
-          <Card className="border-0 shadow-2xl rounded-[32px] overflow-hidden bg-background/80 backdrop-blur">
+          <Card className="overflow-hidden rounded-[32px] border-0 bg-background/80 shadow-2xl backdrop-blur">
             <CardContent className="p-8 md:p-10">
-              <form onSubmit={handleSubmit} className="space-y-7">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
                 {/* Name + Email */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  {/* Name */}
                   <div className="space-y-2">
                     <Label>نام کامل</Label>
 
                     <div className="relative">
-                      <User className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <User className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 
                       <Input
                         placeholder="نام خود را وارد کنید"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            name: e.target.value,
-                          })
-                        }
-                        className="h-12 pr-12 rounded-2xl"
+                        className="h-12 rounded-2xl pr-12"
+                        {...register("name")}
                       />
                     </div>
+
+                    {errors.name && (
+                      <p className="text-sm text-destructive">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Email */}
                   <div className="space-y-2">
                     <Label>ایمیل</Label>
 
                     <div className="relative">
-                      <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Mail className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 
                       <Input
                         type="email"
-                        placeholder="example@gmail.com"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            email: e.target.value,
-                          })
-                        }
-                        className="h-12 pr-12 rounded-2xl text-left"
                         dir="ltr"
+                        placeholder="example@gmail.com"
+                        className="h-12 rounded-2xl pr-12 text-left"
+                        {...register("email")}
                       />
                     </div>
+
+                    {errors.email && (
+                      <p className="text-sm text-destructive">
+                        {errors.email.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -118,7 +203,11 @@ const FeedbackPage = () => {
                       <button
                         key={star}
                         type="button"
-                        onClick={() => setRating(star)}
+                        onClick={() =>
+                          setValue("rating", star, {
+                            shouldValidate: true,
+                          })
+                        }
                         className="transition-transform hover:scale-110"
                       >
                         <Star
@@ -131,6 +220,12 @@ const FeedbackPage = () => {
                       </button>
                     ))}
                   </div>
+
+                  {errors.rating && (
+                    <p className="text-sm text-destructive">
+                      {errors.rating.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Message */}
@@ -140,45 +235,45 @@ const FeedbackPage = () => {
                   <Textarea
                     rows={6}
                     placeholder="نظریه، پیشنهاد یا انتقاد خود را بنویسید..."
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        message: e.target.value,
-                      })
-                    }
-                    className="rounded-3xl resize-none p-4"
+                    className="resize-none rounded-3xl p-4"
+                    {...register("message")}
                   />
+
+                  {errors.message && (
+                    <p className="text-sm text-destructive">
+                      {errors.message.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Info Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-2xl border bg-muted/40 p-4">
-                    <CheckCircle2 className="h-6 w-6 text-green-500 mb-2" />
+                    <CheckCircle2 className="mb-2 h-6 w-6 text-green-500" />
 
                     <h4 className="font-semibold">پاسخ سریع</h4>
 
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       نظریات شما بررسی می‌شود
                     </p>
                   </div>
 
                   <div className="rounded-2xl border bg-muted/40 p-4">
-                    <CheckCircle2 className="h-6 w-6 text-blue-500 mb-2" />
+                    <CheckCircle2 className="mb-2 h-6 w-6 text-blue-500" />
 
                     <h4 className="font-semibold">بهبود سیستم</h4>
 
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       نظریات شما باعث پیشرفت ما می‌شود
                     </p>
                   </div>
 
                   <div className="rounded-2xl border bg-muted/40 p-4">
-                    <CheckCircle2 className="h-6 w-6 text-purple-500 mb-2" />
+                    <CheckCircle2 className="mb-2 h-6 w-6 text-purple-500" />
 
                     <h4 className="font-semibold">امنیت اطلاعات</h4>
 
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       اطلاعات شما محفوظ خواهد بود
                     </p>
                   </div>
@@ -187,10 +282,12 @@ const FeedbackPage = () => {
                 {/* Submit */}
                 <Button
                   type="submit"
-                  className="w-full h-14 rounded-2xl text-base font-semibold"
+                  disabled={isSubmitting}
+                  className="h-14 w-full rounded-2xl text-base font-semibold"
                 >
                   <Send className="ml-2 h-5 w-5" />
-                  ارسال نظریه
+
+                  {isSubmitting ? "در حال ارسال..." : "ارسال نظریه"}
                 </Button>
               </form>
             </CardContent>

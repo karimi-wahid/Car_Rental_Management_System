@@ -1,201 +1,210 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Car, ArrowRight, Fuel, Gauge, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect } from "react";
+import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowUpLeft, Fuel, Users, Gauge } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 import useCarStore from "@/store/carStore";
+import FavoriteButton from "@/components/cars/FavoriteButton";
+
+const FUEL_MAP = {
+  petrol: "پطرول",
+  diesel: "دیزل",
+  electric: "برقی",
+  hybrid: "هایبرید",
+};
+const TRANS_MAP = { automatic: "اتوماتیک", manual: "دستی" };
+
+const MiniCarCard = ({ car, index, navigate }) => (
+  <motion.article
+    initial={{ opacity: 0, y: 24 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-60px" }}
+    transition={{
+      duration: 0.55,
+      delay: index * 0.1,
+      ease: [0.23, 1, 0.32, 1],
+    }}
+    onClick={() => car.availability && navigate(`/cars/${car._id}`)}
+    className="group relative cursor-pointer"
+    dir="rtl"
+  >
+    {/* Image */}
+    <div className="relative overflow-hidden rounded-2xl mb-4 bg-zinc-100 dark:bg-zinc-800 aspect-4/3">
+      <motion.img
+        src={car.images?.[0]?.url || car.images?.[0] || "/placeholder-car.jpg"}
+        alt={car.name}
+        whileHover={{ scale: 1.05 }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        className="w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
+
+      {/* Pills */}
+      <div className="absolute top-3 right-3 flex gap-1.5">
+        <span className="bg-black/40 backdrop-blur text-white text-[10px] font-medium px-2.5 py-1 rounded-full">
+          {TRANS_MAP[car.transmission] || car.transmission}
+        </span>
+      </div>
+
+      {/* Favorite */}
+      <div
+        className="absolute top-3 left-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <FavoriteButton
+          carId={car._id}
+          classCode="bg-black/30 hover:bg-black/50 backdrop-blur border border-white/10 text-white w-7 h-7 rounded-full"
+        />
+      </div>
+
+      {/* Price */}
+      <div className="absolute bottom-3 right-3">
+        <span className="text-white font-bold text-base drop-shadow-sm">
+          {formatCurrency(car.pricePerDay)}
+          <span className="text-white/60 text-xs font-normal"> / روز</span>
+        </span>
+      </div>
+
+      {/* Arrow on hover */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        whileHover={{ opacity: 1, scale: 1 }}
+        className="absolute bottom-3 left-3"
+      >
+        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
+          <ArrowUpLeft className="w-4 h-4 text-zinc-900" />
+        </div>
+      </motion.div>
+    </div>
+
+    {/* Info */}
+    <div className="px-1">
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <h3 className="font-bold text-zinc-900 dark:text-white text-base leading-tight">
+            {car.name}
+          </h3>
+          <p className="text-xs text-zinc-400 mt-0.5">
+            {car.brand} · {car.carModel || car.model}
+          </p>
+        </div>
+        {!car.availability && (
+          <span className="text-[10px] bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800">
+            ناموجود
+          </span>
+        )}
+      </div>
+
+      {/* Specs inline */}
+      <div className="flex items-center gap-4 mt-2">
+        {[
+          { icon: Users, value: `${car.seats} نفر` },
+          { icon: Fuel, value: FUEL_MAP[car.fuelType] || car.fuelType },
+          {
+            icon: Gauge,
+            value: car.mileage
+              ? `${Number(car.mileage).toLocaleString("fa-IR")} km`
+              : "—",
+          },
+        ].map(({ icon: Icon, value }) => (
+          <div
+            key={value}
+            className="flex items-center gap-1 text-zinc-400 dark:text-zinc-500"
+          >
+            <Icon className="w-3 h-3" />
+            <span className="text-xs">{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </motion.article>
+);
 
 const FeaturedCars = () => {
   const { fetchCars, cars, loading } = useCarStore();
   const navigate = useNavigate();
+  const featured = cars.slice(0, 6);
 
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
-  if (loading) {
-    return (
-      <section className="section-padding bg-muted/30">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <Skeleton className="h-12 w-64 mx-auto mb-4" />
-            <Skeleton className="h-6 w-96 mx-auto" />
+  return (
+    <section
+      className="py-24 px-6 md:px-16 bg-white dark:bg-zinc-950"
+      dir="rtl"
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-14">
+          <div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="text-xs text-zinc-400 tracking-[0.2em] uppercase mb-3 flex items-center gap-3"
+            >
+              <span className="w-8 h-px bg-zinc-300 dark:bg-zinc-700" />
+              انتخاب ویژه
+            </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tight"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              موترهای ویژه
+            </motion.h2>
           </div>
+
+          <motion.button
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            onClick={() => navigate("/cars")}
+            className="hidden md:flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors group"
+          >
+            مشاهده همه
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          </motion.button>
+        </div>
+
+        {/* Grid */}
+        {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-96 rounded-xl" />
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="rounded-2xl bg-zinc-100 dark:bg-zinc-800 aspect-4/3 mb-4" />
+                <div className="h-4 w-32 bg-zinc-100 dark:bg-zinc-800 rounded mb-2" />
+                <div className="h-3 w-20 bg-zinc-100 dark:bg-zinc-800 rounded" />
+              </div>
             ))}
           </div>
-        </div>
-      </section>
-    );
-  }
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featured.map((car, i) => (
+              <MiniCarCard
+                key={car._id}
+                car={car}
+                index={i}
+                navigate={navigate}
+              />
+            ))}
+          </div>
+        )}
 
-  return (
-    <section className="section-padding bg-muted/30 py-3">
-      <div className="container-custom">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <Badge variant="outline" className="mb-4 px-4 py-3">
-            <Car className="w-4 h-4 mr-2" />
-            انتخاب لوکس
-          </Badge>
-          <h2 className="text-xl md:text-3xl font-display font-bold mb-4">
-            موترهای <span className="gradient-text">ویژه</span>
-          </h2>
-          <p className="text-[16px] text-muted-foreground max-w-2xl mx-auto">
-            موترهای لوکس موردعلاقۀ ما را کشف کنید، که به‌دقت برای رانندگان
-            خوش‌سلیقه انتخاب شده‌اند.
-          </p>
-        </motion.div>
-
-        {/* Cars Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {cars.map((car) => (
-            <motion.div
-              key={car._id}
-              variants={itemVariants}
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="group cursor-pointer overflow-hidden border-2 hover:border-primary/50 transition-all duration-300">
-                {/* Image Container */}
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={car.images[0].url}
-                    alt={car.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-
-                  {/* Badges */}
-                  <div className="absolute top-4 left-4 flex gap-2">
-                    <Badge className="bg-primary/90 hover:bg-primary">
-                      {car.transmission}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-background/90">
-                      {car.fuelType}
-                    </Badge>
-                  </div>
-
-                  {/* Price Badge */}
-                  <div className="absolute bottom-4 right-4">
-                    <Badge className="text-lg px-4 py-2 bg-background/90 text-foreground">
-                      {car.pricePerDay}
-                      <span className="text-xs text-muted-foreground ml-1">
-                        /روز
-                      </span>
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <CardContent className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-2xl font-bold mb-1">{car.name}</h3>
-                    <p className="text-muted-foreground">
-                      {car.brand} {car.carModel}
-                    </p>
-                  </div>
-
-                  {/* Specs */}
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center">
-                      <Users className="w-5 h-5 mx-auto mb-1 text-primary" />
-                      <span className="text-sm font-medium">
-                        {car.seats} سیت
-                      </span>
-                    </div>
-                    <div className="text-center">
-                      <Gauge className="w-5 h-5 mx-auto mb-1 text-primary" />
-                      <span className="text-sm font-medium">
-                        {car.mileage || "0"} mi
-                      </span>
-                    </div>
-                    <div className="text-center">
-                      <Fuel className="w-5 h-5 mx-auto mb-1 text-primary" />
-                      <span className="text-sm font-medium">
-                        {car.fuelType}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Features */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {car.features.slice(0, 3).map((feature, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {feature}
-                      </Badge>
-                    ))}
-                    {car.features.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{car.features.length - 3} بیشتر
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <Button
-                    className="w-full group py-3 cursor-pointer"
-                    onClick={() => navigate(`/cars/${car._id}`)}
-                  >
-                    مشاهده جزئیات
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* View All Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="text-center mt-12"
-        >
-          <Button
-            size="lg"
-            variant="outline"
-            className="group py-3 cursor-pointer"
+        {/* Mobile view all */}
+        <div className="mt-10 text-center md:hidden">
+          <button
             onClick={() => navigate("/cars")}
+            className="flex items-center gap-2 mx-auto text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
-            مشاهده تمام موتر ها
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </motion.div>
+            مشاهده همه موترها
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </section>
   );

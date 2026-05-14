@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Search,
   Filter,
@@ -71,19 +71,10 @@ const ManageUsersPage = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
-  const [isVerificationDialogOpen, setIsVerificationDialogOpen] =
-    useState(false);
 
-  const {
-    users,
-    loading,
-    pagination,
-    getAllUsers,
-    updateUserRole,
-    toggleUserStatus,
-  } = useUserStore();
+  const { users, loading, pagination, getAllUsers, updateUserRole } =
+    useUserStore();
 
-  // ✅ Fetch users with filters + pagination
   useEffect(() => {
     getAllUsers();
   }, [getAllUsers]);
@@ -117,22 +108,8 @@ const ManageUsersPage = () => {
     }
   };
 
-  // ✅ Verification toggle
-  const handleVerificationToggle = async () => {
-    if (!selectedUser) return;
-
-    try {
-      await toggleUserStatus(selectedUser._id, !selectedUser.isVerified);
-      await getAllUsers();
-      toast.success(`کاربر ${selectedUser.isVerified ? "غیرفعال" : "فعال"} شد`);
-      setIsVerificationDialogOpen(false);
-    } catch (error) {
-      toast.error("تغییر وضعیت تایید ناموفق بود");
-      console.log(error);
-    }
-  };
-
   // ✅ Client search, role, and verification filter
+  console.log(users);
   const filteredUsers = users
     .filter(
       (u) =>
@@ -142,8 +119,8 @@ const ManageUsersPage = () => {
     .filter((u) => (roleFilter === "all" ? true : u.role === roleFilter))
     .filter((u) => {
       if (verificationFilter === "all") return true;
-      if (verificationFilter === "verified") return u.isVerified;
-      if (verificationFilter === "unverified") return !u.isVerified;
+      if (verificationFilter === "verified") return u.isEmailVerified;
+      if (verificationFilter === "unverified") return !u.isEmailVerified;
       return true;
     });
 
@@ -255,7 +232,7 @@ const ManageUsersPage = () => {
 
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {user.isVerified ? (
+                          {user.isEmailVerified ? (
                             <>
                               <CheckCircle className="text-green-500 w-4 h-4" />
                               <span className="text-sm">تایید شده</span>
@@ -370,49 +347,6 @@ const ManageUsersPage = () => {
               لغو
             </Button>
             <Button onClick={handleRoleChange} className="mr-2 sm:mr-0 sm:ml-2">
-              تایید
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Verification Dialog */}
-      <Dialog
-        open={isVerificationDialogOpen}
-        onOpenChange={setIsVerificationDialogOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-right">
-              {selectedUser?.isVerified ? "لغو تایید" : "تایید"} کاربر
-            </DialogTitle>
-            <DialogDescription className="text-right">
-              {selectedUser?.isVerified
-                ? "آیا مطمئن هستید که می‌خواهید تایید این کاربر را لغو کنید؟"
-                : "آیا مطمئن هستید که می‌خواهید این کاربر را تایید کنید؟"}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <p className="text-right">
-              کاربر: <span className="font-medium">{selectedUser?.name}</span>
-            </p>
-            <p className="text-right text-muted-foreground" dir="ltr">
-              {selectedUser?.email}
-            </p>
-          </div>
-
-          <DialogFooter className="flex-row-reverse sm:flex-row-reverse">
-            <Button
-              variant="outline"
-              onClick={() => setIsVerificationDialogOpen(false)}
-            >
-              لغو
-            </Button>
-            <Button
-              onClick={handleVerificationToggle}
-              className="mr-2 sm:mr-0 sm:ml-2"
-            >
               تایید
             </Button>
           </DialogFooter>

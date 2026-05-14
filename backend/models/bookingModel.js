@@ -144,20 +144,5 @@ bookingSchema.pre('findOneAndUpdate', async function () {
   }
 });
 
-// Auto-populate references
-bookingSchema.pre(/^find/, async function () {
-  const query = this;
-
-  query
-    .populate({
-      path: 'user',
-      select: 'name email avatar',
-    })
-    .populate({
-      path: 'car',
-      select: 'name brand model images pricePerDay',
-    });
-});
-
 // Create the model
 export const Booking = mongoose.model('Booking', bookingSchema);

@@ -176,15 +176,15 @@ export const getAllBookings = catchAsync(async (req, res, next) => {
 
 export const getBookingById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const userId = req.user.id;
+  const userId = req.user._id;
   const userRole = req.user.role;
 
   // Find booking by ID with populated fields
   const booking = await Booking.findById(id)
-    .populate('user', 'name email +role avatar phone address')
+    .populate('user', 'name email +role avatar')
     .populate(
       'car',
-      'name brand carModel images pricePerDay year seats transmission location',
+      'name brand carModel images pricePerDay year seats transmission',
     );
 
   // Check if booking exists
@@ -193,19 +193,74 @@ export const getBookingById = catchAsync(async (req, res, next) => {
   }
 
   // Check authorization: users can only view their own bookings
-  if (userRole !== 'admin' && booking.user._id.toString() !== userId) {
+  console.log(booking.user._id.toString(), userId.toString());
+  if (
+    userRole !== 'admin' &&
+    booking.user._id.toString() !== userId.toString()
+  ) {
     return next(
       new AppError('You do not have permission to view this booking', 403),
     );
   }
-
-  console.log(booking.user);
 
   res.status(200).json({
     status: 'success',
     data: {
       booking,
       userRole,
+    },
+  });
+});
+
+export const getMyBookings = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const {
+    status,
+    page = 1,
+    limit = 10,
+    sort = '-createdAt',
+    startDate,
+    endDate,
+    minPrice,
+    maxPrice,
+  } = req.query;
+
+  const query = { user: userId };
+
+  if (status) query.status = { $in: status.split(',') };
+  if (startDate || endDate) {
+    query.createdAt = {};
+    if (startDate) query.createdAt.$gte = new Date(startDate);
+    if (endDate) query.createdAt.$lte = new Date(endDate);
+  }
+  if (minPrice || maxPrice) {
+    query.totalPrice = {};
+    if (minPrice) query.totalPrice.$gte = parseFloat(minPrice);
+    if (maxPrice) query.totalPrice.$lte = parseFloat(maxPrice);
+  }
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const [bookings, total] = await Promise.all([
+    Booking.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('car', 'name brand carModel images pricePerDay year')
+      .populate('user', 'name email avatar'),
+    Booking.countDocuments(query),
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      bookings,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit)),
+        totalItems: total,
+        itemsPerPage: parseInt(limit),
+      },
     },
   });
 });

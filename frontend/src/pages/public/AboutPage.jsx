@@ -82,7 +82,7 @@ const AboutPage = () => {
       className="min-h-screen"
     >
       {/* ── Hero ─────────────────────────────────────── */}
-      <section className="relative overflow-hidden dark:bg-zinc-950 text-white py-28 px-6">
+      <section className="relative overflow-hidden bg-zinc-950 text-white py-28 px-6">
         <div
           className="absolute inset-0 opacity-10"
           style={{

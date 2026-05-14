@@ -145,8 +145,6 @@ const ContactDetailPanel = ({ contact, onClose }) => {
 
   return (
     <div className="flex flex-col h-full" dir="rtl">
-      <PageHeader title="مدیریت تماس ها" description="مدیریت تماس ها " />
-
       {/* Header */}
       <div className="flex items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
         <button
@@ -327,7 +325,7 @@ const AdminContactsPage = () => {
     setSelectedContact,
   } = useContactStore();
 
-  const [activeTab, setActiveTab] = useState("unread");
+  const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [subject, setSubject] = useState("");
 
@@ -373,9 +371,8 @@ const AdminContactsPage = () => {
         {/* Header */}
         <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 space-y-4 shrink-0">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-bold text-zinc-900 dark:text-white">
-              پیام‌ها
-            </h1>
+            <PageHeader title="مدیریت پیام ها" description="مدیریت پیام ها" />
+
             <div className="flex gap-2 text-xs">
               {summary.unread > 0 && (
                 <span className="bg-blue-500 text-white rounded-full px-2 py-0.5 font-medium">

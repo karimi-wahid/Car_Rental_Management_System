@@ -38,27 +38,27 @@ import { BookingInvoice } from "@/components/common/BookingInvoice";
 import { useAuthStore } from "@/store/authStore";
 
 const BookingDetailsPage = () => {
-  const { carId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const booking = useBookingStore((state) => state.selectedBooking);
   const loading = useBookingStore((state) => state.loading);
-  const { fetchBookingById, cancelBooking } = useBookingStore();
+  const { fetchBookingById, cancelBooking, error } = useBookingStore();
   const [cancellationReason, setCancellationReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
 
   const fetchBookingDetails = useCallback(async () => {
-    if (!carId) return;
+    if (!id) return;
 
     try {
-      await fetchBookingById(carId);
-    } catch (error) {
-      toast.error("بارگذاری جزئیات رزرو ناموفق بود");
-      console.log(error);
+      await fetchBookingById(id);
+    } catch (err) {
+      toast.error(error || "بارگذاری جزئیات رزرو ناموفق بود");
+      console.log(err);
       navigate("/bookings");
     }
-  }, [carId, navigate, fetchBookingById]);
+  }, [id, navigate, fetchBookingById]);
 
   useEffect(() => {
     fetchBookingDetails();
@@ -81,7 +81,7 @@ const BookingDetailsPage = () => {
   };
 
   const handleContactSupport = () => {
-    navigate("/contact", { state: { bookingId: carId } });
+    navigate("/contact", { state: { bookingId: id } });
   };
 
   const getStatusText = (status) => {

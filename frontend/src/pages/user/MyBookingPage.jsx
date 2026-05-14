@@ -38,14 +38,19 @@ const MyBookingsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
+  const currentPage = useBookingStore(
+    (state) => state.pagination?.currentPage ?? 1,
+  );
+  const itemsPerPage = useBookingStore(
+    (state) => state.pagination?.itemsPerPage ?? 10,
+  );
   useEffect(() => {
     fetchUserBookings({
       status: activeTab !== "all" ? activeTab : "",
-      page: pagination.currentPage,
-      limit: pagination.itemsPerPage,
+      page: currentPage,
+      limit: itemsPerPage,
     });
-    // eslint-disable-next-line
-  }, [activeTab, pagination.currentPage, pagination.itemsPerPage]);
+  }, [fetchUserBookings, activeTab, currentPage, itemsPerPage]);
 
   const handleCancelBooking = async (id) => {
     try {
@@ -248,7 +253,7 @@ const MyBookingsPage = () => {
             !searchQuery && activeTab === "all"
               ? {
                   label: "مشاهده موترها",
-                  onClick: () => (window.location.href = "/cars"),
+                  onClick: () => navigate("/cars"),
                 }
               : undefined
           }

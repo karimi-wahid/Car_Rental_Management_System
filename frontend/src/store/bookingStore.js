@@ -13,6 +13,7 @@ import {
   updateBookingStatusService,
   getBookingStatsService,
   buildBookingQuery,
+  getUserBookingsHistoryService,
 } from "@/services/bookingService";
 
 const useBookingStore = create(
@@ -69,7 +70,6 @@ const useBookingStore = create(
 
       fetchUserBookings: async ({ status = "", page = 1, limit = 10 } = {}) => {
         set({ loading: true, error: null });
-
         try {
           const { filters, sort } = get();
 
@@ -82,6 +82,43 @@ const useBookingStore = create(
           });
 
           const res = await getUserBookingsService(query);
+
+          // ✅ flat shape from the new lean endpoint
+          set({
+            userBookings: res.data.data.bookings,
+            pagination: res.data.data.pagination,
+            loading: false,
+          });
+
+          return res.data;
+        } catch (err) {
+          set({
+            error: err.response?.data?.message || "Failed to fetch bookings",
+            loading: false,
+          });
+          throw err;
+        }
+      },
+
+      fetchUserHistoryBookings: async ({
+        status = "",
+        page = 1,
+        limit = 10,
+      } = {}) => {
+        set({ loading: true, error: null });
+
+        try {
+          const { filters, sort } = get();
+
+          const query = buildBookingQuery({
+            page,
+            limit,
+            sort,
+            ...filters,
+            status,
+          });
+
+          const res = await getUserBookingsHistoryService(query);
 
           set({
             userBookings: res.data.data.currentBookings,
@@ -100,6 +137,7 @@ const useBookingStore = create(
         set({ loading: true, error: null });
 
         try {
+          console.log("From Store", id);
           const res = await getBookingByIdService(id);
           console.log("Fetched booking details:", res);
 
@@ -111,6 +149,7 @@ const useBookingStore = create(
           return res.data;
         } catch (err) {
           set({ error: err.response?.data?.message, loading: false });
+          console.log("Error from Store", err);
           throw err;
         }
       },

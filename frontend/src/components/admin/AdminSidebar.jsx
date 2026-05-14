@@ -1,30 +1,21 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   LayoutDashboard,
   Car,
   Users,
   Calendar,
-  BarChart3,
-  Settings,
   LogOut,
   ChevronRight,
   ChevronLeft,
-  FileText,
   Bell,
-  Shield,
-  CreditCard,
-  TrendingUp,
-  Star,
-  Tag,
   MessageSquare,
   HelpCircle,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/store/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -49,30 +40,6 @@ const navigation = [
     href: "/admin/bookings",
     icon: Calendar,
   },
-  // {
-  //   name: "تحلیل و آمار",
-  //   href: "/admin/analytics",
-  //   icon: BarChart3,
-  //   badge: null,
-  // },
-  // {
-  //   name: "گزارشات",
-  //   href: "/admin/reports",
-  //   icon: FileText,
-  //   badge: null,
-  // },
-  // {
-  //   name: "درآمد",
-  //   href: "/admin/revenue",
-  //   icon: TrendingUp,
-  //   badge: { count: "+۱۲٪", variant: "success" },
-  // },
-  // {
-  //   name: "پرداخت‌ها",
-  //   href: "/admin/payments",
-  //   icon: CreditCard,
-  //   badge: null,
-  // },
   {
     name: "نظرات",
     href: "/admin/comments",
@@ -102,6 +69,30 @@ const navigation = [
   //   icon: Settings,
   //   badge: null,
   // },
+  // {
+  //   name: "تحلیل و آمار",
+  //   href: "/admin/analytics",
+  //   icon: BarChart3,
+  //   badge: null,
+  // },
+  // {
+  //   name: "گزارشات",
+  //   href: "/admin/reports",
+  //   icon: FileText,
+  //   badge: null,
+  // },
+  // {
+  //   name: "درآمد",
+  //   href: "/admin/revenue",
+  //   icon: TrendingUp,
+  //   badge: { count: "+۱۲٪", variant: "success" },
+  // },
+  // {
+  //   name: "پرداخت‌ها",
+  //   href: "/admin/payments",
+  //   icon: CreditCard,
+  //   badge: null,
+  // },
 ];
 
 const bottomNavigation = [
@@ -117,6 +108,7 @@ const AdminSidebar = () => {
   const [isMobile, setIsMobile] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
 
   // Check if device is mobile
   useEffect(() => {
@@ -134,7 +126,7 @@ const AdminSidebar = () => {
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (

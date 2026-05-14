@@ -57,11 +57,10 @@ const commentSchema = new mongoose.Schema(
 );
 
 // Virtual: reply count
-commentSchema.virtual('replyCount', {
+commentSchema.virtual('replies', {
   ref: 'Comment',
   localField: '_id',
   foreignField: 'parent',
-  count: true,
 });
 
 // Compound index for efficient car comment queries

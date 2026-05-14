@@ -12,7 +12,7 @@ const UserLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col dark:bg-zinc-950">
       <Navbar />
 
       {/* Mobile Sidebar */}

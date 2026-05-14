@@ -8,6 +8,9 @@ export const createBookingService = (data) =>
 export const getUserBookingsService = (query) =>
   axiosInstance.get(`/bookings/my-bookings?${query}`);
 
+export const getUserBookingsHistoryService = (query) =>
+  axiosInstance.get(`/bookings/my-bookings-history?${query}`);
+
 export const getBookingByIdService = (id) =>
   axiosInstance.get(`/bookings/${id}`);
 

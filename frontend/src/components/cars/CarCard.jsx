@@ -1,165 +1,227 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import {
-  Car,
-  Fuel,
-  Gauge,
-  Users,
-  Calendar,
-  ArrowLeft,
-  Heart,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Users, Fuel, Gauge, Calendar, ArrowUpLeft, Zap } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import FavoriteButton from "./FavoriteButton";
+import { cn } from "@/lib/utils";
 
-export const CarCard = ({ car, index }) => {
+const TRANSMISSION_MAP = { automatic: "اتوماتیک", manual: "دستی" };
+const FUEL_MAP = {
+  petrol: "پطرول",
+  diesel: "دیزل",
+  electric: "برقی",
+  hybrid: "هایبرید",
+};
+
+export const CarCard = ({ car, index = 0 }) => {
   const navigate = useNavigate();
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
-  const getTransmissionText = (transmission) => {
-    return transmission === "automatic" ? "اتوماتیک" : "دستی";
-  };
-
-  const getFuelTypeText = (fuelType) => {
-    switch (fuelType) {
-      case "petrol":
-        return "پطرول";
-      case "diesel":
-        return "دیزل";
-      case "electric":
-        return "برقی";
-      case "hybrid":
-        return "هایبرید";
-      default:
-        return fuelType;
-    }
-  };
+  const isElectric = car.fuelType === "electric";
+  const isAvailable = car.availability;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      whileHover={{ y: -8 }}
-      className="group"
+      transition={{
+        duration: 0.45,
+        delay: index * 0.07,
+        ease: [0.23, 1, 0.32, 1],
+      }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
       dir="rtl"
+      className={cn(
+        "relative group rounded-3xl overflow-hidden cursor-pointer select-none",
+        "bg-white dark:bg-zinc-900",
+        "border border-zinc-100 dark:border-zinc-800",
+        "shadow-sm hover:shadow-2xl hover:shadow-zinc-200/60 dark:hover:shadow-zinc-900/60",
+        "transition-shadow duration-500",
+        !isAvailable && "opacity-75",
+      )}
+      onClick={() => isAvailable && navigate(`/cars/${car._id}`)}
+      style={{ willChange: "transform" }}
     >
-      <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 h-full">
-        {/* Image Container */}
-        <div className="relative h-64 overflow-hidden">
-          <img
-            src={car.images[0].url}
-            alt={car.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+      {/* ── Image ───────────────────────────────── */}
+      <div className="relative h-52 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+        {/* Skeleton shimmer while loading */}
+        {!imgLoaded && (
+          <div className="absolute inset-0 bg-linear-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 animate-pulse" />
+        )}
 
-          {/* Badges */}
-          <div className="absolute top-4 right-4 flex flex-wrap gap-2">
-            <Badge className="bg-primary/90 hover:bg-primary">
-              {getTransmissionText(car.transmission)}
-            </Badge>
-            <Badge variant="secondary" className="bg-background/90">
-              {getFuelTypeText(car.fuelType)}
-            </Badge>
-            {!car.availability && (
-              <Badge variant="destructive">غیرقابل دسترس</Badge>
+        <motion.img
+          src={
+            car.images?.[0]?.url || car.images?.[0] || "/placeholder-car.jpg"
+          }
+          alt={car.name}
+          onLoad={() => setImgLoaded(true)}
+          animate={{ scale: hovered ? 1.06 : 1 }}
+          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+          className="w-full h-full object-cover"
+        />
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/10 to-transparent" />
+
+        {/* Unavailable overlay */}
+        {!isAvailable && (
+          <div className="absolute inset-0 bg-zinc-900/60 flex items-center justify-center">
+            <span className="bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full">
+              غیرقابل دسترس
+            </span>
+          </div>
+        )}
+
+        {/* Top row: badges + favorite */}
+        <div className="absolute top-3.5 right-3.5 left-3.5 flex items-center justify-between">
+          <div className="flex gap-1.5">
+            {/* Transmission pill */}
+            <span className="bg-black/40 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/10">
+              {TRANSMISSION_MAP[car.transmission] || car.transmission}
+            </span>
+
+            {/* Electric indicator */}
+            {isElectric && (
+              <span className="bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
+                <Zap className="w-2.5 h-2.5 fill-white" />
+                برقی
+              </span>
             )}
           </div>
 
-          {/* Favorite Button */}
-          <FavoriteButton
-            carId={car._id}
-            classCode={
-              "absolute top-4 left-4 bg-background/50 hover:bg-background/80 backdrop-blur-sm"
-            }
-          />
-
-          {/* Price Badge */}
-          <div className="absolute bottom-4 left-4">
-            <Badge className="text-lg px-4 py-2 bg-background/90 text-foreground">
-              {formatCurrency(car.pricePerDay)}
-              <span className="text-xs text-muted-foreground mr-1">/ روز</span>
-            </Badge>
-          </div>
-
-          {/* Year Badge */}
-          <div className="absolute bottom-4 right-4">
-            <Badge
-              variant="outline"
-              className="bg-background/50 backdrop-blur-sm"
-            >
-              <Calendar className="w-3 h-3 ml-1" />
-              {car.year}
-            </Badge>
+          {/* Favorite */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <FavoriteButton
+              carId={car._id}
+              classCode="bg-black/30 hover:bg-black/50 backdrop-blur-md border border-white/10 text-white w-8 h-8 rounded-full"
+            />
           </div>
         </div>
 
-        {/* Content */}
-        <CardContent className="p-2">
-          <div className="mb-2">
-            <h3 className="text-2xl font-bold mb-1 line-clamp-1 text-right">
-              {car.name}
-            </h3>
-            <p className="text-muted-foreground flex items-center justify-end">
-              <Car className="w-4 h-4 ml-1" />
-              {car.brand} {car.model}
-            </p>
+        {/* Bottom: price */}
+        <div className="absolute bottom-3.5 right-3.5">
+          <div className="flex items-baseline gap-1">
+            <span className="text-white font-bold text-xl leading-none drop-shadow-sm">
+              {formatCurrency(car.pricePerDay)}
+            </span>
+            <span className="text-white/60 text-xs">/ روز</span>
           </div>
+        </div>
 
-          {/* Specs */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="text-center">
-              <Users className="w-3 h-3 mx-auto mb-1 text-primary" />
-              <span className="text-xs font-medium">{car.seats} صندلی</span>
-            </div>
-            <div className="text-center">
-              <Gauge className="w-3 h-3 mx-auto mb-1 text-primary" />
-              <span className="text-xs font-medium">
-                {car.mileage || "۰"} کیلومتر
+        {/* Bottom: year */}
+        <div className="absolute bottom-3.5 left-3.5">
+          <span className="bg-black/30 backdrop-blur-md text-white/80 text-[11px] px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1">
+            <Calendar className="w-2.5 h-2.5" />
+            {car.year}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Content ─────────────────────────────── */}
+      <div className="p-5">
+        {/* Title row */}
+        <div className="mb-4">
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-white leading-tight line-clamp-1 mb-0.5">
+            {car.name}
+          </h3>
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">
+            {car.brand} · {car.carModel}
+          </p>
+        </div>
+
+        {/* Specs row */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {[
+            { icon: Users, value: `${car.seats} نفر`, label: "ظرفیت" },
+            {
+              icon: Fuel,
+              value: FUEL_MAP[car.fuelType] || car.fuelType,
+              label: "سوخت",
+            },
+            {
+              icon: Gauge,
+              value: car.mileage
+                ? `${Number(car.mileage).toLocaleString("fa-IR")}`
+                : "—",
+              label: "کیلومتر",
+            },
+          ].map(({ icon: Icon, value, label }) => (
+            <div
+              key={label}
+              className="flex flex-col items-center gap-1.5 bg-zinc-50 dark:bg-zinc-800/60 rounded-2xl py-3 px-2"
+            >
+              <Icon className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+              <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 leading-none">
+                {value}
+              </span>
+              <span className="text-[10px] text-zinc-400 leading-none">
+                {label}
               </span>
             </div>
-            <div className="text-center">
-              <Fuel className="w-3 h-3 mx-auto mb-1 text-primary" />
-              <span className="text-xs font-medium">
-                {getFuelTypeText(car.fuelType)}
-              </span>
-            </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Features */}
-          <div className="flex flex-wrap gap-2 mb-6 justify-end">
-            {car.features.slice(0, 3).map((feature, idx) => (
-              <Badge key={idx} variant="outline" className="text-xs">
-                {feature}
-              </Badge>
+        {/* Features */}
+        {car.features?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {car.features.slice(0, 3).map((f, i) => (
+              <span
+                key={i}
+                className="text-[11px] text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full"
+              >
+                {f}
+              </span>
             ))}
             {car.features.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                {car.features.length - 3}+ بیشتر
-              </Badge>
+              <span className="text-[11px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
+                +{car.features.length - 3}
+              </span>
             )}
           </div>
+        )}
 
-          {/* Action Button */}
-          <Button
-            className="w-full group"
-            onClick={() => navigate(`/cars/${car._id}`)}
-            disabled={!car.availability}
-          >
-            {car.availability ? (
-              <>
-                مشاهده جزئیات
-                <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-              </>
-            ) : (
-              "در حال حاضر غیرقابل دسترس"
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-    </motion.div>
+        {/* Divider */}
+        <div className="h-px bg-zinc-100 dark:bg-zinc-800 mb-4" />
+
+        {/* CTA */}
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          disabled={!isAvailable}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isAvailable) navigate(`/cars/${car._id}`, scrollTo(0, 0));
+          }}
+          className={cn(
+            "w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200",
+            isAvailable
+              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-100"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed",
+          )}
+        >
+          <span>{isAvailable ? "مشاهده جزئیات" : "در دسترس نیست"}</span>
+          {isAvailable && (
+            <motion.span
+              animate={{ x: hovered ? -3 : 0, y: hovered ? -3 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ArrowUpLeft className="w-4 h-4" />
+            </motion.span>
+          )}
+        </motion.button>
+      </div>
+
+      {/* Hover border accent */}
+      <motion.div
+        className="absolute inset-0 rounded-3xl pointer-events-none border-2 border-transparent"
+        animate={{
+          borderColor:
+            hovered && isAvailable ? "rgba(0,0,0,0.08)" : "transparent",
+        }}
+        transition={{ duration: 0.2 }}
+      />
+    </motion.article>
   );
 };

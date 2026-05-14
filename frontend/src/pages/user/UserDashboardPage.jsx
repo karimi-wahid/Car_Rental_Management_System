@@ -43,12 +43,7 @@ const UserDashboardPage = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
-  const {
-    userBookings: bookings,
-    fetchUserBookings,
-    loading,
-    error,
-  } = useBookingStore();
+  const { fetchUserHistoryBookings, loading, error } = useBookingStore();
 
   const [upcomingBookings, setUpcomingBookings] = useState([]);
   const [recentBookings, setRecentBookings] = useState([]);
@@ -63,7 +58,7 @@ const UserDashboardPage = () => {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const res = await fetchUserBookings({ page: 1, limit: 5 });
+        const res = await fetchUserHistoryBookings({ page: 1, limit: 5 });
         const { summary, upcomingBookings, recentBookings } = res.data;
 
         setUpcomingBookings(upcomingBookings);
@@ -74,13 +69,14 @@ const UserDashboardPage = () => {
           upcomingTrips: summary.upcomingTrips,
           completedTrips: summary.completedTrips,
         });
-      } catch {
-        toast.error("خطا در دریافت اطلاعات داشبورد");
+      } catch (err) {
+        toast.error(error || "خطا در دریافت اطلاعات داشبورد");
+        console.log(err);
       }
     };
 
     loadDashboard();
-  }, [fetchUserBookings]);
+  }, [fetchUserHistoryBookings]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

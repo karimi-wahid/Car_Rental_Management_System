@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
     },
-    photo: String,
+    avatar: String,
     role: {
       type: String,
       enum: ['admin', 'user'],
@@ -46,10 +46,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
       select: false,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
     },
     emailVerificationToken: String,
     emailVerificationExpires: Date,
@@ -107,11 +103,6 @@ userSchema.methods.createEmailOTP = function () {
 
   return otp; // send plain OTP in email
 };
-
-userSchema.pre(/^find/, function () {
-  // this points to the current query
-  this.find({ active: { $ne: false } });
-});
 
 userSchema.methods.correctPassword = async function (
   candidatePassword,

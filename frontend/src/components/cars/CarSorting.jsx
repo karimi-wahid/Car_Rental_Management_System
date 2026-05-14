@@ -8,12 +8,10 @@ import {
 import { Label } from "@/components/ui/label";
 
 export const CarSorting = ({ value, order, onSortChange }) => {
-  // Convert store format (-createdAt) to component format (createdAt-desc)
   const getSelectValue = () => {
     const sortValue = value || "createdAt";
     const sortOrder = order || "desc";
 
-    // Remove leading dash if present
     const cleanValue = sortValue.startsWith("-")
       ? sortValue.substring(1)
       : sortValue;

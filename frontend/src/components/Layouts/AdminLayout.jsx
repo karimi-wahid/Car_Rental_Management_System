@@ -4,7 +4,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 
 const AdminLayout = () => {
   return (
-    <div className="min-h-screen bg-muted/10">
+    <div className="min-h-screen dark:bg-zinc-950">
       <AdminNavbar />
       <div className="flex">
         <AdminSidebar />

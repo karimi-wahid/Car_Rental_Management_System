@@ -19,9 +19,9 @@ const navigation = [
   { name: "رزروهای من", href: "/bookings", icon: Calendar },
   { name: "تاریخچه رزروها", href: "/bookings/history", icon: History },
   { name: "علاقه‌مندی‌ها", href: "/favorites", icon: Heart },
-  { name: "تنظیمات", href: "/settings", icon: Settings },
-  { name: "اعلان‌ها", href: "/notifications", icon: Bell },
+  // { name: "اعلان‌ها", href: "/notifications", icon: Bell },
   { name: "پیشنهادها", href: "/feedbacks", icon: MessageSquare },
+  { name: "تنظیمات", href: "/settings", icon: Settings },
 ];
 
 // Helper function to get role display text

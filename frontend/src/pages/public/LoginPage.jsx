@@ -1,21 +1,31 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { motion } from "motion/react";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthLayout } from "@/components/auth/AuthLayout";
+
 import { useAuthStore } from "@/store/authStore";
-import toast from "react-hot-toast";
+
+// Zod Schema
+const loginSchema = z.object({
+  email: z.string().min(1, "ایمیل الزامی است").email("ایمیل نامعتبر است"),
+
+  password: z.string().min(1, "رمز عبور الزامی است"),
+});
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Use individual selectors for better performance
+  // Zustand Store
   const login = useAuthStore((state) => state.login);
   const user = useAuthStore((state) => state.user);
   const isLoading = useAuthStore((state) => state.isLoading);
@@ -25,38 +35,40 @@ const LoginPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  // React Hook Form + Zod
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  // Clear error when component mounts
+  // Clear Errors
   useEffect(() => {
     clearError();
   }, [clearError]);
 
-  // Redirect if already authenticated and user is loaded
+  // Redirect After Login
   useEffect(() => {
     if (isAuthenticated && user?.role) {
       const getRedirectPath = () => {
-        if (user?.role === "admin") {
+        if (user.role === "admin") {
           return location.state?.from?.pathname || "/admin/dashboard";
-        } else if (user?.role) {
-          return location.state?.from?.pathname || "/dashboard";
-        } else {
-          return "/";
         }
+
+        return location.state?.from?.pathname || "/dashboard";
       };
+
       navigate(getRedirectPath(), { replace: true });
     }
   }, [isAuthenticated, user, navigate, location.state]);
 
+  // Submit Handler
   const onSubmit = async (data) => {
     clearError();
     await login(data.email, data.password);
@@ -68,38 +80,35 @@ const LoginPage = () => {
       subtitle="برای ادامه، به حساب کاربری خود وارد شوید"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Server Error Display */}
+        {/* Server Error */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center"
+            className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-sm text-destructive"
           >
             {error}
           </motion.div>
         )}
 
-        {/* Email Field */}
+        {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">ایمیل آدرس</Label>
+
           <div className="relative">
-            <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Mail className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
               className="pr-10"
-              {...register("email", {
-                required: "ایمیل الزامی است",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "ایمیل نامعتبر است",
-                },
-              })}
-              disabled={isSubmitting || isLoading}
               autoComplete="email"
+              disabled={isSubmitting || isLoading}
+              {...register("email")}
             />
           </div>
+
           {errors.email && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -111,10 +120,11 @@ const LoginPage = () => {
           )}
         </div>
 
-        {/* Password Field */}
+        {/* Password */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">پسورد</Label>
+
             <Link
               to="/forgot-password"
               className="text-sm text-primary hover:underline"
@@ -122,36 +132,34 @@ const LoginPage = () => {
               رمز عبور را فراموش کرده‌اید؟
             </Link>
           </div>
+
           <div className="relative">
-            <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Lock className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               className="pl-10 pr-10"
-              {...register("password", {
-                required: "رمز عبور الزامی است",
-                minLength: {
-                  value: 8,
-                  message: "رمز عبور باید حداقل 8 کاراکتر باشد",
-                },
-              })}
-              disabled={isSubmitting || isLoading}
               autoComplete="current-password"
+              disabled={isSubmitting || isLoading}
+              {...register("password")}
             />
+
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
-                <EyeOff className="w-5 h-5" />
+                <EyeOff className="h-5 w-5" />
               ) : (
-                <Eye className="w-5 h-5" />
+                <Eye className="h-5 w-5" />
               )}
             </button>
           </div>
+
           {errors.password && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -163,11 +171,11 @@ const LoginPage = () => {
           )}
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <Button
           type="submit"
-          className="w-full"
           size="lg"
+          className="w-full"
           disabled={isSubmitting || isLoading}
         >
           {isSubmitting || isLoading ? (
@@ -180,12 +188,12 @@ const LoginPage = () => {
           )}
         </Button>
 
-        {/* Sign Up Link */}
+        {/* Register */}
         <p className="text-center text-sm text-muted-foreground">
           حساب کاربری ندارید؟{" "}
           <Link
             to="/register"
-            className="text-primary hover:underline font-medium"
+            className="font-medium text-primary hover:underline"
           >
             ثبت نام کنید
           </Link>

@@ -49,7 +49,6 @@ const timeAgo = (date) => {
   });
 };
 
-// ── Comment Input Box ─────────────────────────────────────────
 const CommentInput = ({
   carId,
   parentId = null,
@@ -459,10 +458,11 @@ export const CarComments = ({ carId }) => {
       )}
 
       {/* Comment list */}
-      {loading && carComments.length === 0 ? (
+      {loading && carComments.length >= 0 ? (
         <div className="space-y-6">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex gap-3 animate-pulse">
+              <li>{carComments}</li>
               <div className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-800 shrink-0" />
               <div className="flex-1 space-y-2 pt-1">
                 <div className="h-3 w-28 bg-zinc-200 dark:bg-zinc-800 rounded" />

@@ -1,53 +1,47 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Mail, Phone, Calendar } from "lucide-react";
+import { ArrowRight, Mail, Phone, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-//import { Input } from '@/components/ui/input';
 
 const CTASection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative py-24 overflow-hidden">
-      {/* Background with Parallax Effect */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-linear-to-r from-primary to-primary opacity-80" />
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 5, -5, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'url("https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            mixBlendMode: "overlay",
-          }}
-        />
-      </div>
-
+    <section className="relative py-20 md:py-32 overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
       <div className="container-custom relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-3xl mx-auto">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex justify-center mb-6"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-200 dark:border-blue-500/30 bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm shadow-sm">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-slate-700 dark:text-white">
+                تجربهٔ مجدد خود را شروع کنید
+              </span>
+            </div>
+          </motion.div>
+
           {/* Main Content */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-center mb-10 md:mb-12"
           >
-            <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">
-              آماده‌اید که با استایل رانندگی کنید؟
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
+              آماده‌اید که با
+              <span className="block text-primary">استایل رانندگی کنید؟</span>
             </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              به هزاران مشتری خوشحال بپیوندید که از لوکس بودن ناوگان درجه‌یک ما
-              لذت برده‌اند.
+
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              به هزاران مشتری خوشحال بپیوندید که از ناوگان درجه‌یک و سرویس
+              بی‌نظیر ما لذت برده‌اند.
             </p>
           </motion.div>
 
@@ -57,68 +51,91 @@ const CTASection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+            className="flex flex-col sm:flex-row gap-4 justify-center mb-14 md:mb-16"
           >
             <Button
               size="lg"
-              variant="secondary"
-              className="group text-lg px-8 py-6 bg-white text-primary hover:bg-white/90 cursor-pointer"
+              className="group relative px-8 py-3 md:py-4 text-base md:text-lg font-semibold bg-primary text-white rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30"
               onClick={() => navigate("/cars")}
             >
-              مشاهده موترها
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <span className="flex items-center justify-center">
+                مشاهده موترها
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-300 rtl:rotate-180" />
+              </span>
             </Button>
+
             <Button
               size="lg"
               variant="outline"
-              className="text-lg px-8 py-6 border-white text-white hover:bg-white/10 cursor-pointer"
+              className="px-8 py-3 md:py-4 text-base md:text-lg font-semibold border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-300"
               onClick={() => navigate("/contact")}
             >
               تماس با ما
             </Button>
           </motion.div>
 
-          {/* Newsletter Signup
+          {/* Contact Cards */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="max-w-md mx-auto"
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 pt-8 md:pt-12 border-t border-slate-200 dark:border-slate-700/50"
           >
-            <p className="text-white/80 mb-4">Subscribe for exclusive offers and updates</p>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
-              <Button variant="secondary" className="bg-white text-primary hover:bg-white/90">
-                Subscribe
-              </Button>
-            </div>
-          </motion.div> */}
+            {/* Phone */}
+            <motion.div
+              whileHover={{ y: -4 }}
+              className="flex flex-col items-center gap-3 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <div className="p-3 rounded-lg dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30">
+                <Phone className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
 
-          {/* Quick Contact Options */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6 }}
-            className="mt-12 flex flex-wrap justify-center gap-6 text-white/80"
-          >
-            <div className="flex items-center space-x-2">
-              <Phone className="w-4 h-4" />
-              <span className="text-sm">+93766303465</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Mail className="w-4 h-4" />
-              <span className="text-sm">reservations@carrental.com</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm">24/7 رزرو کردن آنلاین</span>
-            </div>
+              <div className="text-center">
+                <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  تلفن
+                </p>
+                <p className="font-semibold">+93 766 303 465</p>
+              </div>
+            </motion.div>
+
+            {/* Email */}
+            <motion.div
+              whileHover={{ y: -4 }}
+              className="flex flex-col items-center gap-3 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <div className="p-3 rounded-lg dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/30">
+                <Mail className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  ایمیل
+                </p>
+
+                <p className="font-semibold text-sm md:text-base">
+                  reservations@carrental.com
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Booking */}
+            <motion.div
+              whileHover={{ y: -4 }}
+              className="flex flex-col items-center gap-3 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <div className="p-3 rounded-lg dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30">
+                <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+
+              <div className="text-center">
+                <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  رزرو
+                </p>
+
+                <p className="font-semibold">24/7 آنلاین</p>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

@@ -212,6 +212,8 @@ export const getAllComments = catchAsync(async (req, res, next) => {
     Comment.countDocuments(filter),
   ]);
 
+  console.log('COmments', comments);
+
   res.status(200).json({
     status: 'success',
     data: {

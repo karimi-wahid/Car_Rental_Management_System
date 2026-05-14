@@ -11,6 +11,7 @@ import {
   getUserBookingHistory,
   getBookingStatistics,
   updateBookingStatus,
+  getMyBookings,
 } from '../controllers/bookingController.js';
 
 const router = express.Router();
@@ -18,9 +19,10 @@ const router = express.Router();
 // Public routes (authenticated users)
 router.get('/check-availability', protect, checkCarAvailability);
 router.get('/time-slots', protect, getAvailableTimeSlots);
-router.get('/my-bookings', protect, getUserBookingHistory);
+router.get('/my-bookings', protect, getMyBookings);
+router.get('/my-bookings-history', protect, getUserBookingHistory);
 router.post('/', protect, createBooking);
-router.get('/:id', getBookingById);
+router.get('/:id', protect, getBookingById);
 router.patch('/:id', protect, updateBooking);
 router.patch('/:id/cancel', protect, cancelBooking);
 

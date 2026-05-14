@@ -47,13 +47,40 @@ export const updateMe = catchAsync(async (req, res, next) => {
   }
 
   // 2) Filtered out unwanted fields names that are not allowed to be updated
-  const filteredBody = filterObj(req.body, 'name', 'email', 'avatar');
+  const filteredBody = filterObj(req.body, 'name', 'email');
 
   // 3) Update the user document
-  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
     new: true,
     runValidators: true,
   });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser,
+    },
+  });
+});
+
+export const updateAvatar = catchAsync(async (req, res, next) => {
+  console.log(req.user);
+  // multer file check
+  if (!req.file) {
+    return next(new AppError('لطفاً یک عکس انتخاب کنید', 400));
+  }
+
+  // update user avatar
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      avatar: req.file.path,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
 
   res.status(200).json({
     status: 'success',
@@ -179,50 +206,6 @@ export const updateUserRole = catchAsync(async (req, res, next) => {
     message: `User role updated to ${role}`,
     data: {
       updatedUser,
-    },
-  });
-});
-
-export const toggleUserStatus = catchAsync(async (req, res, next) => {
-  const { userId } = req.params;
-  const { isVerified } = req.body;
-  console.log(userId, isVerified);
-
-  // ✅ 1. Only admin
-  if (req.user.role !== 'admin') {
-    return next(new AppError('Only admins can update user status', 403));
-  }
-
-  // ✅ 2. Validate boolean
-  const parsedStatus = isVerified === true || isVerified === 'true';
-
-  // ✅ 3. Find user
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { isVerified },
-    { returnDocument: 'after', runValidators: true },
-  );
-
-  // ✅ 4. Prevent self-update
-  if (userId === req.user._id.toString()) {
-    return next(
-      new AppError('You cannot change your own verification status', 403),
-    );
-  }
-
-  // ✅ 5. Log
-  console.log(
-    `Admin ${req.user.email} set verification of ${user.email} to ${parsedStatus}`,
-  );
-
-  // ✅ 7. Response
-  res.status(200).json({
-    status: 'success',
-    message: `User verification ${
-      parsedStatus ? 'enabled' : 'disabled'
-    } successfully`,
-    data: {
-      user,
     },
   });
 });

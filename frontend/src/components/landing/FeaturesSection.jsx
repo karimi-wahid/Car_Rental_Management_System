@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion, useInView } from "motion/react";
+import { useRef } from "react";
 import {
   Shield,
   Clock,
@@ -6,140 +7,135 @@ import {
   MapPin,
   Headphones,
   Star,
-  Sparkles,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 const features = [
   {
     icon: Shield,
     title: "محافظت ممتاز",
     description: "پوشش کامل بیمه‌ای به همراه هر کرایه برای آرامش خاطر کامل.",
-    color: "from-blue-500 to-cyan-500",
+    num: "01",
   },
   {
     icon: Clock,
     title: "دسترسی ۲۴/۷",
     description:
       "خدمات شبانه‌روزی با زمان‌های انعطاف‌پذیر تحویل و تحویل گرفتن موتر.",
-    color: "from-purple-500 to-pink-500",
+    num: "02",
   },
   {
     icon: CreditCard,
-    title: "پرداخت‌های امن",
+    title: "پرداخت امن",
     description: "گزینه‌های پرداخت متعدد با رمزنگاری امنیتی در سطح بانک.",
-    color: "from-green-500 to-emerald-500",
+    num: "03",
   },
   {
     icon: MapPin,
-    title: "موقعیت‌های مناسب",
+    title: "تحویل در محل",
     description: "نقاط تحویل متعدد در سراسر شهر، شامل ترمینال‌های هوایی.",
-    color: "from-orange-500 to-red-500",
+    num: "04",
   },
   {
     icon: Headphones,
-    title: "خدمات مهمانداری",
+    title: "خدمات اختصاصی",
     description: "مهماندار شخصی برای کمک به درخواست‌های ویژه‌ی شما.",
-    color: "from-indigo-500 to-purple-500",
+    num: "05",
   },
   {
     icon: Star,
     title: "ناوگان ممتاز",
-    description: "مجموعه‌ی برگزیده از بهترین موترهای لوکس.",
-    color: "from-yellow-500 to-orange-500",
+    description: "مجموعه‌ی برگزیده از بهترین موترهای لوکس جهان.",
+    num: "06",
   },
 ];
 
 const FeaturesSection = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="section-padding relative overflow-hidden py-3">
-      {/* Background Decoration */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-0 w-full h-96 bg-linear-to-b from-primary/5 to-transparent" />
-        <div className="absolute bottom-0 right-0 w-full h-96 bg-linear-to-t from-purple-500/5 to-transparent" />
-      </div>
-
-      <div className="container-custom">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <Badge variant="outline" className="mb-4 px-4 py-3">
-            <Sparkles className="w-4 h-4 mr-2" />
-            چرا ما را انتخاب کنید؟
-          </Badge>
-          <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">
-            تجربه‌ی{" "}
-            <span className="gradient-text inline-block">خدمات بی‌نظیر</span>
-          </h2>
-          <p className="text-[16px] text-muted-foreground max-w-2xl mx-auto">
-            کار ما فقط کرایه‌ی موتر نیست - ما تجربه‌ای بی‌نظیر و متناسب با
-            نیازهای شما را ارائه می‌دهیم.
-          </p>
-        </motion.div>
-
-        {/* Features Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              variants={itemVariants}
-              whileHover={{ y: -5 }}
-              className="group relative"
+    <section
+      className="py-24 px-6 md:px-16 bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300"
+      dir="rtl"
+      ref={ref}
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.5 }}
+              className="text-xs text-zinc-500 dark:text-zinc-500 tracking-[0.25em] uppercase mb-4 flex items-center gap-3"
             >
-              <div
-                className="absolute inset-0 bg-linear-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl blur-xl -z-10"
-                style={{
-                  background: `linear-gradient(135deg, ${feature.color.split(" ")[1]}20, ${feature.color.split(" ")[3]}20)`,
-                }}
-              />
-              <div className="relative p-8 rounded-2xl border bg-card hover:border-primary/50 transition-all duration-300">
-                {/* Icon */}
-                <div
-                  className={`w-16 h-16 rounded-xl bg-linear-to-br ${feature.color} p-4 mb-6`}
-                >
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
+              <span className="w-8 h-px bg-zinc-300 dark:bg-zinc-700" />
+              چرا ما را انتخاب کنید
+            </motion.p>
 
-                {/* Content */}
-                <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white leading-[1.05] tracking-tight"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              خدمات
+              <br />
+              بی‌نظیر
+            </motion.h2>
+          </div>
 
-                {/* Hover Indicator */}
-                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                  </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="text-zinc-600 dark:text-zinc-400 text-sm max-w-xs leading-relaxed md:text-right"
+          >
+            کار ما فقط کرایه‌ی موتر نیست — ما تجربه‌ای متناسب با بالاترین
+            استانداردهای جهانی ارائه می‌دهیم.
+          </motion.p>
+        </div>
+
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-200 dark:bg-zinc-800 rounded-2xl overflow-hidden">
+          {features.map((f, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.5, delay: 0.1 + i * 0.07 }}
+              className="group relative bg-white dark:bg-zinc-950 p-8 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors duration-300"
+            >
+              {/* Number watermark */}
+              <span
+                className="absolute top-6 left-6 text-6xl font-black text-zinc-100 dark:text-zinc-900 select-none transition-colors duration-300 group-hover:text-zinc-200 dark:group-hover:text-zinc-800"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                {f.num}
+              </span>
+
+              {/* Icon */}
+              <div className="relative z-10 mb-6">
+                <div className="w-12 h-12 border border-zinc-300 dark:border-zinc-700 group-hover:border-zinc-500 transition-colors duration-300 flex items-center justify-center rounded-lg bg-zinc-50 dark:bg-transparent">
+                  <f.icon className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-300" />
                 </div>
               </div>
+
+              {/* Text */}
+              <h3 className="relative z-10 text-lg font-bold text-zinc-900 dark:text-white mb-3">
+                {f.title}
+              </h3>
+
+              <p className="relative z-10 text-sm text-zinc-600 dark:text-zinc-500 leading-relaxed group-hover:text-zinc-700 dark:group-hover:text-zinc-400 transition-colors duration-300">
+                {f.description}
+              </p>
+
+              {/* Bottom accent line */}
+              <div className="absolute bottom-0 right-0 h-px w-0 bg-zinc-900/20 dark:bg-white/20 group-hover:w-full transition-all duration-500" />
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

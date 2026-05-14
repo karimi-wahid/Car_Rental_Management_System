@@ -234,7 +234,7 @@ export const CarFilters = ({ onFilterChange, brands, className }) => {
   const handleFilterChange = (key, value) => {
     const clean = value === "all" ? "" : value;
     setFilters(key, clean);
-    onFilterChange?.(key, clean); // pass key and value to parent
+    onFilterChange?.(key, clean);
   };
 
   const handlePriceChange = (value) => {

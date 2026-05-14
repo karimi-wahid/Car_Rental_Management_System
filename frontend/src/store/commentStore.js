@@ -38,6 +38,7 @@ const useCommentStore = create((set, get) => ({
     try {
       const query = buildCommentQuery({ page, limit });
       const res = await getCarCommentsService(carId, query);
+      console.log(res);
       const { comments, pagination } = res.data.data;
 
       set({

@@ -1,13 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
-import {
-  User,
-  Settings,
-  LogOut,
-  ChevronDown,
-  Moon,
-  Sun,
-  Shield,
-} from "lucide-react";
+import { LogOut, ChevronDown, Moon, Sun, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -90,20 +82,7 @@ const AdminNavbar = () => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => navigate("/admin/profile")}
-                className="cursor-pointer"
-              >
-                <User className="ml-2 h-4 w-4" />
-                <span>پروفایل</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => navigate("/admin/settings")}
-                className="cursor-pointer"
-              >
-                <Settings className="ml-2 h-4 w-4" />
-                <span>تنظیمات</span>
-              </DropdownMenuItem>
+
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}

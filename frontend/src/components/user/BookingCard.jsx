@@ -101,7 +101,7 @@ export const BookingCard = ({ booking, onCancel, onViewDetails, onModify }) => {
     if (onViewDetails) {
       onViewDetails(booking._id);
     } else {
-      navigate(`/bookings/${booking._id}`);
+      navigate(`/bookings/${booking.car._id}`);
     }
   };
 

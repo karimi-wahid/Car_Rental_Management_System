@@ -58,7 +58,7 @@ const BookingHistoryPage = () => {
         }
 
         const response = await fetchUserBookings(params);
-        setBookings(response?.data?.currentBookings || []);
+        setBookings(response?.data?.bookings || []);
 
         if (response?.pagination) {
           setPagination({
@@ -76,9 +76,8 @@ const BookingHistoryPage = () => {
           });
         }
       } catch (err) {
-        toast.error("بارگذاری تاریخچه رزرو ناموفق بود");
-        toast.error(error);
-        console.log(error);
+        toast.error(error || "بارگذاری تاریخچه رزرو ناموفق بود");
+        console.log(err);
 
         setBookings([]);
         setPagination({
@@ -91,7 +90,7 @@ const BookingHistoryPage = () => {
     };
 
     fetchBookingHistory();
-  }, [pagination.page, statusFilter, pagination.limit, fetchUserBookings]);
+  }, [pagination.page, statusFilter, pagination.limit]);
 
   const handleExport = () => {
     // Generate CSV

@@ -12,7 +12,10 @@ import {
   Bell,
   Moon,
   Globe,
+  Eye,
+  EyeOff,
 } from "lucide-react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,8 +24,9 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { getInitials } from "@/lib/utils";
-import { toast } from "react-hot-toast";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+
 import {
   Select,
   SelectContent,
@@ -30,45 +34,102 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+
+import { getInitials, cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
+
 import { useThemeStore } from "@/store/themeStore";
 import useUserStore from "@/store/userStore";
-import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 
+import axios from "axios";
+
+/* -------------------------------------------------------------------------- */
+/*                                  ZOD SCHEMA                                */
+/* -------------------------------------------------------------------------- */
+
 const profileSchema = z.object({
-  name: z.string().min(2, "نام باید حداقل ۲ حرف باشد"),
-  email: z.string().email("آدرس ایمیل نامعتبر است"),
-  phone: z.string().optional(),
+  name: z
+    .string()
+    .min(2, "نام باید حداقل ۲ حرف باشد")
+    .max(50, "نام نمی‌تواند بیشتر از ۵۰ حرف باشد"),
+
+  email: z.email("ایمیل نامعتبر است"),
+
+  phone: z
+    .string()
+    .optional()
+    .refine((value) => {
+      if (!value) return true;
+
+      return /^(\+93|0)?7\d{8}$/.test(value);
+    }, "شماره تماس نامعتبر است"),
 });
 
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(1, "رمز عبور فعلی ضروری است"),
-    newPassword: z.string().min(8, "رمز عبور باید حداقل ۸ حرف باشد"),
-    confirmPassword: z.string().min(1, "لطفاً رمز عبور خود را تایید کنید"),
+    currentPassword: z.string().min(1, "رمز عبور فعلی الزامی است"),
+
+    newPassword: z
+      .string()
+      .min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد")
+      .regex(/[a-z]/, "رمز عبور باید شامل حروف کوچک باشد")
+      .regex(/[A-Z]/, "رمز عبور باید شامل حروف بزرگ باشد")
+      .regex(/[0-9]/, "رمز عبور باید شامل عدد باشد")
+      .regex(/[@$!%*?&#]/, "رمز عبور باید شامل کاراکتر خاص باشد"),
+
+    confirmPassword: z.string().min(1, "تایید رمز عبور الزامی است"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "رمز عبور مطابقت ندارد",
+    message: "رمز عبور و تایید آن مطابقت ندارند",
     path: ["confirmPassword"],
   });
+
+/* -------------------------------------------------------------------------- */
+/*                              PASSWORD STRENGTH                             */
+/* -------------------------------------------------------------------------- */
+
+const calculatePasswordStrength = (password) => {
+  let strength = 0;
+
+  if (password.length >= 8) strength += 20;
+  if (/[a-z]/.test(password)) strength += 20;
+  if (/[A-Z]/.test(password)) strength += 20;
+  if (/[0-9]/.test(password)) strength += 20;
+  if (/[@$!%*?&#]/.test(password)) strength += 20;
+
+  return strength;
+};
 
 const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const { theme, toggleTheme } = useThemeStore();
+
   const { user, updateMe, getMe, loading: storeLoading } = useUserStore();
+
   const { updatePassword } = useAuthStore();
+
+  /* -------------------------------------------------------------------------- */
+  /*                               PROFILE FORM                                 */
+  /* -------------------------------------------------------------------------- */
 
   const {
     register: registerProfile,
     handleSubmit: handleProfileSubmit,
-    formState: { errors: profileErrors },
     reset: resetProfile,
+    formState: { errors: profileErrors },
   } = useForm({
     resolver: zodResolver(profileSchema),
+
     defaultValues: {
       name: user?.name || "",
       email: user?.email || "",
@@ -76,32 +137,54 @@ const ProfilePage = () => {
     },
   });
 
+  /* -------------------------------------------------------------------------- */
+  /*                              PASSWORD FORM                                 */
+  /* -------------------------------------------------------------------------- */
+
   const {
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     reset: resetPassword,
+    watch,
     formState: { errors: passwordErrors },
   } = useForm({
     resolver: zodResolver(passwordSchema),
+
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
   });
 
-  // Fetch user data on mount
+  const newPassword = watch("newPassword", "");
+
+  const passwordStrength = calculatePasswordStrength(newPassword);
+
+  const getStrengthText = (strength) => {
+    if (strength < 50) return "ضعیف";
+    if (strength < 75) return "متوسط";
+    return "قوی";
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  EFFECTS                                   */
+  /* -------------------------------------------------------------------------- */
+
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUser = async () => {
       try {
         await getMe();
       } catch (error) {
-        toast.error("بارگذاری اطلاعات کاربر ناموفق بود");
-        console.error(error);
+        toast.error("بارگذاری اطلاعات ناموفق بود");
       }
     };
 
     if (!user) {
-      fetchUserData();
+      fetchUser();
     }
   }, [getMe, user]);
 
-  // Update form when user data changes
   useEffect(() => {
     if (user) {
       resetProfile({
@@ -112,115 +195,120 @@ const ProfilePage = () => {
     }
   }, [user, resetProfile]);
 
+  /* -------------------------------------------------------------------------- */
+  /*                               PROFILE SUBMIT                               */
+  /* -------------------------------------------------------------------------- */
+
   const onProfileSubmit = async (data) => {
     setIsLoading(true);
+
     try {
-      // Only send allowed fields (name, email, avatar)
-      const updateData = {
+      await updateMe({
         name: data.name,
         email: data.email,
-      };
+      });
 
-      await updateMe(updateData);
       toast.success("پروفایل موفقانه به‌روز شد");
     } catch (error) {
       toast.error(
         error.response?.data?.message || "به‌روزرسانی پروفایل ناموفق بود",
       );
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  /* -------------------------------------------------------------------------- */
+  /*                              PASSWORD SUBMIT                               */
+  /* -------------------------------------------------------------------------- */
+
   const onPasswordSubmit = async (data) => {
     setIsPasswordLoading(true);
+
     try {
       await updatePassword(
         data.currentPassword,
         data.newPassword,
         data.confirmPassword,
       );
+
       toast.success("رمز عبور موفقانه تغییر کرد");
+
       resetPassword();
     } catch (error) {
       toast.error(error.response?.data?.message || "تغییر رمز عبور ناموفق بود");
-      console.error(error);
     } finally {
       setIsPasswordLoading(false);
     }
   };
 
+  /* -------------------------------------------------------------------------- */
+  /*                               AVATAR UPLOAD                                */
+  /* -------------------------------------------------------------------------- */
+
   const handleAvatarUpload = async (event) => {
     const file = event.target.files?.[0];
+
     if (!file) return;
 
     setUploadingAvatar(true);
 
     try {
-      // Create FormData for file upload
       const formData = new FormData();
+
       formData.append("avatar", file);
 
-      // Upload avatar
       const response = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/users/updateMe`,
+        `${import.meta.env.VITE_API_URL}/users/update-avatar`,
         formData,
         {
           withCredentials: true,
+
           headers: {
             "Content-Type": "multipart/form-data",
           },
         },
       );
 
-      // Update user in store
-      if (response.data.data.user) {
-        useUserStore.getState().setUser(response.data.data.user);
-      }
-
-      toast.success("عکس پروفایل موفقانه به‌روز شد");
+      toast.success("عکس پروفایل به‌روز شد");
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "آپلود عکس پروفایل ناموفق بود",
-      );
-      console.error(error);
+      toast.error(error.response?.data?.message || "آپلود عکس ناموفق بود");
+      console.log(error);
     } finally {
       setUploadingAvatar(false);
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      dir="rtl"
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} dir="rtl">
+      {/* HEADER */}
+
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold mb-2 text-right">
-          تنظیمات پروفایل
-        </h1>
+        <h1 className="text-3xl font-bold mb-2 text-right">تنظیمات پروفایل</h1>
+
         <p className="text-muted-foreground text-right">
-          تنظیمات و ترجیحات حساب کاربری خود را مدیریت کنید
+          حساب کاربری و تنظیمات خود را مدیریت کنید
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar */}
+        {/* SIDEBAR */}
+
         <div className="lg:col-span-1">
           <Card>
             <CardContent className="p-6 text-center">
               <div className="relative mb-4 group">
                 <Avatar className="w-24 h-24 mx-auto ring-4 ring-primary/20">
                   <AvatarImage src={user?.avatar} />
+
                   <AvatarFallback className="text-2xl">
                     {getInitials(user?.name || "کاربر")}
                   </AvatarFallback>
                 </Avatar>
+
                 <label
                   htmlFor="avatar-upload"
-                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                  className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   {uploadingAvatar ? (
                     <Loader2 className="w-6 h-6 text-white animate-spin" />
@@ -228,201 +316,266 @@ const ProfilePage = () => {
                     <Camera className="w-6 h-6 text-white" />
                   )}
                 </label>
+
                 <input
                   id="avatar-upload"
                   type="file"
                   accept="image/*"
                   className="hidden"
                   onChange={handleAvatarUpload}
-                  disabled={uploadingAvatar}
                 />
               </div>
+
               <h2 className="text-xl font-semibold mb-1">{user?.name}</h2>
+
               <p className="text-sm text-muted-foreground mb-4">
                 {user?.email}
               </p>
-              <Badge variant="outline" className="px-3 py-1">
+
+              <Badge variant="outline">
                 {user?.role === "admin" ? "مدیر سیستم" : "عضو"}
               </Badge>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
+        {/* CONTENT */}
+
         <div className="lg:col-span-3">
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="preferences">
-                <Bell className="w-4 h-4 ml-2" />
-                ترجیحات
+          <Tabs defaultValue="profile" dir="rtl">
+            <TabsList className="grid grid-cols-3 mb-8">
+              <TabsTrigger value="profile">
+                <User className="w-4 h-4 ml-2" />
+                پروفایل
               </TabsTrigger>
               <TabsTrigger value="security">
                 <Lock className="w-4 h-4 ml-2" />
                 امنیت
               </TabsTrigger>
-              <TabsTrigger value="profile">
-                <User className="w-4 h-4 ml-2" />
-                پروفایل
+              <TabsTrigger value="preferences">
+                <Bell className="w-4 h-4 ml-2" />
+                ترجیحات
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="profile">
+            {/* PROFILE */}
+
+            <TabsContent value="profile" dir="rtl">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-right">اطلاعات شخصی</CardTitle>
                 </CardHeader>
+
                 <CardContent>
                   <form
+                    dir="rtl"
                     onSubmit={handleProfileSubmit(onProfileSubmit)}
                     className="space-y-6"
                   >
                     <div className="space-y-2">
-                      <Label htmlFor="name" className="text-right block">
-                        نام کامل
-                      </Label>
+                      <Label htmlFor="name">نام کامل</Label>
+
                       <Input
                         id="name"
                         {...registerProfile("name")}
                         disabled={storeLoading}
-                        className="text-right"
                       />
+
                       {profileErrors.name && (
-                        <p className="text-sm text-destructive text-right">
+                        <p className="text-sm text-destructive">
                           {profileErrors.name.message}
                         </p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-right block">
-                        آدرس ایمیل
-                      </Label>
+                      <Label htmlFor="email">ایمیل</Label>
+
                       <Input
                         id="email"
                         type="email"
                         {...registerProfile("email")}
                         disabled={storeLoading}
-                        className="text-right"
-                        dir="ltr"
                       />
+
                       {profileErrors.email && (
-                        <p className="text-sm text-destructive text-right">
+                        <p className="text-sm text-destructive">
                           {profileErrors.email.message}
                         </p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-right block">
-                        شماره تلفن (اختیاری)
-                      </Label>
+                      <Label htmlFor="phone">شماره تماس</Label>
+
                       <Input
                         id="phone"
-                        type="tel"
+                        placeholder="+93 700 000 000"
                         {...registerProfile("phone")}
                         disabled={storeLoading}
-                        placeholder="در حال حاضر قابل به‌روزرسانی نیست"
-                        className="text-right"
-                        dir="ltr"
                       />
-                      <p className="text-xs text-muted-foreground text-right">
-                        به‌روزرسانی شماره تلفن در این نسخه موجود نیست
-                      </p>
+
+                      {profileErrors.phone && (
+                        <p className="text-sm text-destructive">
+                          {profileErrors.phone.message}
+                        </p>
+                      )}
                     </div>
 
                     <Separator />
 
-                    <div className="flex justify-start">
-                      <Button
-                        type="submit"
-                        disabled={isLoading || storeLoading}
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                            در حال ذخیره...
-                          </>
-                        ) : (
-                          <>
-                            <Save className="ml-2 h-4 w-4" />
-                            ذخیره تغییرات
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <Button type="submit" disabled={isLoading || storeLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                          در حال ذخیره...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="ml-2 h-4 w-4" />
+                          ذخیره تغییرات
+                        </>
+                      )}
+                    </Button>
                   </form>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="security">
+            {/* SECURITY */}
+
+            <TabsContent value="security" dir="rtl">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-right">تغییر رمز عبور</CardTitle>
                 </CardHeader>
+
                 <CardContent>
                   <form
                     onSubmit={handlePasswordSubmit(onPasswordSubmit)}
                     className="space-y-6"
                   >
+                    {/* CURRENT PASSWORD */}
+
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="currentPassword"
-                        className="text-right block"
-                      >
-                        رمز عبور فعلی
-                      </Label>
-                      <Input
-                        id="currentPassword"
-                        type="password"
-                        {...registerPassword("currentPassword")}
-                        disabled={isPasswordLoading}
-                        className="text-right"
-                        dir="ltr"
-                      />
+                      <Label htmlFor="currentPassword">رمز عبور فعلی</Label>
+
+                      <div className="relative">
+                        <Input
+                          id="currentPassword"
+                          type={showCurrentPassword ? "text" : "password"}
+                          {...registerPassword("currentPassword")}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowCurrentPassword(!showCurrentPassword)
+                          }
+                          className="absolute left-3 top-1/2 -translate-y-1/2"
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+
                       {passwordErrors.currentPassword && (
-                        <p className="text-sm text-destructive text-right">
+                        <p className="text-sm text-destructive">
                           {passwordErrors.currentPassword.message}
                         </p>
                       )}
                     </div>
 
+                    {/* NEW PASSWORD */}
+
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword" className="text-right block">
-                        رمز عبور جدید
-                      </Label>
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        {...registerPassword("newPassword")}
-                        disabled={isPasswordLoading}
-                        className="text-right"
-                        dir="ltr"
-                      />
+                      <Label htmlFor="newPassword">رمز عبور جدید</Label>
+
+                      <div className="relative">
+                        <Input
+                          id="newPassword"
+                          type={showNewPassword ? "text" : "password"}
+                          {...registerPassword("newPassword")}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2"
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+
                       {passwordErrors.newPassword && (
-                        <p className="text-sm text-destructive text-right">
+                        <p className="text-sm text-destructive">
                           {passwordErrors.newPassword.message}
                         </p>
                       )}
+
+                      {/* PASSWORD STRENGTH */}
+
+                      {newPassword && (
+                        <div className="space-y-2 mt-3">
+                          <div className="flex justify-between text-sm">
+                            <span>قدرت رمز عبور</span>
+
+                            <span
+                              className={cn(
+                                passwordStrength < 50 && "text-destructive",
+
+                                passwordStrength >= 50 &&
+                                  passwordStrength < 75 &&
+                                  "text-yellow-500",
+
+                                passwordStrength >= 75 && "text-green-500",
+                              )}
+                            >
+                              {getStrengthText(passwordStrength)}
+                            </span>
+                          </div>
+
+                          <Progress value={passwordStrength} />
+                        </div>
+                      )}
                     </div>
 
+                    {/* CONFIRM PASSWORD */}
+
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="confirmPassword"
-                        className="text-right block"
-                      >
-                        تایید رمز عبور جدید
-                      </Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        {...registerPassword("confirmPassword")}
-                        disabled={isPasswordLoading}
-                        className="text-right"
-                        dir="ltr"
-                      />
+                      <Label htmlFor="confirmPassword">تایید رمز عبور</Label>
+
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          {...registerPassword("confirmPassword")}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                          className="absolute left-3 top-1/2 -translate-y-1/2"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+
                       {passwordErrors.confirmPassword && (
-                        <p className="text-sm text-destructive text-right">
+                        <p className="text-sm text-destructive">
                           {passwordErrors.confirmPassword.message}
                         </p>
                       )}
@@ -430,130 +583,67 @@ const ProfilePage = () => {
 
                     <Separator />
 
-                    <div className="flex justify-start">
-                      <Button type="submit" disabled={isPasswordLoading}>
-                        {isPasswordLoading ? (
-                          <>
-                            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                            در حال به‌روزرسانی...
-                          </>
-                        ) : (
-                          "به‌روزرسانی رمز عبور"
-                        )}
-                      </Button>
-                    </div>
+                    <Button type="submit" disabled={isPasswordLoading}>
+                      {isPasswordLoading ? (
+                        <>
+                          <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                          در حال به‌روزرسانی...
+                        </>
+                      ) : (
+                        "به‌روزرسانی رمز عبور"
+                      )}
+                    </Button>
                   </form>
-                </CardContent>
-              </Card>
-
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle className="text-right">
-                    تایید هویت دو مرحله‌ای
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="text-right">
-                      <p className="font-medium">فعال‌سازی تایید دو مرحله‌ای</p>
-                      <p className="text-sm text-muted-foreground">
-                        یک لایه امنیتی اضافی به حساب خود اضافه کنید
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch disabled />
-                      <span className="text-xs text-muted-foreground mr-2">
-                        به زودی
-                      </span>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="preferences">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-right">تنظیمات اعلان‌ها</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-right">
-                      <p className="font-medium">اعلان‌های ایمیلی</p>
-                      <p className="text-sm text-muted-foreground">
-                        دریافت تاییدیه‌های رزرو و به‌روزرسانی‌ها
-                      </p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="text-right">
-                      <p className="font-medium">اعلان‌های پیامکی</p>
-                      <p className="text-sm text-muted-foreground">
-                        دریافت پیامک برای به‌روزرسانی‌های فوری
-                      </p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="text-right">
-                      <p className="font-medium">ایمیل‌های بازاریابی</p>
-                      <p className="text-sm text-muted-foreground">
-                        دریافت پیشنهادات و تخفیف‌ها
-                      </p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            {/* PREFERENCES */}
 
-              <Card className="mt-6">
+            <TabsContent value="preferences" dir="rtl">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-right">تنظیمات نمایش</CardTitle>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Moon className="w-4 h-4" />
-                      <div className="text-right">
-                        <p className="font-medium">حالت تاریک</p>
-                        <p className="text-sm text-muted-foreground">
-                          تغییر بین تم روشن و تاریک
-                        </p>
-                      </div>
+                    <div className="text-right">
+                      <p className="font-medium">حالت تاریک</p>
+
+                      <p className="text-sm text-muted-foreground">
+                        تغییر بین تم روشن و تاریک
+                      </p>
                     </div>
+
                     <Switch
                       checked={theme === "dark"}
                       onCheckedChange={toggleTheme}
                     />
                   </div>
+
                   <Separator />
+
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-4 h-4" />
-                      <div className="text-right">
-                        <p className="font-medium">زبان</p>
-                        <p className="text-sm text-muted-foreground">
-                          زبان مورد نظر خود را انتخاب کنید
-                        </p>
-                      </div>
+                    <div className="text-right">
+                      <p className="font-medium">زبان</p>
+
+                      <p className="text-sm text-muted-foreground">
+                        زبان سیستم را انتخاب کنید
+                      </p>
                     </div>
+
                     <Select defaultValue="fa">
-                      <SelectTrigger className="w-30 text-right">
+                      <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
+
                       <SelectContent>
-                        <SelectItem value="en" className="text-right">
-                          English
-                        </SelectItem>
-                        <SelectItem value="fa" className="text-right">
-                          فارسی (دری)
-                        </SelectItem>
-                        <SelectItem value="ps" className="text-right">
-                          پشتو
-                        </SelectItem>
+                        <SelectItem value="fa">فارسی</SelectItem>
+
+                        <SelectItem value="ps">پشتو</SelectItem>
+
+                        <SelectItem value="en">English</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

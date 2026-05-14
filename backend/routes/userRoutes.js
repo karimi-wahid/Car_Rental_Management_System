@@ -7,17 +7,25 @@ import {
   getAllUsers,
   getMe,
   getUser,
-  toggleUserStatus,
+  updateAvatar,
   updateMe,
   updateUser,
   updateUserRole,
 } from '../controllers/userController.js';
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
 router.get('/me', protect, getMe);
 router.patch('/updateMe', protect, updateMe);
 router.delete('/deleteMe', protect, deleteMe);
+router.patch(
+  '/update-avatar',
+  protect,
+  restrictTo('user'),
+  upload.single('avatar'),
+  updateAvatar,
+);
 
 router.route('/').get(getAllUsers).post(createUser);
 
@@ -28,6 +36,5 @@ router
   .delete(protect, restrictTo('admin'), deleteUser);
 
 router.patch('/:id/role', protect, restrictTo('admin'), updateUserRole);
-router.patch('/:userId/status', protect, restrictTo('admin'), toggleUserStatus);
 
 export default router;

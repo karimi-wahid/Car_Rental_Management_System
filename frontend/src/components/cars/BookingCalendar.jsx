@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { format, addDays } from "date-fns";
-import { faIR } from "date-fns/locale";
+import { addDays } from "date-fns";
 import { Calendar as CalendarIcon, CheckCircle, XCircle } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const BookingCalendar = ({ pricePerDay, onBookingSubmit, disabled }) => {
   const [date, setDate] = useState({
@@ -55,10 +54,6 @@ export const BookingCalendar = ({ pricePerDay, onBookingSubmit, disabled }) => {
         )
       : 0;
 
-  const formatPersianDate = (date) => {
-    return format(date, "d MMMM yyyy", { locale: faIR });
-  };
-
   return (
     <Card className="sticky top-24" dir="rtl">
       <CardContent className="p-6">
@@ -104,16 +99,12 @@ export const BookingCalendar = ({ pricePerDay, onBookingSubmit, disabled }) => {
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="font-medium">
-                  {formatPersianDate(date.from)}
-                </span>
+                <span className="font-medium">{formatDate(date.from)}</span>
                 <span className="text-muted-foreground">تاریخ شروع</span>
               </div>
 
               <div className="flex justify-between">
-                <span className="font-medium">
-                  {formatPersianDate(date.to)}
-                </span>
+                <span className="font-medium">{formatDate(date.to)}</span>
                 <span className="text-muted-foreground">تاریخ ختم</span>
               </div>
 

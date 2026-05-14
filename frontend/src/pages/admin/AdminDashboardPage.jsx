@@ -498,7 +498,8 @@ const AdminDashboardPage = () => {
                     <div className="relative w-28 h-28 rounded-lg overflow-hidden shrink-0">
                       <img
                         src={
-                          car.carDetails.images?.[0] || "/placeholder-car.jpg"
+                          car.carDetails.images?.[0].url ||
+                          "/placeholder-car.jpg"
                         }
                         alt={car.carDetails.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
