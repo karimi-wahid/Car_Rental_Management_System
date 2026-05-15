@@ -102,6 +102,7 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => scrollTo(0, 0)}
               className="relative text-sm text-muted-foreground transition hover:text-foreground flex items-center gap-2"
             >
               {item.icon && <item.icon className="h-4 w-4" />}
@@ -152,18 +153,6 @@ const Navbar = () => {
                   پروفایل
                 </DropdownMenuItem>
 
-                {userRole === "admin" && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      navigate("/admin/settings");
-                      setOpen(false);
-                    }}
-                  >
-                    <Shield className="mr-2 h-4 w-4" />
-                    تنظیمات ادمین
-                  </DropdownMenuItem>
-                )}
-
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="text-red-600 hover:text-red-700 focus:text-red-700"
@@ -175,10 +164,23 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <div className="hidden md:flex gap-2">
-              <Button variant="ghost" onClick={() => navigate("/login")}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  navigate("/login");
+                  scrollTo(0, 0);
+                }}
+              >
                 ورود
               </Button>
-              <Button onClick={() => navigate("/register")}>ثبت نام</Button>
+              <Button
+                onClick={() => {
+                  navigate("/register");
+                  scrollTo(0, 0);
+                }}
+              >
+                ثبت نام
+              </Button>
             </div>
           )}
 
@@ -242,6 +244,7 @@ const Navbar = () => {
                     className="justify-start"
                     onClick={() => {
                       navigate("/profile");
+                      scrollTo(0, 0);
                       setOpen(false);
                     }}
                   >
@@ -265,6 +268,7 @@ const Navbar = () => {
                   <Button
                     onClick={() => {
                       navigate("/login");
+                      scrollTo(0, 0);
                       setOpen(false);
                     }}
                   >
@@ -273,6 +277,7 @@ const Navbar = () => {
                   <Button
                     onClick={() => {
                       navigate("/register");
+                      scrollTo(0, 0);
                       setOpen(false);
                     }}
                   >

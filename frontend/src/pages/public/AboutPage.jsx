@@ -82,7 +82,7 @@ const AboutPage = () => {
       className="min-h-screen"
     >
       {/* ── Hero ─────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-zinc-950 text-white py-28 px-6">
+      <section className="relative overflow-hidden dark:bg-zinc-950 dark:text-white text-black py-28 px-6">
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -100,7 +100,7 @@ const AboutPage = () => {
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             کرایه موتر لوکس
             <br />
-            <span className="text-zinc-400">با خدمات بی‌نظیر</span>
+            <span className="dark:text-zinc-400">با خدمات بی‌نظیر</span>
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             از سال ۱۳۹۵، ما بهترین تجربه کرایه موتر را با ناوگانی از برترین
@@ -109,8 +109,11 @@ const AboutPage = () => {
           <div className="flex gap-4 justify-center mt-10">
             <Button
               size="lg"
-              onClick={() => navigate("/cars")}
-              className="bg-white text-zinc-950 hover:bg-zinc-100"
+              onClick={() => {
+                navigate("/cars");
+                scrollTo(0, 0);
+              }}
+              className="dark:bg-white bg-primary text-white dark:text-zinc-950 dark:hover:bg-zinc-100"
             >
               <Car className="ml-2 w-5 h-5" />
               مشاهده موترها
@@ -118,8 +121,11 @@ const AboutPage = () => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate("/contact")}
-              className="border-white/30 text-white hover:bg-white/10"
+              onClick={() => {
+                navigate("/contact");
+                scrollTo(0, 0);
+              }}
+              className="dark:border-white/30 dark:text-white border-black hover:bg-white/10"
             >
               تماس با ما
             </Button>
@@ -313,7 +319,7 @@ const AboutPage = () => {
       </section>
 
       {/* ── CTA ──────────────────────────────────────── */}
-      <section className="bg-zinc-950 text-white py-20 px-6 text-center">
+      <section className="dark:bg-zinc-950 dark:text-white py-20 px-6 text-center">
         <motion.div variants={itemVariants} className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">آماده شروع سفر هستید؟</h2>
           <p className="text-zinc-400 mb-8">
@@ -322,8 +328,11 @@ const AboutPage = () => {
           <div className="flex gap-4 justify-center">
             <Button
               size="lg"
-              onClick={() => navigate("/cars")}
-              className="bg-white text-zinc-950 hover:bg-zinc-100"
+              onClick={() => {
+                navigate("/cars");
+                scrollTo(0, 0);
+              }}
+              className="dark:bg-white dark:text-zinc-950 bg-primary text-white hover:bg-zinc-100"
             >
               <Car className="ml-2 w-5 h-5" />
               رزرو موتر
@@ -331,8 +340,11 @@ const AboutPage = () => {
             <Button
               size="lg"
               variant="ghost"
-              onClick={() => navigate(-1)}
-              className="text-zinc-400 hover:text-white hover:bg-white/10"
+              onClick={() => {
+                navigate(-1);
+                scrollTo(0, 0);
+              }}
+              className="text-zinc-400 dark:hover:text-white hover:bg-white/10"
             >
               <ArrowLeft className="ml-2 w-5 h-5" />
               بازگشت

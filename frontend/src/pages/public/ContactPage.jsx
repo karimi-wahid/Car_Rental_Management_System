@@ -207,17 +207,19 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen" dir="rtl">
       {/* Hero */}
-      <section className="bg-zinc-950 px-6 py-20 text-center text-white">
+      <section className="dark:bg-zinc-950 px-6 py-20 text-center text-white">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mx-auto max-w-2xl"
         >
-          <Badge className="mb-4 border-white/20 bg-white/10 text-white">
+          <Badge className="mb-4 border-black bg-white dark:border-white/20 dark:bg-white/10 dark:text-white text-black">
             تماس با ما
           </Badge>
 
-          <h1 className="mb-4 text-4xl font-bold">چطور می‌توانیم کمک کنیم؟</h1>
+          <h1 className="mb-4 text-4xl font-bold dark:text-white text-black">
+            چطور می‌توانیم کمک کنیم؟
+          </h1>
 
           <p className="text-zinc-400">
             تیم ما آماده پاسخگویی به سوالات و حل مشکلات شماست.

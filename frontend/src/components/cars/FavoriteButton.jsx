@@ -6,6 +6,7 @@ import useFavoriteStore from "@/store/favoriteStore";
 const FavoriteButton = ({ carId, classCode }) => {
   const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
   const loading = useFavoriteStore((s) => s.loading);
+  const error = useFavoriteStore((s) => s.error);
   const isFavoriteFn = useFavoriteStore((s) => s.isFavorite);
 
   const favorited = isFavoriteFn(carId);
@@ -17,9 +18,9 @@ const FavoriteButton = ({ carId, classCode }) => {
       toast.success(
         favorited ? "از علاقه‌مندی‌ها حذف شد" : "به علاقه‌مندی‌ها اضافه شد",
       );
-    } catch (error) {
-      toast.error("خطایی رخ داد");
-      console.error("Error toggling favorite:", error);
+    } catch (err) {
+      toast.error(error || "خطایی رخ داد");
+      console.error("Error toggling favorite:", err);
     }
   };
 

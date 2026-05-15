@@ -17,9 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useAuthStore } from "@/store/authStore";
-//import { formatCurrency } from "@/lib/utils";
 import { toast } from "react-hot-toast";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatNumber } from "@/lib/utils";
 import useBookingStore from "@/store/bookingStore";
 import { BookingCard } from "@/components/user/BookingCard";
 
@@ -115,7 +114,9 @@ const UserDashboardPage = () => {
                 </div>
                 <Badge variant="outline">کل</Badge>
               </div>
-              <h3 className="text-3xl font-bold">{stats.totalBookings}</h3>
+              <h3 className="text-3xl font-bold">
+                {formatNumber(stats.totalBookings)}
+              </h3>
               <p className="text-sm text-muted-foreground mt-1">کل رزروها</p>
             </CardContent>
           </Card>
@@ -147,7 +148,9 @@ const UserDashboardPage = () => {
                 </div>
                 <Badge variant="outline">پیش رو</Badge>
               </div>
-              <h3 className="text-3xl font-bold">{stats.upcomingTrips}</h3>
+              <h3 className="text-3xl font-bold">
+                {formatNumber(stats.upcomingTrips)}
+              </h3>
               <p className="text-sm text-muted-foreground mt-1">
                 سفرهای پیش رو
               </p>
@@ -164,7 +167,9 @@ const UserDashboardPage = () => {
                 </div>
                 <Badge variant="outline">تکمیل شده</Badge>
               </div>
-              <h3 className="text-3xl font-bold">{stats.completedTrips}</h3>
+              <h3 className="text-3xl font-bold">
+                {formatNumber(stats.completedTrips)}
+              </h3>
               <p className="text-sm text-muted-foreground mt-1">
                 سفرهای تکمیل شده
               </p>
@@ -176,13 +181,22 @@ const UserDashboardPage = () => {
       {/* Quick Actions */}
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center gap-4">
-          <Button onClick={() => navigate("/cars")} size="lg">
+          <Button
+            onClick={() => {
+              navigate("/cars");
+              scrollTo(0, 0);
+            }}
+            size="lg"
+          >
             <Plus className="ml-2 h-4 w-4" />
             رزرو موتر جدید
           </Button>
           <Button
             variant="outline"
-            onClick={() => navigate("/bookings")}
+            onClick={() => {
+              navigate("/bookings");
+              scrollTo(0, 0);
+            }}
             size="lg"
           >
             <Calendar className="ml-2 h-4 w-4" />
@@ -194,7 +208,13 @@ const UserDashboardPage = () => {
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">سفرهای پیش رو</h2>
-          <Button variant="ghost" onClick={() => navigate("/bookings")}>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              navigate("/bookings");
+              scrollTo(0, 0);
+            }}
+          >
             مشاهده همه
             <ArrowLeft className="mr-2 h-4 w-4" />
           </Button>
@@ -231,7 +251,13 @@ const UserDashboardPage = () => {
       <motion.div variants={itemVariants}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">فعالیت‌های اخیر</h2>
-          <Button variant="ghost" onClick={() => navigate("/bookings/history")}>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              navigate("/bookings/history");
+              scrollTo(0, 0);
+            }}
+          >
             مشاهده تاریخچه
             <ArrowLeft className="mr-2 h-4 w-4" />
           </Button>
@@ -253,7 +279,10 @@ const UserDashboardPage = () => {
                 <Card
                   key={booking._id}
                   className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/bookings/${booking._id}`)}
+                  onClick={() => {
+                    navigate(`/bookings/${booking._id}`);
+                    scrollTo(0, 0);
+                  }}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -303,7 +332,13 @@ const UserDashboardPage = () => {
             <p className="text-muted-foreground mb-6">
               شما هنوز هیچ رزروی انجام نداده‌اید. اولین سفر خود را شروع کنید!
             </p>
-            <Button onClick={() => navigate("/cars")} size="lg">
+            <Button
+              onClick={() => {
+                navigate("/cars");
+                scrollTo(0, 0);
+              }}
+              size="lg"
+            >
               رزرو اولین موتر
             </Button>
           </Card>

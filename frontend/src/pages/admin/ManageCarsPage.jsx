@@ -17,9 +17,6 @@ import {
   XCircle,
   Upload,
   Image as ImageIcon,
-  Info,
-  Settings2,
-  ImagePlus,
 } from "lucide-react";
 import {
   Table,
@@ -596,10 +593,10 @@ const ManageCarsPage = () => {
     transmission: "automatic",
     fuelType: "petrol",
     pricePerDay: 0,
-    images: [""],
+    images: [],
     imageFiles: [],
     description: "",
-    features: [""],
+    features: [],
     licensePlate: "",
     mileage: 0,
     color: "",
