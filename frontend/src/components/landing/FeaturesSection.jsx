@@ -8,55 +8,61 @@ import {
   Headphones,
   Star,
 } from "lucide-react";
-
-const features = [
-  {
-    icon: Shield,
-    title: "محافظت ممتاز",
-    description: "پوشش کامل بیمه‌ای به همراه هر کرایه برای آرامش خاطر کامل.",
-    num: "01",
-  },
-  {
-    icon: Clock,
-    title: "دسترسی ۲۴/۷",
-    description:
-      "خدمات شبانه‌روزی با زمان‌های انعطاف‌پذیر تحویل و تحویل گرفتن موتر.",
-    num: "02",
-  },
-  {
-    icon: CreditCard,
-    title: "پرداخت امن",
-    description: "گزینه‌های پرداخت متعدد با رمزنگاری امنیتی در سطح بانک.",
-    num: "03",
-  },
-  {
-    icon: MapPin,
-    title: "تحویل در محل",
-    description: "نقاط تحویل متعدد در سراسر شهر، شامل ترمینال‌های هوایی.",
-    num: "04",
-  },
-  {
-    icon: Headphones,
-    title: "خدمات اختصاصی",
-    description: "مهماندار شخصی برای کمک به درخواست‌های ویژه‌ی شما.",
-    num: "05",
-  },
-  {
-    icon: Star,
-    title: "ناوگان ممتاز",
-    description: "مجموعه‌ی برگزیده از بهترین موترهای لوکس جهان.",
-    num: "06",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const FeaturesSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const { t, i18n } = useTranslation();
+
+  const features = [
+    {
+      icon: Shield,
+      title: t("features.items.protection.title"),
+      description: t("features.items.protection.description"),
+      num: "01",
+    },
+
+    {
+      icon: Clock,
+      title: t("features.items.support24.title"),
+      description: t("features.items.support24.description"),
+      num: "02",
+    },
+
+    {
+      icon: CreditCard,
+      title: t("features.items.payment.title"),
+      description: t("features.items.payment.description"),
+      num: "03",
+    },
+
+    {
+      icon: MapPin,
+      title: t("features.items.delivery.title"),
+      description: t("features.items.delivery.description"),
+      num: "04",
+    },
+
+    {
+      icon: Headphones,
+      title: t("features.items.concierge.title"),
+      description: t("features.items.concierge.description"),
+      num: "05",
+    },
+
+    {
+      icon: Star,
+      title: t("features.items.premium.title"),
+      description: t("features.items.premium.description"),
+      num: "06",
+    },
+  ];
 
   return (
     <section
       className="py-24 px-6 md:px-16 bg-white dark:bg-zinc-950 overflow-hidden transition-colors duration-300"
-      dir="rtl"
+      dir={i18n.language === "en" ? "ltr" : "rtl"}
       ref={ref}
     >
       <div className="max-w-7xl mx-auto">
@@ -70,7 +76,7 @@ const FeaturesSection = () => {
               className="text-xs text-zinc-500 dark:text-zinc-500 tracking-[0.25em] uppercase mb-4 flex items-center gap-3"
             >
               <span className="w-8 h-px bg-zinc-300 dark:bg-zinc-700" />
-              چرا ما را انتخاب کنید
+              {t("features.whyChooseUs")}
             </motion.p>
 
             <motion.h2
@@ -80,9 +86,9 @@ const FeaturesSection = () => {
               className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white leading-[1.05] tracking-tight"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              خدمات
+              {t("features.title1")}
               <br />
-              بی‌نظیر
+              {t("features.title2")}
             </motion.h2>
           </div>
 
@@ -92,8 +98,7 @@ const FeaturesSection = () => {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-zinc-600 dark:text-zinc-400 text-sm max-w-xs leading-relaxed md:text-right"
           >
-            کار ما فقط کرایه‌ی موتر نیست — ما تجربه‌ای متناسب با بالاترین
-            استانداردهای جهانی ارائه می‌دهیم.
+            {t("features.description")}
           </motion.p>
         </div>
 

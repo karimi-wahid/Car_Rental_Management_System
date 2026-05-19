@@ -1,0 +1,121 @@
+{
+  "hero": {
+    "badge": "Premium Car Rental Experience",
+    "title1": "Drive Your Dream Car",
+    "title2": "With Luxury and Style",
+    "description": "Experience automotive excellence. Choose from our premium luxury car collection with unmatched comfort and performance.",
+    "viewCars": "View Cars",
+    "learnMore": "Learn More",
+
+    "stats": {
+      "cars": "Luxury Cars",
+      "support": "Customer Support",
+      "customers": "Satisfied Customers"
+    }
+  },
+  "day": "day",
+  "person": "persons",
+  "unavailable": "Unavailable",
+
+  "fuel": {
+    "petrol": "Petrol",
+    "diesel": "Diesel",
+    "electric": "Electric",
+    "hybrid": "Hybrid"
+  },
+
+  "transmission": {
+    "automatic": "Automatic",
+    "manual": "Manual"
+  },
+
+  "featured": {
+    "selection": "Featured Selection",
+    "title": "Featured Cars",
+    "viewAll": "View All",
+    "viewAllCars": "View All Cars"
+  },
+  "features": {
+    "whyChooseUs": "Why Choose Us",
+    "title1": "Exceptional",
+    "title2": "Services",
+
+    "description": "We do more than car rentals — we provide an experience tailored to the highest international standards.",
+
+    "items": {
+      "protection": {
+        "title": "Premium Protection",
+        "description": "Full insurance coverage included with every rental for complete peace of mind."
+      },
+
+      "support24": {
+        "title": "24/7 Availability",
+        "description": "Round-the-clock services with flexible pickup and drop-off times."
+      },
+
+      "payment": {
+        "title": "Secure Payment",
+        "description": "Multiple payment options with bank-level security encryption."
+      },
+
+      "delivery": {
+        "title": "Location Delivery",
+        "description": "Multiple delivery points across the city, including airport terminals."
+      },
+
+      "concierge": {
+        "title": "Dedicated Service",
+        "description": "Personal concierge assistance for your special requests."
+      },
+
+      "premium": {
+        "title": "Premium Cars",
+        "description": "A curated collection of the world's finest luxury vehicles."
+      }
+    }
+  },
+  "howItWorks": {
+    "badge": "Simple & Fast Process",
+    "title": "How It Works",
+    "description": "Just four simple steps to get your dream car",
+
+    "steps": {
+      "browse": {
+        "title": "Browse & Choose",
+        "description": "Explore our premium fleet and choose the perfect car for your needs."
+      },
+
+      "dates": {
+        "title": "Select Dates",
+        "description": "Choose your pickup and return dates with our flexible booking system."
+      },
+
+      "booking": {
+        "title": "Secure Booking",
+        "description": "Complete your reservation through our secure payment process."
+      },
+
+      "drive": {
+        "title": "Pick Up & Drive",
+        "description": "Get your keys and enjoy an unforgettable driving experience."
+      }
+    }
+  },
+  "cta": {
+    "badge": "Start Your Premium Experience",
+
+    "title1": "Ready to Drive",
+    "title2": "in Style?",
+
+    "description": "Join thousands of happy customers who have enjoyed our premium fleet and exceptional service.",
+
+    "viewCars": "View Cars",
+    "contactUs": "Contact Us",
+
+    "phone": "Phone",
+    "email": "Email",
+    "booking": "Booking",
+
+    "online247": "24/7 Online"
+  }
+}

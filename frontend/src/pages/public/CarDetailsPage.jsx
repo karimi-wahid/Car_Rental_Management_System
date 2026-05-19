@@ -128,7 +128,7 @@ const ImageStrip = ({ images, carName }) => {
 
   return (
     <>
-      <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[420px] md:h-[520px]">
+      <div className="grid grid-cols-4 grid-rows-2 gap-2 h-105 md:h-130">
         {/* Main large image */}
         <div
           className="col-span-3 row-span-2 relative overflow-hidden rounded-2xl cursor-zoom-in"
@@ -141,7 +141,7 @@ const ImageStrip = ({ images, carName }) => {
             transition={{ duration: 0.5 }}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
         </div>
 
         {/* Thumbnails */}

@@ -15,6 +15,18 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,10 +49,12 @@ import {
 
 import { getInitials, cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 import { useThemeStore } from "@/store/themeStore";
 import useUserStore from "@/store/userStore";
 import { useAuthStore } from "@/store/authStore";
+import { useTranslation } from "react-i18next";
 
 import axios from "axios";
 
@@ -117,6 +131,11 @@ const ProfilePage = () => {
   const { user, updateMe, getMe, loading: storeLoading } = useUserStore();
 
   const { updatePassword } = useAuthStore();
+
+  const navigate = useNavigate();
+  const { deleteMe } = useUserStore();
+  const logout = useAuthStore((state) => state.logout);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   /* -------------------------------------------------------------------------- */
   /*                               PROFILE FORM                                 */
@@ -277,6 +296,40 @@ const ProfilePage = () => {
     } finally {
       setUploadingAvatar(false);
     }
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                               Delete Account                                */
+  /* -------------------------------------------------------------------------- */
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      await deleteMe();
+      await logout();
+      toast.success("حساب کاربری حذف شد");
+      navigate("/");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "حذف حساب ناموفق بود");
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                               Language Change                                */
+  /* -------------------------------------------------------------------------- */
+
+  const { i18n, t } = useTranslation();
+
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang);
+
+    localStorage.setItem("lang", lang);
+
+    document.documentElement.dir = lang === "en" ? "ltr" : "rtl";
+
+    document.documentElement.lang = lang;
   };
 
   return (
@@ -633,7 +686,10 @@ const ProfilePage = () => {
                       </p>
                     </div>
 
-                    <Select defaultValue="fa">
+                    <Select
+                      defaultValue="fa"
+                      onValueChange={handleLanguageChange}
+                    >
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -646,6 +702,68 @@ const ProfilePage = () => {
                         <SelectItem value="en">English</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-right">
+                      <p className="font-medium text-destructive">
+                        حذف حساب کاربری
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        این عمل غیرقابل بازگشت است. تمام داده‌های شما حذف خواهد
+                        شد.
+                      </p>
+                    </div>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="border-destructive text-destructive hover:bg-destructive hover:text-white transition-colors shrink-0"
+                          disabled={deletingAccount}
+                        >
+                          <Trash2 className="w-4 h-4 ml-2" />
+                          حذف حساب
+                        </Button>
+                      </AlertDialogTrigger>
+
+                      <AlertDialogContent dir="rtl">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="text-right text-destructive">
+                            آیا از حذف حساب اطمینان دارید؟
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="text-right space-y-2">
+                            <span className="block">
+                              این عمل قابل بازگشت نیست. با حذف حساب:
+                            </span>
+                            <ul className="list-disc list-inside space-y-1 text-right text-sm">
+                              <li>تمام اطلاعات شخصی شما پاک می‌شود</li>
+                              <li>تاریخچه رزروها حذف می‌شود</li>
+                              <li>دسترسی به حساب برای همیشه از بین می‌رود</li>
+                            </ul>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex-row-reverse gap-2">
+                          <AlertDialogCancel>انصراف</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteAccount}
+                            disabled={deletingAccount}
+                            className="bg-destructive hover:bg-destructive/90 text-white"
+                          >
+                            {deletingAccount ? (
+                              <>
+                                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                                در حال حذف...
+                              </>
+                            ) : (
+                              "بله، حساب را حذف کن"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </CardContent>
               </Card>

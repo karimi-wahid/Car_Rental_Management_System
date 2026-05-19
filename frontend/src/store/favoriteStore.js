@@ -157,10 +157,7 @@ const useFavoriteStore = create(
     }),
     {
       name: "favorite-storage",
-      partialize: (state) => ({
-        // Only persist these fields (favorites)
-        favorites: state.favorites,
-      }),
+      partialize: (state) => ({}),
     },
   ),
 );

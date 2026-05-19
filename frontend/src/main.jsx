@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { DirectionProvider } from "./components/ui/direction";
+import "./i18n";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

@@ -137,6 +137,10 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 
+userSchema.statics.findByEmailRaw = function (email) {
+  return this.findOne({ email }).select('+password +active +isEmailVerified');
+};
+
 const User = mongoose.model('User', userSchema);
 
 export default User;

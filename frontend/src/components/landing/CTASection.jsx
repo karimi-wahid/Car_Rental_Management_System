@@ -2,12 +2,17 @@ import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Mail, Phone, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 const CTASection = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <section
+      className="relative py-20 md:py-32 overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300"
+      dir={i18n.language === "en" ? "ltr" : "rtl"}
+    >
       <div className="container-custom relative z-10">
         <div className="max-w-3xl mx-auto">
           {/* Badge */}
@@ -21,7 +26,7 @@ const CTASection = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-200 dark:border-blue-500/30 bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm shadow-sm">
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-slate-700 dark:text-white">
-                تجربهٔ مجدد خود را شروع کنید
+                {t("cta.badge")}
               </span>
             </div>
           </motion.div>
@@ -35,13 +40,12 @@ const CTASection = () => {
             className="text-center mb-10 md:mb-12"
           >
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
-              آماده‌اید که با
-              <span className="block text-primary">استایل رانندگی کنید؟</span>
+              {t("cta.title1")}
+              <span className="block text-primary">{t("cta.title2")}</span>
             </h2>
 
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              به هزاران مشتری خوشحال بپیوندید که از ناوگان درجه‌یک و سرویس
-              بی‌نظیر ما لذت برده‌اند.
+              {t("cta.description")}
             </p>
           </motion.div>
 
@@ -59,7 +63,7 @@ const CTASection = () => {
               onClick={() => navigate("/cars")}
             >
               <span className="flex items-center justify-center">
-                مشاهده موترها
+                {t("cta.viewCars")}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:-translate-x-1 transition-transform duration-300 rtl:rotate-180" />
               </span>
             </Button>
@@ -70,7 +74,7 @@ const CTASection = () => {
               className="px-8 py-3 md:py-4 text-base md:text-lg font-semibold border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-300"
               onClick={() => navigate("/contact")}
             >
-              تماس با ما
+              {t("cta.contactUs")}
             </Button>
           </motion.div>
 
@@ -93,7 +97,7 @@ const CTASection = () => {
 
               <div className="text-center">
                 <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  تلفن
+                  {t("cta.phone")}
                 </p>
                 <p className="font-semibold">+93 766 303 465</p>
               </div>
@@ -110,7 +114,7 @@ const CTASection = () => {
 
               <div className="text-center">
                 <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  ایمیل
+                  {t("cta.email")}
                 </p>
 
                 <p className="font-semibold text-sm md:text-base">
@@ -130,10 +134,10 @@ const CTASection = () => {
 
               <div className="text-center">
                 <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  رزرو
+                  {t("cta.booking")}
                 </p>
 
-                <p className="font-semibold">24/7 آنلاین</p>
+                <p className="font-semibold">{t("cta.online247")}</p>
               </div>
             </motion.div>
           </motion.div>

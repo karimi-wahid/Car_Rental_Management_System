@@ -12,6 +12,7 @@ import {
   deleteUserService,
   updateUserRoleService,
 } from "@/services/userService";
+import useFavoriteStore from "./favoriteStore";
 
 const useUserStore = create(
   persist(
@@ -77,6 +78,7 @@ const useUserStore = create(
             user: res.data.data.user,
             loading: false,
           });
+          useFavoriteStore.getState().reset();
 
           return res.data;
         } catch (err) {

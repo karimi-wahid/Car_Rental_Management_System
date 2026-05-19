@@ -11,6 +11,7 @@ import {
   verifyOTPService,
   resendVerificationService,
 } from "@/services/authService";
+import useFavoriteStore from "@/store/favoriteStore";
 
 const authStore = (set) => ({
   user: null,
@@ -195,10 +196,8 @@ const authStore = (set) => ({
     try {
       await logoutService();
     } finally {
-      set({
-        user: null,
-        isAuthenticated: false,
-      });
+      set({ user: null, isAuthenticated: false });
+      useFavoriteStore.getState().reset(); // clear favorites on logout
     }
   },
 

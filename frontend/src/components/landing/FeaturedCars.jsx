@@ -5,16 +5,21 @@ import { ArrowLeft, ArrowUpLeft, Fuel, Users, Gauge } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import useCarStore from "@/store/carStore";
 import FavoriteButton from "@/components/cars/FavoriteButton";
+import { useTranslation } from "react-i18next";
 
 const FUEL_MAP = {
-  petrol: "پطرول",
-  diesel: "دیزل",
-  electric: "برقی",
-  hybrid: "هایبرید",
+  petrol: "fuel.petrol",
+  diesel: "fuel.diesel",
+  electric: "fuel.electric",
+  hybrid: "fuel.hybrid",
 };
-const TRANS_MAP = { automatic: "اتوماتیک", manual: "دستی" };
 
-const MiniCarCard = ({ car, index, navigate }) => (
+const TRANS_MAP = {
+  automatic: "transmission.automatic",
+  manual: "transmission.manual",
+};
+
+const MiniCarCard = ({ car, index, navigate, t, i18n }) => (
   <motion.article
     initial={{ opacity: 0, y: 24 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -26,7 +31,7 @@ const MiniCarCard = ({ car, index, navigate }) => (
     }}
     onClick={() => car.availability && navigate(`/cars/${car._id}`)}
     className="group relative cursor-pointer"
-    dir="rtl"
+    dir={i18n.language === "en" ? "ltr" : "rtl"}
   >
     {/* Image */}
     <div className="relative overflow-hidden rounded-2xl mb-4 bg-zinc-100 dark:bg-zinc-800 aspect-4/3">
@@ -42,7 +47,7 @@ const MiniCarCard = ({ car, index, navigate }) => (
       {/* Pills */}
       <div className="absolute top-3 right-3 flex gap-1.5">
         <span className="bg-black/40 backdrop-blur text-white text-[10px] font-medium px-2.5 py-1 rounded-full">
-          {TRANS_MAP[car.transmission] || car.transmission}
+          {t(TRANS_MAP[car.transmission]) || car.transmission}
         </span>
       </div>
 
@@ -61,7 +66,9 @@ const MiniCarCard = ({ car, index, navigate }) => (
       <div className="absolute bottom-3 right-3">
         <span className="text-white font-bold text-base drop-shadow-sm">
           {formatCurrency(car.pricePerDay)}
-          <span className="text-white/60 text-xs font-normal"> / روز</span>
+          <span className="text-white/60 text-xs font-normal">
+            / {t("day")}
+          </span>
         </span>
       </div>
 
@@ -90,7 +97,7 @@ const MiniCarCard = ({ car, index, navigate }) => (
         </div>
         {!car.availability && (
           <span className="text-[10px] bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800">
-            ناموجود
+            {t("unavailable")}
           </span>
         )}
       </div>
@@ -98,12 +105,14 @@ const MiniCarCard = ({ car, index, navigate }) => (
       {/* Specs inline */}
       <div className="flex items-center gap-4 mt-2">
         {[
-          { icon: Users, value: `${car.seats} نفر` },
-          { icon: Fuel, value: FUEL_MAP[car.fuelType] || car.fuelType },
+          { icon: Users, value: `${car.seats} ${t("person")}` },
+          { icon: Fuel, value: t(FUEL_MAP[car.fuelType]) || car.fuelType },
           {
             icon: Gauge,
             value: car.mileage
-              ? `${Number(car.mileage).toLocaleString("fa-IR")} km`
+              ? `${Number(car.mileage).toLocaleString(
+                  i18n.language === "en" ? "en-US" : "fa-IR",
+                )} km`
               : "—",
           },
         ].map(({ icon: Icon, value }) => (
@@ -124,6 +133,7 @@ const FeaturedCars = () => {
   const { fetchCars, cars, loading } = useCarStore();
   const navigate = useNavigate();
   const featured = cars.slice(0, 6);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     fetchCars();
@@ -132,7 +142,7 @@ const FeaturedCars = () => {
   return (
     <section
       className="py-24 px-6 md:px-16 bg-white dark:bg-zinc-950"
-      dir="rtl"
+      dir={i18n.language === "en" ? "ltr" : "rtl"}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -145,7 +155,7 @@ const FeaturedCars = () => {
               className="text-xs text-zinc-400 tracking-[0.2em] uppercase mb-3 flex items-center gap-3"
             >
               <span className="w-8 h-px bg-zinc-300 dark:bg-zinc-700" />
-              انتخاب ویژه
+              {t("featured.selection")}
             </motion.p>
             <motion.h2
               initial={{ opacity: 0, y: 16 }}
@@ -155,7 +165,7 @@ const FeaturedCars = () => {
               className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tight"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              موترهای ویژه
+              {t("featured.title")}{" "}
             </motion.h2>
           </div>
 
@@ -166,7 +176,7 @@ const FeaturedCars = () => {
             onClick={() => navigate("/cars")}
             className="hidden md:flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors group"
           >
-            مشاهده همه
+            {t("featured.viewAll")}
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           </motion.button>
         </div>
@@ -190,6 +200,8 @@ const FeaturedCars = () => {
                 car={car}
                 index={i}
                 navigate={navigate}
+                t={t}
+                i18n={i18n}
               />
             ))}
           </div>

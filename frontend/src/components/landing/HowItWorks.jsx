@@ -9,38 +9,41 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-const steps = [
-  {
-    icon: Search,
-    title: "مرور کنید و انتخاب کنید",
-    description:
-      "ناوگان ممتاز ما را مشاهده کنید و موتر مناسب برای نیازهایتان را انتخاب نمایید.",
-    number: 1,
-  },
-  {
-    icon: Calendar,
-    title: "تاریخ‌ها را انتخاب کنید",
-    description:
-      "تاریخ تحویل و تحویل گرفتن موتر خود را با سیستم رزرو انعطاف‌پذیر ما انتخاب کنید.",
-    number: 2,
-  },
-  {
-    icon: CreditCard,
-    title: "رزرو امن",
-    description: "رزرو خود را با پروسه‌ی پرداخت امن ما تکمیل کنید.",
-    number: 3,
-  },
-  {
-    icon: Key,
-    title: "تحویل بگیرید و برانید",
-    description:
-      "کلیدهای خود را دریافت کنید و از یک تجربه‌ی رانندگی فراموش‌نشدنی لذت ببرید.",
-    number: 4,
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const HowItWorks = () => {
+  const { t, i18n } = useTranslation();
+
+  const steps = [
+    {
+      icon: Search,
+      title: t("howItWorks.steps.browse.title"),
+      description: t("howItWorks.steps.browse.description"),
+      number: 1,
+    },
+
+    {
+      icon: Calendar,
+      title: t("howItWorks.steps.dates.title"),
+      description: t("howItWorks.steps.dates.description"),
+      number: 2,
+    },
+
+    {
+      icon: CreditCard,
+      title: t("howItWorks.steps.booking.title"),
+      description: t("howItWorks.steps.booking.description"),
+      number: 3,
+    },
+
+    {
+      icon: Key,
+      title: t("howItWorks.steps.drive.title"),
+      description: t("howItWorks.steps.drive.description"),
+      number: 4,
+    },
+  ];
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -62,7 +65,10 @@ const HowItWorks = () => {
   };
 
   return (
-    <section className="relative py-20 md:py-32  overflow-hidden">
+    <section
+      className="relative py-20 md:py-32  overflow-hidden"
+      dir={i18n.language === "en" ? "ltr" : "rtl"}
+    >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Section Header */}
         <motion.div
@@ -81,19 +87,19 @@ const HowItWorks = () => {
           >
             <Badge
               variant="outline"
-              className="px-4 py-2 border-accent/40 bg-accent/5 hover:bg-accent/10 transition-colors"
+              className="px-4 py-2 border-acdcent/40 bg-accent/5 hover:bg-accent/10 transition-colors"
             >
               <CheckCircle className="w-3.5 h-3.5 mr-2" />
-              فرآیند ساده و سریع
+              {t("howItWorks.badge")}
             </Badge>
           </motion.div>
 
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-            <span>چگونه کار می‌کند</span>
+            <span>{t("howItWorks.title")}</span>
           </h2>
 
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            فقط چهار مرحله ساده برای داشتن موتر آرزویی خود
+            {t("howItWorks.description")}
           </p>
         </motion.div>
 
