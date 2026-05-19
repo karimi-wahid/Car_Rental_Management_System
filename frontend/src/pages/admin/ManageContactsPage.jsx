@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Pagination } from "@/components/ui/Pagination";
+import { Pagination } from "@/components/ui/pagination";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import useContactStore from "@/store/contactStore";

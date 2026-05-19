@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Pagination } from "@/components/ui/Pagination";
+import { Pagination } from "@/components/ui/pagination";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";

@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Pagination } from "@/components/ui/Pagination";
+import { Pagination } from "@/components/ui/pagination";
 import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";

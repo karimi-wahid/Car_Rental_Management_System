@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { CarFilters } from "@/components/cars/CarFilters";
 import { CarSorting } from "@/components/cars/CarSorting";
 import { CarCard } from "@/components/cars/CarCard";
-import { Pagination } from "@/components/ui/Pagination";
+import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { SkeletonCard } from "@/components/common/LoadingState";

@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "start:dev": "nodemon server.js",
-    "start:prod": "SET NODE_ENV=production && nodemon server.js"
+    "start:prod": "cross-env NODE_ENV=production node server.js"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +33,7 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.1.8",
