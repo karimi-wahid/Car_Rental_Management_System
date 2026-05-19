@@ -14,51 +14,13 @@ import {
   ArrowLeft,
   CheckCircle,
 } from "lucide-react";
-
-const stats = [
-  { value: "۵۰۰+", label: "موتر در ناوگان" },
-  { value: "۱۲,۰۰۰+", label: "مشتری راضی" },
-  { value: "۸", label: "سال تجربه" },
-  { value: "۲۴/۷", label: "پشتیبانی" },
-];
-
-const values = [
-  {
-    icon: Shield,
-    title: "اطمینان و امنیت",
-    description:
-      "تمام موترهای ما به صورت منظم بررسی فنی می‌شوند و بیمه کامل دارند.",
-  },
-  {
-    icon: Clock,
-    title: "تحویل به موقع",
-    description:
-      "موتر شما دقیقاً در زمان و مکان مورد نظر آماده تحویل خواهد بود.",
-  },
-  {
-    icon: Star,
-    title: "کیفیت بی‌نظیر",
-    description:
-      "ناوگان ما از برترین برندهای جهان تشکیل شده تا بهترین تجربه را داشته باشید.",
-  },
-  {
-    icon: Users,
-    title: "تیم حرفه‌ای",
-    description: "کارشناسان ما همیشه آماده پاسخگویی و راهنمایی شما هستند.",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const team = [
   { name: "احمد کریمی", role: "مدیر عامل", initials: "AK" },
   { name: "مریم نوری", role: "مدیر عملیات", initials: "MN" },
   { name: "سعید رحیمی", role: "مدیر فنی", initials: "SR" },
   { name: "فاطمه احمدی", role: "مدیر مشتریان", initials: "FA" },
-];
-
-const milestones = [
-  { year: "۱۳۹۵", event: "تأسیس شرکت با ۱۵ موتر" },
-  { year: "۱۳۹۷", event: "گسترش به ۱۰۰ موتر لوکس" },
-  { year: "۱۴۰۵", event: "راه‌اندازی پلتفرم آنلاین" },
 ];
 
 const containerVariants = {
@@ -73,6 +35,57 @@ const itemVariants = {
 
 const AboutPage = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+
+  const stats = [
+    { value: "500+", label: t("about.stats.cars") },
+    { value: "12,000+", label: t("about.stats.customers") },
+    { value: "8", label: t("about.stats.experience") },
+    { value: "24/7", label: t("about.stats.support") },
+  ];
+
+  const values = [
+    {
+      icon: Shield,
+      title: t("about.values.security.title"),
+      description: t("about.values.security.description"),
+    },
+
+    {
+      icon: Clock,
+      title: t("about.values.delivery.title"),
+      description: t("about.values.delivery.description"),
+    },
+
+    {
+      icon: Star,
+      title: t("about.values.quality.title"),
+      description: t("about.values.quality.description"),
+    },
+
+    {
+      icon: Users,
+      title: t("about.values.team.title"),
+      description: t("about.values.team.description"),
+    },
+  ];
+
+  const milestones = [
+    {
+      year: "2016",
+      event: t("about.milestones.one"),
+    },
+
+    {
+      year: "2018",
+      event: t("about.milestones.two"),
+    },
+
+    {
+      year: "2026",
+      event: t("about.milestones.three"),
+    },
+  ];
 
   return (
     <motion.div
@@ -80,6 +93,7 @@ const AboutPage = () => {
       initial="hidden"
       animate="visible"
       className="min-h-screen"
+      dir={i18n.language === "en" ? "ltr" : "rtl"}
     >
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="relative overflow-hidden dark:bg-zinc-950 dark:text-white text-black py-28 px-6">
@@ -95,16 +109,15 @@ const AboutPage = () => {
           className="relative max-w-4xl mx-auto text-center"
         >
           <Badge className="mb-6 bg-white/10 text-white border-white/20 px-4 py-1.5">
-            درباره ما
+            {t("about.badge")}
           </Badge>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            کرایه موتر لوکس
+            {t("about.heroTitle1")}
             <br />
-            <span className="dark:text-zinc-400">با خدمات بی‌نظیر</span>
+            <span className="dark:text-zinc-400">{t("about.heroTitle2")}</span>
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            از سال ۱۳۹۵، ما بهترین تجربه کرایه موتر را با ناوگانی از برترین
-            خودروهای جهان و خدمات ۲۴ ساعته ارائه می‌دهیم.
+            {t("about.heroDescription")}
           </p>
           <div className="flex gap-4 justify-center mt-10">
             <Button
@@ -113,10 +126,10 @@ const AboutPage = () => {
                 navigate("/cars");
                 scrollTo(0, 0);
               }}
-              className="dark:bg-white bg-primary text-white dark:text-zinc-950 dark:hover:bg-zinc-100"
+              className="bg-primary text-white"
             >
               <Car className="ml-2 w-5 h-5" />
-              مشاهده موترها
+              {t("about.viewCars")}
             </Button>
             <Button
               size="lg"
@@ -127,7 +140,7 @@ const AboutPage = () => {
               }}
               className="dark:border-white/30 dark:text-white border-black hover:bg-white/10"
             >
-              تماس با ما
+              {t("about.contactUs")}
             </Button>
           </div>
         </motion.div>
@@ -158,28 +171,24 @@ const AboutPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div variants={itemVariants}>
             <Badge variant="outline" className="mb-4">
-              داستان ما
+              {t("about.storyBadge")}
             </Badge>
             <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-6 leading-snug">
-              از یک رویا تا بزرگترین
+              {t("about.storyTitle1")}
               <br />
-              ناوگان موتر لوکس
+              {t("about.storyTitle2")}
             </h2>
             <p className="text-zinc-500 leading-relaxed mb-4">
-              شرکت ما در سال ۱۳۹۵ با ۱۵ موتر و یک تیم کوچک ۵ نفره آغاز به کار
-              کرد. هدف ما از ابتدا ساده بود: ارائه بهترین تجربه کرایه موتر با
-              بالاترین استانداردهای کیفیت و خدمات مشتری.
+              {t("about.storyParagraph1")}
             </p>
             <p className="text-zinc-500 leading-relaxed mb-6">
-              امروز با بیش از ۵۰۰ موتر از برترین برندهای جهان، هزاران مشتری
-              راضی، و تیمی از ۸۰ متخصص حرفه‌ای، به عنوان پیشرو در صنعت کرایه
-              موتر لوکس شناخته می‌شویم.
+              {t("about.storyParagraph2")}
             </p>
             <div className="space-y-3">
               {[
-                "بیمه کامل برای تمام موترها",
-                "تحویل در هر نقطه شهر",
-                "پشتیبانی ۲۴ ساعته",
+                t("about.checks.insurance"),
+                t("about.checks.delivery"),
+                t("about.checks.support"),
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
@@ -220,10 +229,10 @@ const AboutPage = () => {
         <div className="max-w-5xl mx-auto">
           <motion.div variants={itemVariants} className="text-center mb-14">
             <Badge variant="outline" className="mb-4">
-              ارزش‌های ما
+              {t("about.valuesBadge")}
             </Badge>
             <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">
-              چرا ما را انتخاب کنید؟
+              {t("about.valuesTitle")}
             </h2>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -252,10 +261,10 @@ const AboutPage = () => {
       <section className="max-w-5xl mx-auto px-6 py-20">
         <motion.div variants={itemVariants} className="text-center mb-14">
           <Badge variant="outline" className="mb-4">
-            تیم ما
+            {t("about.teamBadge")}
           </Badge>
           <h2 className="text-3xl font-bold text-zinc-900 dark:text-white">
-            افرادی که پشت موفقیت ما هستند
+            {t("about.teamTitle")}
           </h2>
         </motion.div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -284,9 +293,11 @@ const AboutPage = () => {
         <div className="max-w-5xl mx-auto">
           <motion.div variants={itemVariants} className="text-center mb-10">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
-              با ما در ارتباط باشید
+              {t("about.contactTitle")}
             </h2>
-            <p className="text-zinc-500 text-sm">هر سوالی دارید، ما اینجاییم</p>
+            <p className="text-zinc-500 text-sm">
+              {t("about.contactDescription")}
+            </p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
@@ -321,10 +332,8 @@ const AboutPage = () => {
       {/* ── CTA ──────────────────────────────────────── */}
       <section className="dark:bg-zinc-950 dark:text-white py-20 px-6 text-center">
         <motion.div variants={itemVariants} className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">آماده شروع سفر هستید؟</h2>
-          <p className="text-zinc-400 mb-8">
-            از بین بیش از ۵۰۰ موتر لوکس انتخاب کنید و همین امروز رزرو کنید.
-          </p>
+          <h2 className="text-3xl font-bold mb-4">{t("about.ctaTitle")}</h2>
+          <p className="text-zinc-400 mb-8">{t("about.ctaDescription")}</p>
           <div className="flex gap-4 justify-center">
             <Button
               size="lg"
@@ -335,7 +344,7 @@ const AboutPage = () => {
               className="dark:bg-white dark:text-zinc-950 bg-primary text-white hover:bg-zinc-100"
             >
               <Car className="ml-2 w-5 h-5" />
-              رزرو موتر
+              {t("about.bookCar")}
             </Button>
             <Button
               size="lg"
@@ -347,7 +356,7 @@ const AboutPage = () => {
               className="text-zinc-400 dark:hover:text-white hover:bg-white/10"
             >
               <ArrowLeft className="ml-2 w-5 h-5" />
-              بازگشت
+              {t("about.back")}
             </Button>
           </div>
         </motion.div>

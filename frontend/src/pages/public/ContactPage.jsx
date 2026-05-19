@@ -31,133 +31,127 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import useContactStore from "@/store/contactStore";
 import { useLocation } from "react-router-dom";
-
-// Zod Schema
-const contactSchema = z.object({
-  name: z.string().min(1, "نام الزامی است").min(2, "نام خیلی کوتاه است"),
-
-  email: z.string().min(1, "ایمیل الزامی است").email("ایمیل نامعتبر است"),
-
-  phone: z.string().optional(),
-
-  subject: z.string().min(1, "موضوع الزامی است"),
-
-  message: z
-    .string()
-    .min(1, "پیام الزامی است")
-    .min(10, "پیام باید حداقل ۱۰ کاراکتر باشد")
-    .max(2000, "پیام نباید از ۲۰۰۰ کاراکتر بیشتر باشد"),
-});
-
-const CONTACT_INFO = [
-  {
-    icon: MapPin,
-    label: "آدرس",
-    value: "کابل، ناحیه سوم، سرک دارالامان، مقابل پارک",
-  },
-
-  {
-    icon: Phone,
-    label: "تلفن",
-    value: "+93 700 123 456",
-  },
-
-  {
-    icon: Mail,
-    label: "ایمیل",
-    value: "info@luxcar.af",
-  },
-
-  {
-    icon: Clock,
-    label: "ساعات کاری",
-    value: "شنبه تا پنج‌شنبه، ۸ صبح تا ۸ شب",
-  },
-];
-
-const SUBJECTS = [
-  { value: "general", label: "سوال عمومی" },
-  { value: "booking", label: "مشکل رزرو" },
-  { value: "complaint", label: "شکایت" },
-  { value: "partnership", label: "همکاری تجاری" },
-  { value: "other", label: "سایر" },
-];
-
-const FAQS = [
-  {
-    q: "چطور می‌توانم موتر رزرو کنم؟",
-    a: "از صفحه موترها، موتر مورد نظر را انتخاب کنید، تاریخ شروع و پایان را مشخص کنید و روی دکمه رزرو کلیک کنید.",
-  },
-
-  {
-    q: "آیا امکان لغو رزرو وجود دارد؟",
-    a: "بله، تا ۲۴ ساعت قبل از شروع رزرو می‌توانید آن را لغو کنید.",
-  },
-
-  {
-    q: "چه مدارکی برای کرایه موتر نیاز است؟",
-    a: "گواهینامه معتبر رانندگی و کارت ملی یا پاسپورت الزامی است.",
-  },
-
-  {
-    q: "آیا تحویل در محل امکان‌پذیر است؟",
-    a: "بله، برای رزروهای بالای ۳ روز، تحویل در محل رایگان انجام می‌شود.",
-  },
-];
-
-const FAQItem = ({ faq }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-zinc-100 dark:border-zinc-800">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between p-5 text-right transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900"
-      >
-        <span className="text-sm font-medium text-zinc-900 dark:text-white">
-          {faq.q}
-        </span>
-
-        {open ? (
-          <ChevronUp className="ml-3 h-4 w-4 shrink-0 text-zinc-400" />
-        ) : (
-          <ChevronDown className="ml-3 h-4 w-4 shrink-0 text-zinc-400" />
-        )}
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <p className="border-t border-zinc-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-zinc-500 dark:border-zinc-800">
-              {faq.a}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+import { useTranslation } from "react-i18next";
 
 const ContactPage = () => {
   const user = useAuthStore((state) => state.user);
-
   const { createContact, submitting } = useContactStore();
-
   const location = useLocation();
-
   const [success, setSuccess] = useState(false);
-
   const [trackingId, setTrackingId] = useState("");
+  const { t, i18n } = useTranslation();
+
+  const contactSchema = z.object({
+    name: z
+      .string()
+      .min(1, t("contact.validation.nameRequired"))
+      .min(2, t("contact.validation.nameShort")),
+
+    email: z
+      .string()
+      .min(1, t("contact.validation.emailRequired"))
+      .email(t("contact.validation.emailInvalid")),
+
+    phone: z.string().optional(),
+
+    subject: z.string().min(1, t("contact.validation.subjectRequired")),
+
+    message: z
+      .string()
+      .min(1, t("contact.validation.messageRequired"))
+      .min(10, t("contact.validation.messageShort"))
+      .max(2000, t("contact.validation.messageLong")),
+  });
+
+  const CONTACT_INFO = [
+    {
+      icon: MapPin,
+      label: t("contact.info.address"),
+      value: t("contact.info.addressValue"),
+    },
+
+    {
+      icon: Phone,
+      label: t("contact.info.phone"),
+      value: "+93 700 123 456",
+    },
+
+    {
+      icon: Mail,
+      label: t("contact.info.email"),
+      value: "info@luxcar.af",
+    },
+
+    {
+      icon: Clock,
+      label: t("contact.info.hours"),
+      value: t("contact.info.hoursValue"),
+    },
+  ];
+
+  const SUBJECTS = [
+    {
+      value: "general",
+      label: t("contact.subjects.general"),
+    },
+
+    {
+      value: "booking",
+      label: t("contact.subjects.booking"),
+    },
+
+    {
+      value: "complaint",
+      label: t("contact.subjects.complaint"),
+    },
+
+    {
+      value: "partnership",
+      label: t("contact.subjects.partnership"),
+    },
+
+    {
+      value: "other",
+      label: t("contact.subjects.other"),
+    },
+  ];
+
+  const FAQS = [
+    {
+      id: "faq-1",
+      q: t("contact.faq.q1"),
+      a: t("contact.faq.a1"),
+    },
+
+    {
+      id: "faq-2",
+      q: t("contact.faq.q2"),
+      a: t("contact.faq.a2"),
+    },
+
+    {
+      id: "faq-3",
+      q: t("contact.faq.q3"),
+      a: t("contact.faq.a3"),
+    },
+
+    {
+      id: "faq-4",
+      q: t("contact.faq.q4"),
+      a: t("contact.faq.a4"),
+    },
+  ];
 
   // React Hook Form + Zod
   const {
@@ -198,14 +192,14 @@ const ContactPage = () => {
 
       reset();
 
-      toast.success("پیام شما ارسال شد!");
+      toast.success(t("contact.toastSuccess"));
     } else {
       toast.error(result.error);
     }
   };
 
   return (
-    <div className="min-h-screen" dir="rtl">
+    <div className="min-h-screen" dir={i18n.language === "en" ? "ltr" : "rtl"}>
       {/* Hero */}
       <section className="dark:bg-zinc-950 px-6 py-20 text-center text-white">
         <motion.div
@@ -214,16 +208,14 @@ const ContactPage = () => {
           className="mx-auto max-w-2xl"
         >
           <Badge className="mb-4 border-black bg-white dark:border-white/20 dark:bg-white/10 dark:text-white text-black">
-            تماس با ما
+            {t("contact.badge")}
           </Badge>
 
           <h1 className="mb-4 text-4xl font-bold dark:text-white text-black">
-            چطور می‌توانیم کمک کنیم؟
+            {t("contact.title")}
           </h1>
 
-          <p className="text-zinc-400">
-            تیم ما آماده پاسخگویی به سوالات و حل مشکلات شماست.
-          </p>
+          <p className="text-zinc-400">{t("contact.description")}</p>
         </motion.div>
       </section>
 
@@ -264,18 +256,29 @@ const ContactPage = () => {
               ))}
             </div>
 
-            {/* FAQ */}
+            {/* FAQ with shadcn Accordion */}
             <div>
               <h3 className="mb-4 flex items-center gap-2 font-semibold text-zinc-900 dark:text-white">
                 <MessageSquare className="h-4 w-4" />
-                سوالات متداول
+                {t("contact.faqTitle")}
               </h3>
 
-              <div className="space-y-2">
-                {FAQS.map((faq, i) => (
-                  <FAQItem key={i} faq={faq} />
+              <Accordion type="single" collapsible className="space-y-2">
+                {FAQS.map((faq) => (
+                  <AccordionItem
+                    key={faq.id}
+                    value={faq.id}
+                    className="rounded-xl border border-zinc-100 dark:border-zinc-800 px-5"
+                  >
+                    <AccordionTrigger className="py-4 text-sm font-medium text-zinc-900 hover:no-underline dark:text-white">
+                      {faq.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
-              </div>
+              </Accordion>
             </div>
           </div>
 
@@ -299,19 +302,22 @@ const ContactPage = () => {
                   <CheckCircle className="mx-auto mb-6 h-16 w-16 text-emerald-500" />
 
                   <h2 className="mb-3 text-2xl font-bold text-zinc-900 dark:text-white">
-                    پیام شما ارسال شد!
+                    {t("contact.successTitle")}
                   </h2>
 
-                  <p className="mb-2 text-zinc-500">از تماس شما متشکریم.</p>
+                  <p className="mb-2 text-zinc-500">
+                    {t("contact.successDescription")}
+                  </p>
 
                   {trackingId && (
                     <p className="mb-6 font-mono text-xs text-zinc-400">
-                      شماره پیگیری: {trackingId.slice(-8).toUpperCase()}
+                      {t("contact.tracking")}:{" "}
+                      {trackingId.slice(-8).toUpperCase()}
                     </p>
                   )}
 
                   <Button variant="outline" onClick={() => setSuccess(false)}>
-                    ارسال پیام جدید
+                    {t("contact.newMessage")}
                   </Button>
                 </motion.div>
               ) : (
@@ -329,18 +335,18 @@ const ContactPage = () => {
                   className="rounded-2xl border border-zinc-100 bg-zinc-50 p-8 dark:border-zinc-800 dark:bg-zinc-900"
                 >
                   <h2 className="mb-6 text-xl font-bold text-zinc-900 dark:text-white">
-                    ارسال پیام
+                    {t("contact.sendMessage")}
                   </h2>
 
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       {/* Name */}
                       <div className="space-y-2">
-                        <Label htmlFor="name">نام کامل *</Label>
+                        <Label htmlFor="name">{t("contact.fullName")} *</Label>
 
                         <Input
                           id="name"
-                          placeholder="محمد احمدی"
+                          placeholder={t("contact.namePlaceholder")}
                           className="bg-white dark:bg-zinc-800"
                           {...register("name")}
                         />
@@ -354,12 +360,12 @@ const ContactPage = () => {
 
                       {/* Email */}
                       <div className="space-y-2">
-                        <Label htmlFor="email">ایمیل *</Label>
+                        <Label htmlFor="email">{t("contact.email")} *</Label>
 
                         <Input
                           id="email"
                           type="email"
-                          placeholder="you@example.com"
+                          placeholder={t("contact.emailPlaceholder")}
                           className="bg-white dark:bg-zinc-800"
                           {...register("email")}
                         />
@@ -375,11 +381,11 @@ const ContactPage = () => {
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       {/* Phone */}
                       <div className="space-y-2">
-                        <Label htmlFor="phone">شماره تماس</Label>
+                        <Label htmlFor="phone">{t("contact.phone")}</Label>
 
                         <Input
                           id="phone"
-                          placeholder="+93 700 000 000"
+                          placeholder={t("contact.phonePlaceholder")}
                           className="bg-white dark:bg-zinc-800"
                           {...register("phone")}
                         />
@@ -387,14 +393,16 @@ const ContactPage = () => {
 
                       {/* Subject */}
                       <div className="space-y-2">
-                        <Label>موضوع *</Label>
+                        <Label>{t("contact.subject")} *</Label>
 
                         <Select
                           value={subject}
                           onValueChange={(val) => setValue("subject", val)}
                         >
                           <SelectTrigger className="bg-white dark:bg-zinc-800">
-                            <SelectValue placeholder="انتخاب موضوع" />
+                            <SelectValue
+                              placeholder={t("contact.subjectPlaceholder")}
+                            />
                           </SelectTrigger>
 
                           <SelectContent>
@@ -416,12 +424,12 @@ const ContactPage = () => {
 
                     {/* Message */}
                     <div className="space-y-2">
-                      <Label htmlFor="message">پیام *</Label>
+                      <Label htmlFor="message">{t("contact.message")} *</Label>
 
                       <Textarea
                         id="message"
                         rows={6}
-                        placeholder="پیام خود را اینجا بنویسید..."
+                        placeholder={t("contact.messagePlaceholder")}
                         className="resize-none bg-white dark:bg-zinc-800"
                         {...register("message")}
                       />
@@ -443,12 +451,12 @@ const ContactPage = () => {
                       {submitting ? (
                         <>
                           <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                          در حال ارسال...
+                          {t("contact.sending")}
                         </>
                       ) : (
                         <>
                           <Send className="ml-2 h-4 w-4" />
-                          ارسال پیام
+                          {t("contact.submit")}
                         </>
                       )}
                     </Button>

@@ -117,5 +117,160 @@
     "booking": "Booking",
 
     "online247": "24/7 Online"
+  },
+  "about": {
+    "badge": "About Us",
+
+    "heroTitle1": "Luxury Car Rental",
+    "heroTitle2": "With Exceptional Service",
+
+    "heroDescription": "Since 2016, we have delivered the best car rental experience with a fleet of the world's finest vehicles and 24/7 support.",
+
+    "viewCars": "View Cars",
+    "contactUs": "Contact Us",
+
+    "stats": {
+      "cars": "Cars in Fleet",
+      "customers": "Satisfied Customers",
+      "experience": "Years Experience",
+      "support": "Support"
+    },
+
+    "storyBadge": "Our Story",
+
+    "storyTitle1": "From a Dream to the Largest",
+    "storyTitle2": "Luxury Car Fleet",
+
+    "storyParagraph1": "Our company started in 2016 with 15 cars and a small team of five people. Our goal was simple: provide the best luxury car rental experience.",
+
+    "storyParagraph2": "Today, with more than 500 luxury vehicles and thousands of satisfied customers, we are recognized as a leader in the luxury car rental industry.",
+
+    "checks": {
+      "insurance": "Full insurance for all vehicles",
+      "delivery": "Delivery anywhere in the city",
+      "support": "24-hour customer support"
+    },
+
+    "milestones": {
+      "one": "Company founded with 15 cars",
+      "two": "Expanded to 100 luxury cars",
+      "three": "Launched online platform"
+    },
+
+    "valuesBadge": "Our Values",
+    "valuesTitle": "Why Choose Us?",
+
+    "values": {
+      "security": {
+        "title": "Trust & Security",
+        "description": "All our vehicles are regularly inspected and fully insured."
+      },
+
+      "delivery": {
+        "title": "On-Time Delivery",
+        "description": "Your vehicle will always be ready at your chosen time and location."
+      },
+
+      "quality": {
+        "title": "Exceptional Quality",
+        "description": "Our fleet includes the world's top luxury brands."
+      },
+
+      "team": {
+        "title": "Professional Team",
+        "description": "Our specialists are always ready to assist and guide you."
+      }
+    },
+
+    "teamBadge": "Our Team",
+    "teamTitle": "The People Behind Our Success",
+
+    "contactTitle": "Get in Touch",
+    "contactDescription": "We are here for all your questions",
+
+    "ctaTitle": "Ready to Start Your Journey?",
+    "ctaDescription": "Choose from over 500 luxury cars and book today.",
+
+    "bookCar": "Book a Car",
+    "back": "Back"
+  },
+  "contact": {
+    "badge": "Contact Us",
+    "title": "How Can We Help?",
+    "description": "Our team is ready to answer your questions and solve your problems.",
+
+    "faqTitle": "Frequently Asked Questions",
+
+    "successTitle": "Your Message Has Been Sent!",
+    "successDescription": "Thank you for contacting us.",
+    "tracking": "Tracking ID",
+    "newMessage": "Send New Message",
+
+    "sendMessage": "Send Message",
+
+    "fullName": "Full Name *",
+    "email": "Email *",
+    "phone": "Phone Number",
+    "subject": "Subject *",
+    "message": "Message *",
+
+    "namePlaceholder": "John Doe",
+    "emailPlaceholder": "you@example.com",
+    "phonePlaceholder": "+1 000 000 000",
+    "subjectPlaceholder": "Select subject",
+    "messagePlaceholder": "Write your message here...",
+
+    "submit": "Send Message",
+    "sending": "Sending...",
+
+    "toastSuccess": "Your message has been sent!",
+
+    "info": {
+      "address": "Address",
+      "addressValue": "Kabul, District 3, Darulaman Road",
+
+      "phone": "Phone",
+
+      "email": "Email",
+
+      "hours": "Working Hours",
+      "hoursValue": "Saturday to Thursday, 8 AM to 8 PM"
+    },
+
+    "subjects": {
+      "general": "General Question",
+      "booking": "Booking Issue",
+      "complaint": "Complaint",
+      "partnership": "Business Partnership",
+      "other": "Other"
+    },
+
+    "faq": {
+      "q1": "How can I book a car?",
+      "a1": "Select your preferred car, choose the dates, and click the booking button.",
+
+      "q2": "Can I cancel my booking?",
+      "a2": "Yes, you can cancel up to 24 hours before your booking starts.",
+
+      "q3": "What documents are required?",
+      "a3": "A valid driving license and national ID or passport are required.",
+
+      "q4": "Is delivery available?",
+      "a4": "Yes, free delivery is available for bookings longer than 3 days."
+    },
+
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameShort": "Name is too short",
+
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email address",
+
+      "subjectRequired": "Subject is required",
+
+      "messageRequired": "Message is required",
+      "messageShort": "Message must be at least 10 characters",
+      "messageLong": "Message cannot exceed 2000 characters"
+    }
   }
 }
