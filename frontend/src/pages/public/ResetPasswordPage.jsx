@@ -24,36 +24,42 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslation } from "react-i18next";
 
-import useAuthStore from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 import { cn } from "@/lib/utils";
 import { calculatePasswordStrength } from "@/utils/passwordStrength";
 
 // Zod Schema
-const resetPasswordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد")
-      .regex(/[a-z]/, "رمز عبور باید شامل حروف کوچک باشد")
-      .regex(/[A-Z]/, "رمز عبور باید شامل حروف بزرگ باشد")
-      .regex(/[0-9]/, "رمز عبور باید شامل عدد باشد")
-      .regex(/[@$!%*?&#]/, "رمز عبور باید شامل کاراکتر خاص باشد"),
+const resetPasswordSchema = (t) =>
+  z
+    .object({
+      password: z
+        .string()
+        .min(8, t("auth.reset.validation.passwordMin"))
+        .regex(/[a-z]/, t("auth.reset.validation.lowercase"))
+        .regex(/[A-Z]/, t("auth.reset.validation.uppercase"))
+        .regex(/[0-9]/, t("auth.reset.validation.number"))
+        .regex(/[@$!%*?&#]/, t("auth.reset.validation.special")),
 
-    passwordConfirm: z.string().min(1, "تایید رمز عبور الزامی است"),
-  })
+      passwordConfirm: z
+        .string()
+        .min(1, t("auth.reset.validation.confirmRequired")),
+    })
 
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "رمز عبور و تایید آن مطابقت ندارند",
+    .refine((data) => data.password === data.passwordConfirm, {
+      message: t("auth.reset.validation.passwordMismatch"),
 
-    path: ["passwordConfirm"],
-  });
+      path: ["passwordConfirm"],
+    });
 
 const ResetPasswordPage = () => {
   const { token } = useParams();
 
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language !== "en";
 
   // Auth Store
   const resetPassword = useAuthStore((state) => state.resetPassword);
@@ -82,7 +88,7 @@ const ResetPasswordPage = () => {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(resetPasswordSchema(t)),
 
     defaultValues: {
       password: "",
@@ -118,17 +124,17 @@ const ResetPasswordPage = () => {
   };
 
   const getStrengthText = (strength) => {
-    if (strength < 50) return "ضعیف";
+    if (strength < 50) return t("auth.reset.strength.weak");
 
-    if (strength < 75) return "متوسط";
+    if (strength < 75) return t("auth.reset.strength.medium");
 
-    return "قوی";
+    return t("auth.reset.strength.strong");
   };
 
   // Submit
   const onSubmit = async (data) => {
     if (!token) {
-      setTokenError("لینک بازنشانی نامعتبر است");
+      setTokenError(t("auth.reset.invalidLink"));
 
       return;
     }
@@ -153,7 +159,13 @@ const ResetPasswordPage = () => {
   // Success State
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div
+        dir={isRTL ? "rtl" : "ltr"}
+        className={cn(
+          "flex min-h-screen items-center justify-center p-4",
+          isRTL ? "text-right" : "text-left",
+        )}
+      >
         <motion.div
           initial={{
             opacity: 0,
@@ -171,11 +183,11 @@ const ResetPasswordPage = () => {
             </div>
 
             <h1 className="mb-4 text-2xl font-bold">
-              رمز عبور با موفقیت بازنشانی شد!
+              {t("auth.reset.successTitle")}
             </h1>
 
             <p className="mb-6 text-muted-foreground">
-              رمز عبور شما تغییر یافت. در حال انتقال به داشبورد...
+              {t("auth.reset.successDescription")}
             </p>
 
             <div className="flex justify-center">
@@ -208,22 +220,25 @@ const ResetPasswordPage = () => {
             </div>
 
             <h1 className="mb-4 text-2xl font-bold">
-              لینک نامعتبر یا منقضی شده
+              {t("auth.reset.invalidTitle")}
             </h1>
 
             <p className="mb-6 text-muted-foreground">
-              لطفاً دوباره درخواست لینک بازنشانی کنید.
+              {t("auth.reset.invalidDescription")}
             </p>
 
             <div className="space-y-3">
               <Link to="/forgot-password">
-                <Button className="w-full">درخواست لینک جدید</Button>
+                <Button className="w-full">
+                  {t("auth.reset.requestNewLink")}
+                </Button>
               </Link>
 
               <Link to="/login">
                 <Button variant="outline" className="w-full gap-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  برگشت به صفحه ورود
+                  <ArrowLeft className={cn("h-4 w-4", isRTL && "rotate-180")} />
+
+                  {t("auth.reset.backToLogin")}
                 </Button>
               </Link>
             </div>
@@ -252,17 +267,18 @@ const ResetPasswordPage = () => {
             to="/login"
             className="mb-6 inline-flex items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ArrowLeft className="ml-2 h-4 w-4" />
-            برگشت به صفحه ورود
+            <ArrowLeft
+              className={cn("h-4 w-4", isRTL ? "ml-2 rotate-180" : "mr-2")}
+            />
+
+            {t("auth.reset.backToLogin")}
           </Link>
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="mb-2 text-2xl font-bold">تعیین رمز عبور جدید</h1>
+            <h1 className="mb-2 text-2xl font-bold">{t("auth.reset.title")}</h1>
 
-            <p className="text-muted-foreground">
-              لطفاً رمز عبور جدید خود را وارد کنید.
-            </p>
+            <p className="text-muted-foreground">{t("auth.reset.subtitle")}</p>
           </div>
 
           {/* Server Error */}
@@ -293,13 +309,17 @@ const ResetPasswordPage = () => {
               <Label htmlFor="password">رمز عبور جدید</Label>
 
               <div className="relative">
-                <Lock className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-
+                <Lock
+                  className={cn(
+                    "absolute top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground",
+                    isRTL ? "right-3" : "left-3",
+                  )}
+                />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="pl-10 pr-10"
+                  className={cn("px-10", isRTL ? "text-right" : "text-left")}
                   autoComplete="new-password"
                   autoFocus
                   disabled={isLoading}
@@ -309,7 +329,10 @@ const ResetPasswordPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className={cn(
+                    "absolute top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground",
+                    isRTL ? "left-3" : "right-3",
+                  )}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -338,16 +361,23 @@ const ResetPasswordPage = () => {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <Label htmlFor="passwordConfirm">تایید رمز عبور</Label>
+              <Label htmlFor="passwordConfirm">
+                {t("auth.reset.confirmPassword")}
+              </Label>
 
               <div className="relative">
-                <Lock className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <Lock
+                  className={cn(
+                    "absolute top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground",
+                    isRTL ? "right-3" : "left-3",
+                  )}
+                />
 
                 <Input
                   id="passwordConfirm"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="pl-10 pr-10"
+                  className={cn("px-10", isRTL ? "text-right" : "text-left")}
                   autoComplete="new-password"
                   disabled={isLoading}
                   {...register("passwordConfirm")}
@@ -356,7 +386,10 @@ const ResetPasswordPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className={cn(
+                    "absolute top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground",
+                    isRTL ? "left-3" : "right-3",
+                  )}
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -394,7 +427,9 @@ const ResetPasswordPage = () => {
                   className="mt-4 space-y-2"
                 >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">قدرت رمز عبور</span>
+                    <span className="text-muted-foreground">
+                      {t("auth.reset.passwordStrength")}
+                    </span>
 
                     <span
                       className={cn(
@@ -423,30 +458,30 @@ const ResetPasswordPage = () => {
               {/* Requirements */}
               <div className="mt-2 space-y-1">
                 <p className="mb-2 text-xs text-muted-foreground">
-                  رمز عبور باید شامل:
+                  {t("auth.reset.requirementsTitle")}
                 </p>
 
                 <div className="grid grid-cols-2 gap-1">
                   {[
                     {
                       regex: /.{8,}/,
-                      text: "۸ کاراکتر",
+                      text: t("auth.reset.requirements.min"),
                     },
                     {
                       regex: /[a-z]/,
-                      text: "حروف کوچک",
+                      text: t("auth.reset.requirements.lowercase"),
                     },
                     {
                       regex: /[A-Z]/,
-                      text: "حروف بزرگ",
+                      text: t("auth.reset.requirements.uppercase"),
                     },
                     {
                       regex: /[0-9]/,
-                      text: "عدد",
+                      text: t("auth.reset.requirements.number"),
                     },
                     {
                       regex: /[@$!%*?&#]/,
-                      text: "کاراکتر خاص",
+                      text: t("auth.reset.requirements.special"),
                     },
                   ].map((req, index) => (
                     <div key={index} className="flex items-center text-xs">
@@ -486,11 +521,17 @@ const ResetPasswordPage = () => {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                  در حال بازنشانی...
+                  <Loader2
+                    className={cn(
+                      "h-4 w-4 animate-spin",
+                      isRTL ? "ml-2" : "mr-2",
+                    )}
+                  />
+
+                  {t("auth.reset.loading")}
                 </>
               ) : (
-                "بازنشانی رمز عبور"
+                t("auth.reset.submit")
               )}
             </Button>
           </form>

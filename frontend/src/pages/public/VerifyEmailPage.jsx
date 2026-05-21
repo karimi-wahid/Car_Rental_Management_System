@@ -8,13 +8,17 @@ import { Card } from "@/components/ui/card";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 const VerifyEmailPage = () => {
   const { token } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { verifyOTP, resendVerification } = useAuthStore();
+  const { t, i18n } = useTranslation();
 
+  const isRTL = i18n.language !== "en";
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
   const [resending, setResending] = useState(false);
@@ -37,8 +41,8 @@ const VerifyEmailPage = () => {
         setStatus("error");
         setMessage(
           email
-            ? "لطفاً کد تایید ارسال شده به ایمیل خود را وارد کنید"
-            : "هیچ روش تاییدی ارائه نشده است",
+            ? t("auth.verify.enterOtp")
+            : t("auth.verify.noVerificationMethod"),
         );
         return;
       }
@@ -48,8 +52,8 @@ const VerifyEmailPage = () => {
 
         if (response.success) {
           setStatus("success");
-          setMessage("ایمیل شما موفقانه تایید شد!");
-          toast.success("ایمیل تایید شد!");
+          setMessage(t("auth.verify.successMessage"));
+          toast.success(t("auth.verify.toastSuccess"));
           localStorage.removeItem("email");
           setTimeout(() => navigate("/dashboard", { replace: true }), 2000);
         } else {
@@ -57,13 +61,15 @@ const VerifyEmailPage = () => {
         }
       } catch (error) {
         setStatus("error");
-        setMessage(error.message || "تایید ناموفق بود");
-        toast.error("تایید ناموفق بود");
+        setMessage(error.message || t("auth.verify.failed"));
+        toast.error(t("auth.verify.failed"));
 
         const storedEmail = localStorage.getItem("email") || "";
         if (storedEmail) {
           setEmail(storedEmail);
-          toast("لطفاً از کد تایید استفاده کنید", { icon: "📧" });
+          toast(t("auth.verify.useOtp"), {
+            icon: "📧",
+          });
         }
       }
     };
@@ -144,7 +150,7 @@ const VerifyEmailPage = () => {
   // ===============================
   const handleVerifyOTP = async (otpCode) => {
     if (!email) {
-      toast.error("آدرس ایمیل یافت نشد. لطفاً ایمیل خود را وارد کنید.");
+      toast.error(t("auth.verify.emailNotFound"));
       return;
     }
 
@@ -154,15 +160,16 @@ const VerifyEmailPage = () => {
 
       if (result.success) {
         setStatus("success");
-        setMessage("ایمیل شما موفقانه تایید شد!");
-        toast.success("ایمیل تایید شد!");
+        setMessage(t("auth.verify.successMessage"));
+
+        toast.success(t("auth.verify.toastSuccess"));
         localStorage.removeItem("pendingVerificationEmail");
         setTimeout(() => navigate("/dashboard", { replace: true }), 2000);
       } else {
         throw new Error(result.error);
       }
     } catch (error) {
-      toast.error(error.message || "کد تایید نامعتبر یا منقضی شده است");
+      toast.error(error.message || t("auth.verify.invalidOtp"));
       await shakeAnimation();
       setOtp(["", "", "", "", "", ""]);
       document.getElementById("otp-0")?.focus();
@@ -182,35 +189,35 @@ const VerifyEmailPage = () => {
       const result = await resendVerification(email);
 
       if (result.success) {
-        toast.success("کد تایید ارسال شد!");
+        toast.success(t("auth.verify.resendSuccess"));
         setCountdown(60);
         setOtp(["", "", "", "", "", ""]);
       } else {
         throw new Error(result.error);
       }
     } catch (error) {
-      toast.error(error.message || "ارسال مجدد کد ناموفق بود");
+      toast.error(error.message || t("auth.verify.resendFailed"));
     } finally {
       setResending(false);
     }
   };
 
   const handleSendToEmail = async () => {
-    if (!email) return toast.error("لطفاً ایمیل خود را وارد کنید");
+    if (!email) return toast.error(t("auth.verify.enterEmail"));
 
     setResending(true);
     try {
       const result = await resendVerification(email);
 
       if (result.success) {
-        toast.success("کد تایید ارسال شد!");
+        toast.success(t("auth.verify.resendSuccess"));
         setCountdown(60);
         setOtp(["", "", "", "", "", ""]);
       } else {
         toast.error(result.error);
       }
     } catch {
-      toast.error("ارسال کد ناموفق بود");
+      toast.error(t("auth.verify.sendFailed"));
     } finally {
       setResending(false);
     }
@@ -225,8 +232,11 @@ const VerifyEmailPage = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      dir="rtl"
+      className={cn(
+        "min-h-screen flex items-center justify-center p-4",
+        isRTL ? "text-right" : "text-left",
+      )}
+      dir={isRTL ? "rtl" : "ltr"}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -238,9 +248,13 @@ const VerifyEmailPage = () => {
           {status === "loading" && (
             <>
               <Loader2 className="w-10 h-10 mx-auto animate-spin mb-4 text-primary" />
-              <h2 className="text-xl font-bold">در حال تایید ایمیل...</h2>
+
+              <h2 className="text-xl font-bold">
+                {t("auth.verify.loadingTitle")}
+              </h2>
+
               <p className="text-muted-foreground mt-2">
-                لطفاً منتظر بمانید...
+                {t("auth.verify.loadingSubtitle")}
               </p>
             </>
           )}
@@ -255,16 +269,18 @@ const VerifyEmailPage = () => {
               >
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
               </motion.div>
-              <h2 className="text-xl font-bold mb-2">ایمیل تایید شد!</h2>
+              <h2 className="text-xl font-bold mb-2">
+                {t("auth.verify.successTitle")}
+              </h2>
               <p className="text-muted-foreground">{message}</p>
               <p className="text-sm text-muted-foreground mt-2">
-                در حال انتقال به داشبورد...
+                {t("auth.verify.redirecting")}
               </p>
               <Button
                 className="mt-4 w-full"
                 onClick={() => navigate("/dashboard", { replace: true })}
               >
-                رفتن به داشبورد
+                {t("auth.verify.goDashboard")}
               </Button>
             </>
           )}
@@ -273,24 +289,29 @@ const VerifyEmailPage = () => {
           {status === "error" && (
             <>
               <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">تایید ناموفق بود</h2>
+              <h2 className="text-xl font-bold mb-2">
+                {t("auth.verify.failedTitle")}
+              </h2>
               <p className="mb-6 text-muted-foreground text-sm">{message}</p>
 
               {email ? (
                 /* ── OTP FORM ── */
                 <>
                   <p className="text-sm text-muted-foreground mb-4">
-                    کد ۶ رقمی ارسال شده به{" "}
-                    <span className="font-medium text-foreground" dir="ltr">
+                    {t("auth.verify.enterCode")}{" "}
+                    <span
+                      className="font-medium text-foreground"
+                      dir={isRTL ? "rtl" : "ltr"}
+                    >
                       {email}
-                    </span>{" "}
-                    را وارد کنید
+                    </span>
+                    {t("auth.verify.enterCodeSuffix")}
                   </p>
 
                   <motion.div
                     animate={controls}
                     className="flex justify-center gap-2 mb-4"
-                    style={{ direction: "ltr" }}
+                    style={{ direction: isRTL ? "rtl" : "ltr" }}
                   >
                     {otp.map((digit, index) => (
                       <Input
@@ -304,6 +325,7 @@ const VerifyEmailPage = () => {
                         onKeyDown={(e) => handleKeyDown(e, index)}
                         onPaste={handlePaste}
                         disabled={verifyingOTP}
+                        className="text-center"
                       />
                     ))}
                   </motion.div>
@@ -315,11 +337,17 @@ const VerifyEmailPage = () => {
                   >
                     {verifyingOTP ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                        در حال تایید...
+                        <Loader2
+                          className={cn(
+                            "w-4 h-4 animate-spin",
+                            isRTL ? "ml-2" : "mr-2",
+                          )}
+                        />
+
+                        {t("auth.verify.verifying")}
                       </>
                     ) : (
-                      "تایید کد"
+                      t("auth.verify.verifyCode")
                     )}
                   </Button>
 
@@ -330,28 +358,38 @@ const VerifyEmailPage = () => {
                     disabled={resending || countdown > 0}
                   >
                     {resending ? (
-                      <Loader2 className="w-4 h-4 animate-spin ml-2" />
+                      <Loader2
+                        className={cn(
+                          "w-4 h-4 animate-spin",
+                          isRTL ? "ml-2" : "mr-2",
+                        )}
+                      />
                     ) : (
-                      <RefreshCw className="w-4 h-4 ml-2" />
+                      <RefreshCw
+                        className={cn("w-4 h-4", isRTL ? "ml-2" : "mr-2")}
+                      />
                     )}
+
                     {countdown > 0
-                      ? `ارسال مجدد تا ${countdown} ثانیه`
-                      : "ارسال مجدد کد"}
+                      ? t("auth.verify.resendCountdown", {
+                          seconds: countdown,
+                        })
+                      : t("auth.verify.resendCode")}
                   </Button>
                 </>
               ) : (
                 /* ── NO EMAIL — ask for it and resend ── */
                 <>
                   <p className="text-sm text-muted-foreground mb-4">
-                    آدرس ایمیل خود را برای دریافت کد تایید وارد کنید.
+                    {t("auth.verify.enterEmailDescription")}
                   </p>
 
                   <Input
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={t("auth.verify.emailPlaceholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    dir="ltr"
+                    dir={isRTL ? "rtl" : "ltr"}
                   />
 
                   <Button
@@ -361,17 +399,23 @@ const VerifyEmailPage = () => {
                   >
                     {resending ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                        در حال ارسال...
+                        <Loader2
+                          className={cn(
+                            "w-4 h-4 animate-spin",
+                            isRTL ? "ml-2" : "mr-2",
+                          )}
+                        />
+
+                        {t("auth.verify.sending")}
                       </>
                     ) : (
-                      "ارسال کد تایید"
+                      t("auth.verify.sendCode")
                     )}
                   </Button>
 
                   <Link to="/register">
                     <Button variant="ghost" className="w-full text-sm">
-                      حساب کاربری ندارید؟ ثبت نام کنید
+                      {t("auth.verify.noAccount")}
                     </Button>
                   </Link>
                 </>

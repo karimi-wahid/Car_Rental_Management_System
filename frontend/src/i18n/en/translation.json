@@ -272,5 +272,220 @@
       "messageShort": "Message must be at least 10 characters",
       "messageLong": "Message cannot exceed 2000 characters"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Login to continue to your account",
+      "email": "Email Address",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "submit": "Login",
+      "loading": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "register": "Register"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Sign up to start your luxury car rental experience",
+
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating account...",
+
+      "alreadyHaveAccount": "Already have an account?",
+      "login": "Login",
+
+      "termsText": "By signing up, you agree to our",
+      "terms": "Terms & Conditions",
+      "and": "and",
+      "privacy": "Privacy Policy",
+      "agreeText": ".",
+
+      "passwordStrength": "Password Strength",
+
+      "strength": {
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong"
+      },
+
+      "requirementsTitle": "Password must contain:",
+
+      "requirements": {
+        "min": "At least 8 characters",
+        "lowercase": "One lowercase letter",
+        "uppercase": "One uppercase letter",
+        "number": "One number",
+        "special": "One special character"
+      },
+
+      "toast": {
+        "verifyEmail": "Check your email and enter the verification code"
+      },
+
+      "validation": {
+        "nameRequired": "Full name is required",
+        "nameMin": "Name must be at least 2 characters",
+        "nameMax": "Name cannot exceed 50 characters",
+
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email address",
+
+        "passwordRequired": "Password is required",
+        "passwordMin": "Password must be at least 8 characters",
+        "passwordWeak": "Weak password. Please choose a stronger password",
+
+        "confirmRequired": "Password confirmation is required",
+        "passwordMismatch": "Passwords do not match"
+      }
+    },
+    "reset": {
+      "title": "Set New Password",
+      "subtitle": "Please enter your new password.",
+
+      "backToLogin": "Back to Login",
+
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+
+      "passwordStrength": "Password Strength",
+
+      "submit": "Reset Password",
+      "loading": "Resetting...",
+
+      "successTitle": "Password Reset Successfully!",
+      "successDescription": "Your password has been changed. Redirecting to dashboard...",
+
+      "invalidTitle": "Invalid or Expired Link",
+      "invalidDescription": "Please request a new reset link.",
+
+      "requestNewLink": "Request New Link",
+
+      "invalidLink": "Invalid reset link",
+
+      "strength": {
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong"
+      },
+
+      "requirementsTitle": "Password must contain:",
+
+      "requirements": {
+        "min": "8 characters",
+        "lowercase": "Lowercase",
+        "uppercase": "Uppercase",
+        "number": "Number",
+        "special": "Special character"
+      },
+
+      "validation": {
+        "passwordMin": "Password must be at least 8 characters",
+        "lowercase": "Password must contain lowercase letters",
+        "uppercase": "Password must contain uppercase letters",
+        "number": "Password must contain a number",
+        "special": "Password must contain a special character",
+
+        "confirmRequired": "Password confirmation is required",
+
+        "passwordMismatch": "Passwords do not match"
+      }
+    },
+    "forgot": {
+      "title": "Forgot Password?",
+      "subtitle": "Enter your email to receive a password reset link.",
+
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+
+      "submit": "Send Reset Link",
+      "loading": "Sending...",
+
+      "backToLogin": "Back to Login",
+
+      "rememberPassword": "Remembered your password? Login",
+
+      "successTitle": "Check Your Email",
+
+      "successDescription": "A password reset link was sent to",
+
+      "noEmail": "Didn't receive the email?",
+
+      "tryAgain": "Try Again",
+
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email address"
+      }
+    },
+    "verify": {
+      "loadingTitle": "Verifying Email...",
+      "loadingSubtitle": "Please wait...",
+
+      "successTitle": "Email Verified!",
+      "successMessage": "Your email was successfully verified!",
+      "toastSuccess": "Email verified!",
+      "redirecting": "Redirecting to dashboard...",
+      "goDashboard": "Go to Dashboard",
+
+      "failedTitle": "Verification Failed",
+      "failed": "Verification failed",
+
+      "invalidOtp": "Invalid or expired verification code",
+
+      "verifyCode": "Verify Code",
+      "verifying": "Verifying...",
+
+      "enterOtp": "Please enter the verification code sent to your email",
+
+      "enterCode": "Enter the 6-digit code sent to",
+      "enterCodeSuffix": "",
+
+      "resendCode": "Resend Code",
+
+      "resendCountdown": "Resend in {{seconds}} seconds",
+
+      "resendSuccess": "Verification code sent!",
+
+      "resendFailed": "Failed to resend code",
+
+      "sendFailed": "Failed to send code",
+
+      "sending": "Sending...",
+
+      "sendCode": "Send Verification Code",
+
+      "enterEmail": "Please enter your email",
+
+      "emailNotFound": "Email address not found. Please enter your email.",
+
+      "enterEmailDescription": "Enter your email address to receive a verification code.",
+
+      "emailPlaceholder": "your@email.com",
+
+      "useOtp": "Please use the verification code",
+
+      "noVerificationMethod": "No verification method provided",
+
+      "noAccount": "Don't have an account? Register"
+    }
+  },
+  "callback": {
+    "invalid": "Verification link is invalid or has expired.",
+    "success": "Email verified! Welcome 🎉",
+    "loginRequired": "Email verified! Please log in.",
+    "somethingWrong": "Something went wrong. Please try logging in.",
+    "loading": "Verifying your email..."
   }
 }

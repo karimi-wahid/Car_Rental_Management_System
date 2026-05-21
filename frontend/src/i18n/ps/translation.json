@@ -272,5 +272,223 @@
       "messageShort": "پیغام باید لږ تر لږه ۱۰ حروف ولري",
       "messageLong": "پیغام باید له ۲۰۰۰ حروفو زیات نه وي"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "بیا ښه راغلاست",
+      "subtitle": "د دوام لپاره خپل حساب ته ننوځئ",
+      "email": "بریښنالیک",
+      "password": "پټنوم",
+      "forgotPassword": "پټنوم مو هېر کړی؟",
+      "showPassword": "پټنوم ښکاره کړئ",
+      "hidePassword": "پټنوم پټ کړئ",
+      "submit": "ننوتل",
+      "loading": "د ننوتلو په حال کې...",
+      "noAccount": "حساب نه لرئ؟",
+      "register": "راجستر کړئ"
+    },
+    "register": {
+      "title": "حساب جوړ کړئ",
+      "subtitle": "د لوکس موټر کرایې تجربې پیل لپاره نوم لیکنه وکړئ",
+
+      "fullName": "بشپړ نوم",
+      "fullNamePlaceholder": "محمد علي",
+
+      "email": "بریښنالیک",
+      "emailPlaceholder": "you@example.com",
+
+      "password": "پاسورډ",
+      "confirmPassword": "د پاسورډ تایید",
+
+      "createAccount": "حساب جوړ کړئ",
+      "creatingAccount": "حساب جوړیږي...",
+
+      "alreadyHaveAccount": "له مخکې حساب لرئ؟",
+      "login": "ننوتل",
+
+      "termsText": "په نوم لیکنې سره تاسو زموږ د",
+      "terms": "شرایطو او قوانینو",
+      "and": "او",
+      "privacy": "محرمیت پالیسۍ",
+      "agreeText": "سره موافق یاست.",
+
+      "passwordStrength": "د پاسورډ ځواک",
+
+      "strength": {
+        "weak": "کمزوری",
+        "medium": "منځنی",
+        "strong": "قوي"
+      },
+
+      "requirementsTitle": "پاسورډ باید لاندې موارد ولري:",
+
+      "requirements": {
+        "min": "لږ تر لږه ۸ توري",
+        "lowercase": "یو کوچنی حرف",
+        "uppercase": "یو لوی حرف",
+        "number": "یو عدد",
+        "special": "یو ځانګړی کرکټر"
+      },
+
+      "toast": {
+        "verifyEmail": "خپل ایمیل وګورئ او د تایید کوډ دننه کړئ"
+      },
+
+      "validation": {
+        "nameRequired": "بشپړ نوم اړین دی",
+        "nameMin": "نوم باید لږ تر لږه ۲ توري ولري",
+        "nameMax": "نوم باید له ۵۰ تورو زیات نه وي",
+
+        "emailRequired": "بریښنالیک اړین دی",
+        "emailInvalid": "ناسم بریښنالیک",
+
+        "passwordRequired": "پاسورډ اړین دی",
+        "passwordMin": "پاسورډ باید لږ تر لږه ۸ توري ولري",
+        "passwordWeak": "کمزوری پاسورډ. مهرباني وکړئ قوي پاسورډ وټاکئ",
+
+        "confirmRequired": "د پاسورډ تایید اړین دی",
+        "passwordMismatch": "پاسورډونه یو شان نه دي"
+      }
+    },
+    "reset": {
+      "title": "نوی پاسورډ وټاکئ",
+      "subtitle": "مهرباني وکړئ خپل نوی پاسورډ دننه کړئ.",
+
+      "backToLogin": "د ننوتلو پاڼې ته ستنیدل",
+
+      "newPassword": "نوی پاسورډ",
+      "confirmPassword": "د پاسورډ تایید",
+
+      "passwordStrength": "د پاسورډ ځواک",
+
+      "submit": "پاسورډ بیا تنظیم کړئ",
+      "loading": "بیا تنظیمیږي...",
+
+      "successTitle": "پاسورډ په بریالیتوب بدل شو!",
+      "successDescription": "ستاسو پاسورډ بدل شو. داشبورډ ته انتقالیږئ...",
+
+      "invalidTitle": "ناسم یا ختم شوی لینک",
+      "invalidDescription": "مهرباني وکړئ نوی لینک وغواړئ.",
+
+      "requestNewLink": "نوی لینک وغواړئ",
+
+      "invalidLink": "د بیا تنظیم لینک ناسم دی",
+
+      "strength": {
+        "weak": "کمزوری",
+        "medium": "منځنی",
+        "strong": "قوي"
+      },
+
+      "requirementsTitle": "پاسورډ باید ولري:",
+
+      "requirements": {
+        "min": "۸ توري",
+        "lowercase": "کوچني حروف",
+        "uppercase": "لوی حروف",
+        "number": "شمېره",
+        "special": "ځانګړی کرکټر"
+      },
+
+      "validation": {
+        "passwordMin": "پاسورډ باید لږ تر لږه ۸ توري ولري",
+        "lowercase": "پاسورډ باید کوچني حروف ولري",
+        "uppercase": "پاسورډ باید لوی حروف ولري",
+        "number": "پاسورډ باید شمېره ولري",
+        "special": "پاسورډ باید ځانګړی کرکټر ولري",
+
+        "confirmRequired": "د پاسورډ تایید اړین دی",
+
+        "passwordMismatch": "پاسورډونه یو شان نه دي"
+      }
+    },
+    "forgot": {
+      "title": "پاسورډ مو هېر کړی؟",
+
+      "subtitle": "خپل ایمیل دننه کړئ ترڅو د پاسورډ بیا تنظیم لینک درولېږل شي.",
+
+      "email": "بریښنالیک",
+
+      "emailPlaceholder": "you@example.com",
+
+      "submit": "د بیا تنظیم لینک ولېږئ",
+
+      "loading": "لېږل کېږي...",
+
+      "backToLogin": "د ننوتلو پاڼې ته ستنیدل",
+
+      "rememberPassword": "پاسورډ مو په یاد شو؟ ننوتل",
+
+      "successTitle": "خپل ایمیل وګورئ",
+
+      "successDescription": "د پاسورډ بدلون لینک دې ایمیل ته ولېږل شو",
+
+      "noEmail": "ایمیل مو ترلاسه نه کړ؟",
+
+      "tryAgain": "بیا هڅه وکړئ",
+
+      "validation": {
+        "emailRequired": "بریښنالیک اړین دی",
+        "emailInvalid": "ناسم بریښنالیک"
+      }
+    },
+    "verify": {
+      "loadingTitle": "ایمیل تاییدیږي...",
+      "loadingSubtitle": "مهرباني وکړئ انتظار وکړئ...",
+
+      "successTitle": "ایمیل تایید شو!",
+      "successMessage": "ستاسو ایمیل په بریالیتوب تایید شو!",
+      "toastSuccess": "ایمیل تایید شو!",
+      "redirecting": "داشبورد ته انتقالیږئ...",
+      "goDashboard": "داشبورد ته لاړ شئ",
+
+      "failedTitle": "تایید ناکام شو",
+      "failed": "تایید ناکام شو",
+
+      "invalidOtp": "د تایید کوډ ناسم یا ختم شوی دی",
+
+      "verifyCode": "کوډ تایید کړئ",
+      "verifying": "تاییدیږي...",
+
+      "enterOtp": "مهرباني وکړئ خپل ایمیل ته لېږل شوی تایید کوډ دننه کړئ",
+
+      "enterCode": "هغه ۶ عددي کوډ دننه کړئ چې دې ایمیل ته لېږل شوی",
+      "enterCodeSuffix": "را وارد کنید",
+
+      "resendCode": "کوډ بیا ولېږئ",
+
+      "resendCountdown": "بیا لېږل په {{seconds}} ثانیو کې",
+
+      "resendSuccess": "د تایید کوډ ولېږل شو!",
+
+      "resendFailed": "د کوډ بیا لېږل ناکام شول",
+
+      "sendFailed": "د کوډ لېږل ناکام شول",
+
+      "sending": "لېږل کېږي...",
+
+      "sendCode": "د تایید کوډ ولېږئ",
+
+      "enterEmail": "مهرباني وکړئ خپل ایمیل دننه کړئ",
+
+      "emailNotFound": "د ایمیل پته ونه موندل شوه. مهرباني وکړئ خپل ایمیل دننه کړئ.",
+
+      "enterEmailDescription": "د تایید کوډ ترلاسه کولو لپاره خپل ایمیل دننه کړئ.",
+
+      "emailPlaceholder": "your@email.com",
+
+      "useOtp": "مهرباني وکړئ د تایید کوډ وکاروئ",
+
+      "noVerificationMethod": "د تایید کومه طریقه نشته",
+
+      "noAccount": "حساب نلرئ؟ ثبت نام وکړئ"
+    }
+  },
+  "callback": {
+    "invalid": "د تایید لینک ناسم دی یا وخت یې تېر شوی.",
+    "success": "ستاسو ایمیل تایید شو! ښه راغلاست 🎉",
+    "loginRequired": "ایمیل تایید شو! مهرباني وکړئ ننوځئ.",
+    "somethingWrong": "یو څه ستونزه رامنځته شوه. مهرباني وکړئ بیا ننوځئ.",
+    "loading": "ستاسو ایمیل تاییدیږي..."
   }
 }

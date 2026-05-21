@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { motion } from "motion/react";
 import {
   Eye,
@@ -15,163 +14,129 @@ import {
   XCircle,
   Loader2,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { calculatePasswordStrength } from "@/utils/passwordStrength";
-
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
-// Zod Schema
-const registerSchema = z
-  .object({
-    name: z
-      .string()
-      .min(1, "اسم کامل الزامی است")
-      .min(2, "اسم باید حداقل ۲ حرف باشد")
-      .max(50, "اسم نمی‌تواند بیشتر از ۵۰ حرف باشد"),
-
-    email: z.string().min(1, "ایمیل الزامی است").email("ایمیل نامعتبر است"),
-
-    password: z
-      .string()
-      .min(1, "رمز عبور الزامی است")
-      .min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد")
-      .refine((value) => calculatePasswordStrength(value) >= 50, {
-        message: "رمز عبور ضعیف است. لطفاً رمز قوی‌تری انتخاب کنید",
-      }),
-
-    passwordConfirm: z.string().min(1, "تایید رمز عبور الزامی است"),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "رمز عبور و تایید آن مطابقت ندارند",
-    path: ["passwordConfirm"],
-  });
+const registerSchema = (t) =>
+  z
+    .object({
+      name: z
+        .string()
+        .min(1, t("auth.register.validation.nameRequired"))
+        .min(2, t("auth.register.validation.nameMin"))
+        .max(50, t("auth.register.validation.nameMax")),
+      email: z
+        .string()
+        .min(1, t("auth.register.validation.emailRequired"))
+        .email(t("auth.register.validation.emailInvalid")),
+      password: z
+        .string()
+        .min(1, t("auth.register.validation.passwordRequired"))
+        .min(8, t("auth.register.validation.passwordMin"))
+        .refine((v) => calculatePasswordStrength(v) >= 50, {
+          message: t("auth.register.validation.passwordWeak"),
+        }),
+      passwordConfirm: z
+        .string()
+        .min(1, t("auth.register.validation.confirmRequired")),
+    })
+    .refine((d) => d.password === d.passwordConfirm, {
+      message: t("auth.register.validation.passwordMismatch"),
+      path: ["passwordConfirm"],
+    });
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const dir = i18n.language === "en" ? "ltr" : "rtl";
+  const isRTL = dir === "rtl";
 
-  // Auth Store
-  const signup = useAuthStore((state) => state.signup);
-  const isLoading = useAuthStore((state) => state.isLoading);
-  const error = useAuthStore((state) => state.error);
-  const clearError = useAuthStore((state) => state.clearError);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const signup = useAuthStore((s) => s.signup);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const error = useAuthStore((s) => s.error);
+  const clearError = useAuthStore((s) => s.clearError);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [showPassword, setShowPassword] = useState(false);
-
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [serverError, setServerError] = useState("");
 
-  // React Hook Form + Zod
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(registerSchema),
-
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      passwordConfirm: "",
-    },
+    resolver: zodResolver(registerSchema(t)),
+    defaultValues: { name: "", email: "", password: "", passwordConfirm: "" },
   });
 
   const password = watch("password", "");
 
-  // Clear Errors
   useEffect(() => {
     clearError();
     setServerError("");
   }, [clearError]);
-
-  // Redirect
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard", { replace: true });
-    }
+    if (isAuthenticated) navigate("/dashboard", { replace: true });
   }, [isAuthenticated, navigate]);
 
-  // Password Strength
   const passwordStrength = calculatePasswordStrength(password);
 
-  const getStrengthColor = (strength) => {
-    if (strength < 50) return "bg-destructive";
-    if (strength < 75) return "bg-yellow-500";
+  const getStrengthColor = (s) =>
+    s < 50 ? "bg-destructive" : s < 75 ? "bg-yellow-500" : "bg-green-500";
+  const getStrengthText = (s) =>
+    s < 50
+      ? t("auth.register.strength.weak")
+      : s < 75
+        ? t("auth.register.strength.medium")
+        : t("auth.register.strength.strong");
 
-    return "bg-green-500";
-  };
-
-  const getStrengthText = (strength) => {
-    if (strength < 50) return "ضعیف";
-    if (strength < 75) return "متوسط";
-
-    return "قوی";
-  };
-
-  // Submit
   const onSubmit = async (data) => {
     setServerError("");
-
     const result = await signup({
       name: data.name,
       email: data.email,
       password: data.password,
       passwordConfirm: data.passwordConfirm,
     });
-
     if (result.success) {
-      localStorage.setItem("email", data.email);
-
-      toast.success("ایمیل خود را بررسی کنید و کد تایید را وارد کنید");
-
+      localStorage.setItem("pendingVerificationEmail", data.email);
+      toast.success(t("auth.register.toast.verifyEmail"));
       navigate("/verify-email");
     } else {
       setServerError(result.error);
     }
   };
 
-  // Password Requirements
   const passwordRequirements = [
-    { regex: /.{8,}/, text: "حداقل ۸ کاراکتر" },
-
-    {
-      regex: /[a-z]/,
-      text: "یک حرف کوچک",
-    },
-
-    {
-      regex: /[A-Z]/,
-      text: "یک حرف بزرگ",
-    },
-
-    {
-      regex: /[0-9]/,
-      text: "یک عدد",
-    },
-
-    {
-      regex: /[@$!%*?&]/,
-      text: "یک کاراکتر خاص",
-    },
+    { regex: /.{8,}/, text: t("auth.register.requirements.min") },
+    { regex: /[a-z]/, text: t("auth.register.requirements.lowercase") },
+    { regex: /[A-Z]/, text: t("auth.register.requirements.uppercase") },
+    { regex: /[0-9]/, text: t("auth.register.requirements.number") },
+    { regex: /[@$!%*?&]/, text: t("auth.register.requirements.special") },
   ];
+
+  // Icon position helpers — flip for RTL
+  const iconStart = isRTL ? "right-3" : "left-3";
+  const iconEnd = isRTL ? "left-3" : "right-3";
+  const inputPadStart = isRTL ? "pr-10" : "pl-10";
+  const inputPadBoth = isRTL ? "pr-10 pl-10" : "pl-10 pr-10";
 
   return (
     <AuthLayout
-      title="ایجاد حساب کاربری"
-      subtitle="ثبت نام کنید تا تجربه‌ی کرایه‌ی موتر لوکس خود را آغاز نمایید"
+      title={t("auth.register.title")}
+      subtitle={t("auth.register.subtitle")}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" dir={dir}>
         {/* Server Error */}
         {(serverError || error) && (
           <motion.div
@@ -185,22 +150,24 @@ const RegisterPage = () => {
 
         {/* Name */}
         <div className="space-y-2">
-          <Label htmlFor="name">اسم کامل</Label>
-
+          <Label htmlFor="name">{t("auth.register.fullName")}</Label>
           <div className="relative">
-            <User className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-
+            <User
+              className={cn(
+                "absolute top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground",
+                iconStart,
+              )}
+            />
             <Input
               id="name"
               type="text"
-              placeholder="محمد علی"
-              className="pr-10"
+              placeholder={t("auth.register.fullNamePlaceholder")}
+              className={inputPadStart}
               autoComplete="name"
               disabled={isSubmitting || isLoading}
               {...register("name")}
             />
           </div>
-
           {errors.name && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -214,22 +181,24 @@ const RegisterPage = () => {
 
         {/* Email */}
         <div className="space-y-2">
-          <Label htmlFor="email">ایمیل آدرس</Label>
-
+          <Label htmlFor="email">{t("auth.register.email")}</Label>
           <div className="relative">
-            <Mail className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-
+            <Mail
+              className={cn(
+                "absolute top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground",
+                iconStart,
+              )}
+            />
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
-              className="pr-10"
+              placeholder={t("auth.register.emailPlaceholder")}
+              className={inputPadStart}
               autoComplete="email"
               disabled={isSubmitting || isLoading}
               {...register("email")}
             />
           </div>
-
           {errors.email && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -243,25 +212,35 @@ const RegisterPage = () => {
 
         {/* Password */}
         <div className="space-y-2">
-          <Label htmlFor="password">رمز عبور</Label>
-
+          <Label htmlFor="password">{t("auth.register.password")}</Label>
           <div className="relative">
-            <Lock className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-
+            <Lock
+              className={cn(
+                "absolute top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground",
+                iconStart,
+              )}
+            />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
-              className="pl-10 pr-10"
+              className={inputPadBoth}
               autoComplete="new-password"
               disabled={isSubmitting || isLoading}
               {...register("password")}
             />
-
             <button
               type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              onClick={() => setShowPassword((p) => !p)}
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground",
+                iconEnd,
+              )}
+              aria-label={
+                showPassword
+                  ? t("auth.register.hidePassword")
+                  : t("auth.register.showPassword")
+              }
             >
               {showPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -270,7 +249,6 @@ const RegisterPage = () => {
               )}
             </button>
           </div>
-
           {errors.password && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -284,25 +262,37 @@ const RegisterPage = () => {
 
         {/* Confirm Password */}
         <div className="space-y-2">
-          <Label htmlFor="passwordConfirm">تایید رمز عبور</Label>
-
+          <Label htmlFor="passwordConfirm">
+            {t("auth.register.confirmPassword")}
+          </Label>
           <div className="relative">
-            <Lock className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-
+            <Lock
+              className={cn(
+                "absolute top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground",
+                iconStart,
+              )}
+            />
             <Input
               id="passwordConfirm"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
-              className="pl-10 pr-10"
+              className={inputPadBoth}
               autoComplete="new-password"
               disabled={isSubmitting || isLoading}
               {...register("passwordConfirm")}
             />
-
             <button
               type="button"
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              onClick={() => setShowConfirmPassword((p) => !p)}
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground",
+                iconEnd,
+              )}
+              aria-label={
+                showConfirmPassword
+                  ? t("auth.register.hidePassword")
+                  : t("auth.register.showPassword")
+              }
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -311,7 +301,6 @@ const RegisterPage = () => {
               )}
             </button>
           </div>
-
           {errors.passwordConfirm && (
             <motion.p
               initial={{ opacity: 0, y: -10 }}
@@ -330,8 +319,9 @@ const RegisterPage = () => {
               className="mt-4 space-y-2"
             >
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">قدرت رمز عبور</span>
-
+                <span className="text-muted-foreground">
+                  {t("auth.register.passwordStrength")}
+                </span>
                 <span
                   className={cn(
                     "font-medium",
@@ -345,7 +335,6 @@ const RegisterPage = () => {
                   {getStrengthText(passwordStrength)}
                 </span>
               </div>
-
               <Progress
                 value={passwordStrength}
                 className={cn("h-2", getStrengthColor(passwordStrength))}
@@ -356,17 +345,15 @@ const RegisterPage = () => {
           {/* Requirements */}
           <div className="mt-2 space-y-2">
             <p className="mb-2 text-sm text-muted-foreground">
-              رمز عبور باید شامل موارد زیر باشد:
+              {t("auth.register.requirementsTitle")}
             </p>
-
-            {passwordRequirements.map((req, index) => (
-              <div key={index} className="flex items-center text-sm">
+            {passwordRequirements.map((req, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
                 {req.regex.test(password) ? (
-                  <CheckCircle className="ml-2 h-4 w-4 text-green-500" />
+                  <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
                 ) : (
-                  <XCircle className="ml-2 h-4 w-4 text-muted-foreground" />
+                  <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
                 )}
-
                 <span
                   className={cn(
                     req.regex.test(password)
@@ -383,15 +370,15 @@ const RegisterPage = () => {
 
         {/* Terms */}
         <div className="text-center text-sm text-muted-foreground">
-          با ثبت نام، با{" "}
+          {t("auth.register.termsText")}{" "}
           <Link to="/terms" className="text-primary hover:underline">
-            شرایط و قوانین
+            {t("auth.register.terms")}
           </Link>{" "}
-          و{" "}
+          {t("auth.register.and")}{" "}
           <Link to="/privacy" className="text-primary hover:underline">
-            حریم خصوصی
+            {t("auth.register.privacy")}
           </Link>{" "}
-          ما موافقت می‌کنید.
+          {t("auth.register.agreeText")}
         </div>
 
         {/* Submit */}
@@ -403,22 +390,22 @@ const RegisterPage = () => {
         >
           {isSubmitting || isLoading ? (
             <>
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              در حال ایجاد حساب کاربری...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {t("auth.register.creatingAccount")}
             </>
           ) : (
-            "ساخت حساب کاربری"
+            t("auth.register.createAccount")
           )}
         </Button>
 
-        {/* Login */}
+        {/* Login link */}
         <p className="text-center text-sm text-muted-foreground">
-          از قبل حساب کاربری دارید؟{" "}
+          {t("auth.register.alreadyHaveAccount")}{" "}
           <Link
             to="/login"
             className="font-medium text-primary hover:underline"
           >
-            وارد شوید
+            {t("auth.register.login")}
           </Link>
         </p>
       </form>

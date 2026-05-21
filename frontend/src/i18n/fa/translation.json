@@ -272,5 +272,223 @@
       "messageShort": "پیام باید حداقل ۱۰ کاراکتر باشد",
       "messageLong": "پیام نباید از ۲۰۰۰ کاراکتر بیشتر باشد"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "خوش آمدید دوباره",
+      "subtitle": "برای ادامه، به حساب کاربری خود وارد شوید",
+      "email": "ایمیل آدرس",
+      "password": "پسورد",
+      "forgotPassword": "رمز عبور را فراموش کرده‌اید؟",
+      "showPassword": "نمایش رمز عبور",
+      "hidePassword": "پنهان کردن رمز عبور",
+      "submit": "وارد شوید",
+      "loading": "در حال ورود...",
+      "noAccount": "حساب کاربری ندارید؟",
+      "register": "ثبت نام کنید"
+    },
+    "register": {
+      "title": "ایجاد حساب کاربری",
+      "subtitle": "ثبت نام کنید تا تجربه‌ی کرایه‌ی موتر لوکس خود را آغاز نمایید",
+
+      "fullName": "اسم کامل",
+      "fullNamePlaceholder": "محمد علی",
+
+      "email": "ایمیل آدرس",
+      "emailPlaceholder": "you@example.com",
+
+      "password": "رمز عبور",
+      "confirmPassword": "تایید رمز عبور",
+
+      "createAccount": "ساخت حساب کاربری",
+      "creatingAccount": "در حال ایجاد حساب کاربری...",
+
+      "alreadyHaveAccount": "از قبل حساب کاربری دارید؟",
+      "login": "وارد شوید",
+
+      "termsText": "با ثبت نام، با",
+      "terms": "شرایط و قوانین",
+      "and": "و",
+      "privacy": "حریم خصوصی",
+      "agreeText": "ما موافقت می‌کنید.",
+
+      "passwordStrength": "قدرت رمز عبور",
+
+      "strength": {
+        "weak": "ضعیف",
+        "medium": "متوسط",
+        "strong": "قوی"
+      },
+
+      "requirementsTitle": "رمز عبور باید شامل موارد زیر باشد:",
+
+      "requirements": {
+        "min": "حداقل ۸ کاراکتر",
+        "lowercase": "یک حرف کوچک",
+        "uppercase": "یک حرف بزرگ",
+        "number": "یک عدد",
+        "special": "یک کاراکتر خاص"
+      },
+
+      "toast": {
+        "verifyEmail": "ایمیل خود را بررسی کنید و کد تایید را وارد کنید"
+      },
+
+      "validation": {
+        "nameRequired": "اسم کامل الزامی است",
+        "nameMin": "اسم باید حداقل ۲ حرف باشد",
+        "nameMax": "اسم نمی‌تواند بیشتر از ۵۰ حرف باشد",
+
+        "emailRequired": "ایمیل الزامی است",
+        "emailInvalid": "ایمیل نامعتبر است",
+
+        "passwordRequired": "رمز عبور الزامی است",
+        "passwordMin": "رمز عبور باید حداقل ۸ کاراکتر باشد",
+        "passwordWeak": "رمز عبور ضعیف است. لطفاً رمز قوی‌تری انتخاب کنید",
+
+        "confirmRequired": "تایید رمز عبور الزامی است",
+        "passwordMismatch": "رمز عبور و تایید آن مطابقت ندارند"
+      }
+    },
+    "reset": {
+      "title": "تعیین رمز عبور جدید",
+      "subtitle": "لطفاً رمز عبور جدید خود را وارد کنید.",
+
+      "backToLogin": "برگشت به صفحه ورود",
+
+      "newPassword": "رمز عبور جدید",
+      "confirmPassword": "تایید رمز عبور",
+
+      "passwordStrength": "قدرت رمز عبور",
+
+      "submit": "بازنشانی رمز عبور",
+      "loading": "در حال بازنشانی...",
+
+      "successTitle": "رمز عبور با موفقیت بازنشانی شد!",
+      "successDescription": "رمز عبور شما تغییر یافت. در حال انتقال به داشبورد...",
+
+      "invalidTitle": "لینک نامعتبر یا منقضی شده",
+      "invalidDescription": "لطفاً دوباره درخواست لینک بازنشانی کنید.",
+
+      "requestNewLink": "درخواست لینک جدید",
+
+      "invalidLink": "لینک بازنشانی نامعتبر است",
+
+      "strength": {
+        "weak": "ضعیف",
+        "medium": "متوسط",
+        "strong": "قوی"
+      },
+
+      "requirementsTitle": "رمز عبور باید شامل:",
+
+      "requirements": {
+        "min": "۸ کاراکتر",
+        "lowercase": "حروف کوچک",
+        "uppercase": "حروف بزرگ",
+        "number": "عدد",
+        "special": "کاراکتر خاص"
+      },
+
+      "validation": {
+        "passwordMin": "رمز عبور باید حداقل ۸ کاراکتر باشد",
+        "lowercase": "رمز عبور باید شامل حروف کوچک باشد",
+        "uppercase": "رمز عبور باید شامل حروف بزرگ باشد",
+        "number": "رمز عبور باید شامل عدد باشد",
+        "special": "رمز عبور باید شامل کاراکتر خاص باشد",
+
+        "confirmRequired": "تایید رمز عبور الزامی است",
+
+        "passwordMismatch": "رمز عبور و تایید آن مطابقت ندارند"
+      }
+    },
+    "forgot": {
+      "title": "رمز عبور را فراموش کرده‌اید؟",
+
+      "subtitle": "ایمیل خود را وارد کنید تا لینک بازنشانی رمز برایتان ارسال شود.",
+
+      "email": "ایمیل آدرس",
+
+      "emailPlaceholder": "you@example.com",
+
+      "submit": "فرستادن لینک تغییر رمز",
+
+      "loading": "در حال ارسال...",
+
+      "backToLogin": "برگشت به صفحه ورود",
+
+      "rememberPassword": "به خاطر آوردید؟ وارد شوید",
+
+      "successTitle": "ایمیل‌تان را چک کنید",
+
+      "successDescription": "لینک تغییر رمز عبور به ایمیل",
+
+      "noEmail": "ایمیلی دریافت نکردید؟",
+
+      "tryAgain": "دوباره تلاش کنید",
+
+      "validation": {
+        "emailRequired": "ایمیل الزامی است",
+        "emailInvalid": "ایمیل نامعتبر است"
+      }
+    },
+    "verify": {
+      "loadingTitle": "در حال تایید ایمیل...",
+      "loadingSubtitle": "لطفاً منتظر بمانید...",
+
+      "successTitle": "ایمیل تایید شد!",
+      "successMessage": "ایمیل شما موفقانه تایید شد!",
+      "toastSuccess": "ایمیل تایید شد!",
+      "redirecting": "در حال انتقال به داشبورد...",
+      "goDashboard": "رفتن به داشبورد",
+
+      "failedTitle": "تایید ناموفق بود",
+      "failed": "تایید ناموفق بود",
+
+      "invalidOtp": "کد تایید نامعتبر یا منقضی شده است",
+
+      "verifyCode": "تایید کد",
+      "verifying": "در حال تایید...",
+
+      "enterOtp": "لطفاً کد تایید ارسال شده به ایمیل خود را وارد کنید",
+
+      "enterCode": "کد ۶ رقمی ارسال شده به",
+      "enterCodeSuffix": "را وارد کنید",
+
+      "resendCode": "ارسال مجدد کد",
+
+      "resendCountdown": "ارسال مجدد تا {{seconds}} ثانیه",
+
+      "resendSuccess": "کد تایید ارسال شد!",
+
+      "resendFailed": "ارسال مجدد کد ناموفق بود",
+
+      "sendFailed": "ارسال کد ناموفق بود",
+
+      "sending": "در حال ارسال...",
+
+      "sendCode": "ارسال کد تایید",
+
+      "enterEmail": "لطفاً ایمیل خود را وارد کنید",
+
+      "emailNotFound": "آدرس ایمیل یافت نشد. لطفاً ایمیل خود را وارد کنید.",
+
+      "enterEmailDescription": "آدرس ایمیل خود را برای دریافت کد تایید وارد کنید.",
+
+      "emailPlaceholder": "your@email.com",
+
+      "useOtp": "لطفاً از کد تایید استفاده کنید",
+
+      "noVerificationMethod": "هیچ روش تاییدی ارائه نشده است",
+
+      "noAccount": "حساب کاربری ندارید؟ ثبت نام کنید"
+    }
+  },
+  "callback": {
+    "invalid": "لینک تایید نامعتبر است یا منقضی شده است.",
+    "success": "ایمیل شما تایید شد! خوش آمدید 🎉",
+    "loginRequired": "ایمیل تایید شد! لطفاً وارد شوید.",
+    "somethingWrong": "مشکلی رخ داد. لطفاً وارد حساب شوید.",
+    "loading": "در حال تایید ایمیل..."
   }
 }
