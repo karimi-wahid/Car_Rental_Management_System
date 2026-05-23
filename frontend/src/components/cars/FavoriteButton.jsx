@@ -2,8 +2,10 @@ import { Heart } from "lucide-react";
 import { Button } from "../ui/button";
 import toast from "react-hot-toast";
 import useFavoriteStore from "@/store/favoriteStore";
+import { useTranslation } from "react-i18next";
 
 const FavoriteButton = ({ carId, classCode }) => {
+  const { t } = useTranslation();
   const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
   const loading = useFavoriteStore((s) => s.loading);
   const error = useFavoriteStore((s) => s.error);
@@ -14,12 +16,13 @@ const FavoriteButton = ({ carId, classCode }) => {
   const handleToggle = async () => {
     try {
       await toggleFavorite(carId, favorited);
-      // ✅ Use favorited (captured before toggle) for correct message
       toast.success(
-        favorited ? "از علاقه‌مندی‌ها حذف شد" : "به علاقه‌مندی‌ها اضافه شد",
+        favorited
+          ? t("favoriteButton.removedFromFavorites")
+          : t("favoriteButton.addedToFavorites"),
       );
     } catch (err) {
-      toast.error(error || "خطایی رخ داد");
+      toast.error(error || t("favoriteButton.errorOccurred"));
       console.error("Error toggling favorite:", err);
     }
   };
@@ -31,6 +34,11 @@ const FavoriteButton = ({ carId, classCode }) => {
       onClick={handleToggle}
       className={`${classCode} ${favorited ? "text-red-500" : ""}`}
       disabled={loading}
+      aria-label={
+        favorited
+          ? t("favoriteButton.removeFromFavorites")
+          : t("favoriteButton.addToFavorites")
+      }
     >
       <Heart className="w-4 h-4" fill={favorited ? "currentColor" : "none"} />
     </Button>

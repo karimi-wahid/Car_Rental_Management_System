@@ -2,25 +2,28 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { Users, Fuel, Gauge, Calendar, ArrowUpLeft, Zap } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatNumber } from "@/lib/utils";
 import FavoriteButton from "./FavoriteButton";
 import { cn } from "@/lib/utils";
-
-const TRANSMISSION_MAP = { automatic: "اتوماتیک", manual: "دستی" };
-const FUEL_MAP = {
-  petrol: "پطرول",
-  diesel: "دیزل",
-  electric: "برقی",
-  hybrid: "هایبرید",
-};
+import { useTranslation } from "react-i18next";
 
 export const CarCard = ({ car, index = 0 }) => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [imgLoaded, setImgLoaded] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const isRTL = i18n.language !== "en";
 
   const isElectric = car.fuelType === "electric";
   const isAvailable = car.availability;
+
+  const getTransmissionText = () => {
+    return t(`transmission.${car.transmission}`, car.transmission);
+  };
+
+  const getFuelTypeText = () => {
+    return t(`fuel.${car.fuelType}`, car.fuelType);
+  };
 
   return (
     <motion.article
@@ -33,7 +36,7 @@ export const CarCard = ({ car, index = 0 }) => {
       }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      dir="rtl"
+      dir={isRTL ? "rtl" : "ltr"}
       className={cn(
         "relative group rounded-3xl overflow-hidden cursor-pointer select-none",
         "bg-white dark:bg-zinc-900",
@@ -70,24 +73,26 @@ export const CarCard = ({ car, index = 0 }) => {
         {!isAvailable && (
           <div className="absolute inset-0 bg-zinc-900/60 flex items-center justify-center">
             <span className="bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full">
-              غیرقابل دسترس
+              {t("carCard.unavailable")}
             </span>
           </div>
         )}
 
         {/* Top row: badges + favorite */}
-        <div className="absolute top-3.5 right-3.5 left-3.5 flex items-center justify-between">
+        <div
+          className={`absolute top-3.5 ${isRTL ? "right-3.5 left-3.5" : "left-3.5 right-3.5"} flex items-center justify-between`}
+        >
           <div className="flex gap-1.5">
             {/* Transmission pill */}
             <span className="bg-black/40 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full border border-white/10">
-              {TRANSMISSION_MAP[car.transmission] || car.transmission}
+              {getTransmissionText()}
             </span>
 
             {/* Electric indicator */}
             {isElectric && (
               <span className="bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
                 <Zap className="w-2.5 h-2.5 fill-white" />
-                برقی
+                {t("carCard.electric")}
               </span>
             )}
           </div>
@@ -102,17 +107,21 @@ export const CarCard = ({ car, index = 0 }) => {
         </div>
 
         {/* Bottom: price */}
-        <div className="absolute bottom-3.5 right-3.5">
+        <div
+          className={`absolute bottom-3.5 ${isRTL ? "right-3.5" : "left-3.5"}`}
+        >
           <div className="flex items-baseline gap-1">
             <span className="text-white font-bold text-xl leading-none drop-shadow-sm">
               {formatCurrency(car.pricePerDay)}
             </span>
-            <span className="text-white/60 text-xs">/ روز</span>
+            <span className="text-white/60 text-xs">{t("carCard.perDay")}</span>
           </div>
         </div>
 
         {/* Bottom: year */}
-        <div className="absolute bottom-3.5 left-3.5">
+        <div
+          className={`absolute bottom-3.5 ${isRTL ? "left-3.5" : "right-3.5"}`}
+        >
           <span className="bg-black/30 backdrop-blur-md text-white/80 text-[11px] px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1">
             <Calendar className="w-2.5 h-2.5" />
             {car.year}
@@ -123,7 +132,7 @@ export const CarCard = ({ car, index = 0 }) => {
       {/* ── Content ─────────────────────────────── */}
       <div className="p-5">
         {/* Title row */}
-        <div className="mb-4">
+        <div className={`mb-4 ${isRTL ? "text-right" : "text-left"}`}>
           <h3 className="text-lg font-bold text-zinc-900 dark:text-white leading-tight line-clamp-1 mb-0.5">
             {car.name}
           </h3>
@@ -135,18 +144,20 @@ export const CarCard = ({ car, index = 0 }) => {
         {/* Specs row */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           {[
-            { icon: Users, value: `${car.seats} نفر`, label: "ظرفیت" },
+            {
+              icon: Users,
+              value: t("carCard.seatsCount", { count: car.seats }),
+              label: t("carCard.capacity"),
+            },
             {
               icon: Fuel,
-              value: FUEL_MAP[car.fuelType] || car.fuelType,
-              label: "سوخت",
+              value: getFuelTypeText(),
+              label: t("carCard.fuel"),
             },
             {
               icon: Gauge,
-              value: car.mileage
-                ? `${Number(car.mileage).toLocaleString("fa-IR")}`
-                : "—",
-              label: "کیلومتر",
+              value: car.mileage ? formatNumber(Number(car.mileage)) : "—",
+              label: t("carCard.mileage"),
             },
           ].map(({ icon: Icon, value, label }) => (
             <div
@@ -166,15 +177,25 @@ export const CarCard = ({ car, index = 0 }) => {
 
         {/* Features */}
         {car.features?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {car.features.slice(0, 3).map((f, i) => (
-              <span
-                key={i}
-                className="text-[11px] text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full"
-              >
-                {f}
-              </span>
-            ))}
+          <div
+            className={`flex flex-wrap gap-1.5 mb-4 ${isRTL ? "justify-end" : "justify-start"}`}
+          >
+            {car.features.slice(0, 3).map((f, i) => {
+              // Try to get localized feature name, fallback to original
+              const featureKey = f.toLowerCase().replace(/\s+/g, "");
+              const localizedFeature = t(
+                `carCard.carFeatures.${featureKey}`,
+                f,
+              );
+              return (
+                <span
+                  key={i}
+                  className="text-[11px] text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full"
+                >
+                  {localizedFeature}
+                </span>
+              );
+            })}
             {car.features.length > 3 && (
               <span className="text-[11px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
                 +{car.features.length - 3}
@@ -192,19 +213,25 @@ export const CarCard = ({ car, index = 0 }) => {
           disabled={!isAvailable}
           onClick={(e) => {
             e.stopPropagation();
-            if (isAvailable) navigate(`/cars/${car._id}`, scrollTo(0, 0));
+            if (isAvailable) navigate(`/cars/${car._id}`);
           }}
           className={cn(
             "w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200",
             isAvailable
               ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-100"
               : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed",
+            isRTL ? "flex-row-reverse" : "",
           )}
         >
-          <span>{isAvailable ? "مشاهده جزئیات" : "در دسترس نیست"}</span>
+          <span>
+            {isAvailable ? t("carCard.viewDetails") : t("carCard.notAvailable")}
+          </span>
           {isAvailable && (
             <motion.span
-              animate={{ x: hovered ? -3 : 0, y: hovered ? -3 : 0 }}
+              animate={{
+                x: hovered ? (isRTL ? 3 : -3) : 0,
+                y: hovered ? -3 : 0,
+              }}
               transition={{ duration: 0.2 }}
             >
               <ArrowUpLeft className="w-4 h-4" />

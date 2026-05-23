@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
-
+import { useTranslation } from "react-i18next";
 import logo from "../../assets/logo.svg";
 import { Mail, MapPin, Phone } from "lucide-react";
+
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <footer className="bg-muted/30 border-t px-3">
       <div className="container-custom py-12">
@@ -13,35 +15,36 @@ const Footer = () => {
               <img src={logo} alt="logo" />
             </Link>
             <p className="text-sm text-muted-foreground">
-              بهترین خدمات کرایه‌ی موتر را با ناوگان لوکس و مراقبت استثنایی از
-              مشتری ما تجربه کنید.
+              {t("footer.brandDescription")}
             </p>
             {/* <div className="flex space-x-4">
               <a
                 href="#"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                <Twitter className="w-5 h-5" />
+                <Youtube className="w-5 h-5" />
               </a>
               <a
                 href="#"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                <Linkedin className="w-5 h-5" />
+                <Facebook className="w-5 h-5" />
               </a>
             </div> */}
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4 text-xl">ارتباطات سریع</h3>
+            <h3 className="font-semibold mb-4 text-xl">
+              {t("footer.quickLinks")}
+            </h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
                   to="/about"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  در باره ما
+                  {t("footer.about")}
                 </Link>
               </li>
               <li>
@@ -49,7 +52,7 @@ const Footer = () => {
                   to="/cars"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  موتر های ما
+                  {t("footer.ourCars")}
                 </Link>
               </li>
               <li>
@@ -57,15 +60,15 @@ const Footer = () => {
                   to="/contact"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  تماس با ما
+                  {t("footer.contact")}
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/faq"
+                  to="/contact"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  پرسش‌های رایج
+                  {t("footer.faq")}
                 </Link>
               </li>
             </ul>
@@ -73,25 +76,35 @@ const Footer = () => {
 
           {/* Services */}
           <div>
-            <h3 className="font-semibold mb-4 text-xl">خدمات</h3>
+            <h3 className="font-semibold mb-4 text-xl">
+              {t("footer.services")}
+            </h3>
             <ul className="space-y-2 text-sm">
-              <li className="text-muted-foreground">Airport Transfers</li>
-              <li className="text-muted-foreground">Long-term Rentals</li>
-              <li className="text-muted-foreground">Corporate Accounts</li>
-              <li className="text-muted-foreground">Chauffeured Services</li>
+              <li className="text-muted-foreground">
+                {t("footer.airportTransfers")}
+              </li>
+              <li className="text-muted-foreground">
+                {t("footer.longTermRentals")}
+              </li>
+              <li className="text-muted-foreground">
+                {t("footer.corporateAccounts")}
+              </li>
+              <li className="text-muted-foreground">
+                {t("footer.chauffeuredServices")}
+              </li>
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold mb-4 text-xl">تماس با ما</h3>
+            <h3 className="font-semibold mb-4 text-xl">
+              {t("footer.contactUs")}
+            </h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
                 <span className="text-muted-foreground">
-                  کابل ۱۲۳
-                  <br />
-                  ولایت کابل - کارته نو
+                  {t("footer.address")}
                 </span>
               </li>
               <li className="flex items-center space-x-3">
@@ -110,7 +123,7 @@ const Footer = () => {
 
         <div className="mt-12 pt-8 border-t text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} CarRental. تمام حقوق محفوظ است.
+            © {new Date().getFullYear()} CarRental. {t("footer.copyright")}
           </p>
         </div>
       </div>

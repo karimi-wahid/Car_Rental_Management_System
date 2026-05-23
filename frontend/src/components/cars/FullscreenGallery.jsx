@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { motion } from "motion/react";
 
 const FullscreenGallery = ({ images, initial, onClose }) => {
   const { i18n } = useTranslation();

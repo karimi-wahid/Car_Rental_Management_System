@@ -1,15 +1,18 @@
 import { motion } from "motion/react";
 import { Car, Search, Filter, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export const EmptyState = ({
-  title = "No cars found",
-  description = "Try adjusting your filters or search criteria",
+  title,
+  description,
   icon: IconComponent,
   icon = "car",
   action,
   secondaryAction,
 }) => {
+  const { t } = useTranslation();
+
   const icons = {
     car: Car,
     search: Search,
@@ -17,6 +20,9 @@ export const EmptyState = ({
   };
 
   const Icon = IconComponent || icons[icon] || Car;
+
+  const finalTitle = title || t("emptyState.defaultTitle");
+  const finalDescription = description || t("emptyState.defaultDescription");
 
   return (
     <motion.div
@@ -27,9 +33,9 @@ export const EmptyState = ({
       <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
         <Icon className="w-12 h-12 text-muted-foreground" />
       </div>
-      <h3 className="text-2xl font-bold mb-2">{title}</h3>
+      <h3 className="text-2xl font-bold mb-2">{finalTitle}</h3>
       <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-        {description}
+        {finalDescription}
       </p>
       <div className="flex gap-3 justify-center">
         {action && (

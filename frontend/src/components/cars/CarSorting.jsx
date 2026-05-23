@@ -6,8 +6,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 export const CarSorting = ({ value, order, onSortChange }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language !== "en";
+
   const getSelectValue = () => {
     const sortValue = value || "createdAt";
     const sortOrder = order || "desc";
@@ -24,41 +28,71 @@ export const CarSorting = ({ value, order, onSortChange }) => {
   };
 
   return (
-    <div className="flex items-center space-x-4 space-x-reverse" dir="rtl">
+    <div
+      className={`flex items-center ${isRTL ? "space-x-4 space-x-reverse" : "space-x-4"} ${isRTL ? "flex-row-reverse" : ""}`}
+      dir={isRTL ? "rtl" : "ltr"}
+    >
       <Label
         htmlFor="sort"
-        className="text-sm font-medium whitespace-nowrap px-2"
+        className={`text-sm font-medium whitespace-nowrap px-2 ${isRTL ? "text-right" : "text-left"}`}
       >
-        مرتب‌سازی :
+        {t("carSorting.sortBy")} :
       </Label>
       <Select value={getSelectValue()} onValueChange={handleSortChange}>
-        <SelectTrigger id="sort" className="w-50 text-right">
-          <SelectValue placeholder="مرتب‌سازی" />
+        <SelectTrigger
+          id="sort"
+          className={`w-50 ${isRTL ? "text-right" : "text-left"}`}
+        >
+          <SelectValue placeholder={t("carSorting.sortBy")} />
         </SelectTrigger>
         <SelectContent className="cursor-pointer">
-          <SelectItem value="createdAt-desc" className="text-right">
-            جدیدترین اول
+          <SelectItem
+            value="createdAt-desc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.newestFirst")}
           </SelectItem>
-          <SelectItem value="createdAt-asc" className="text-right">
-            قدیمی‌ترین اول
+          <SelectItem
+            value="createdAt-asc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.oldestFirst")}
           </SelectItem>
-          <SelectItem value="pricePerDay-asc" className="text-right">
-            قیمت: کم به زیاد
+          <SelectItem
+            value="pricePerDay-asc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.priceLowToHigh")}
           </SelectItem>
-          <SelectItem value="pricePerDay-desc" className="text-right">
-            قیمت: زیاد به کم
+          <SelectItem
+            value="pricePerDay-desc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.priceHighToLow")}
           </SelectItem>
-          <SelectItem value="name-asc" className="text-right">
-            نام: الف تا ی
+          <SelectItem
+            value="name-asc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.nameAscending")}
           </SelectItem>
-          <SelectItem value="name-desc" className="text-right">
-            نام: ی تا الف
+          <SelectItem
+            value="name-desc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.nameDescending")}
           </SelectItem>
-          <SelectItem value="year-desc" className="text-right">
-            سال: جدیدترین اول
+          <SelectItem
+            value="year-desc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.yearNewestFirst")}
           </SelectItem>
-          <SelectItem value="year-asc" className="text-right">
-            سال: قدیمی‌ترین اول
+          <SelectItem
+            value="year-asc"
+            className={isRTL ? "text-right" : "text-left"}
+          >
+            {t("carSorting.yearOldestFirst")}
           </SelectItem>
         </SelectContent>
       </Select>

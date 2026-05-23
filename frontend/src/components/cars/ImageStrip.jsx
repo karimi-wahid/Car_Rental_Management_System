@@ -1,6 +1,7 @@
 import { useState } from "react";
 import FullscreenGallery from "./FullscreenGallery";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "motion/react";
 
 const ImageStrip = ({ images, carName }) => {
   const [gallery, setGallery] = useState(null);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
+import { useTranslation } from "react-i18next";
 import {
   Menu,
   X,
@@ -25,26 +26,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useAuthStore } from "@/store/authStore";
 
 import logo from "../../assets/logo.svg";
+import { getInitials } from "@/lib/utils";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  // Get real auth state from store
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
-
-  // Get user initials for avatar fallback
-  const getUserInitials = (name) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   // Get user role
   const userRole = user?.role || "user";
@@ -52,10 +43,29 @@ const Navbar = () => {
   // Role-based navigation items
   const getNavItems = () => {
     const commonItems = [
-      { name: "صفحه اصلی", path: "/", icon: Home },
-      { name: "موتر ها", path: "/cars", icon: Car },
-      { name: "درباره ما", path: "/about", icon: Info },
-      { name: "تماس با ما", path: "/contact", icon: Phone },
+      {
+        name: t("navbar.home"),
+        path: "/",
+        icon: Home,
+      },
+
+      {
+        name: t("navbar.cars"),
+        path: "/cars",
+        icon: Car,
+      },
+
+      {
+        name: t("navbar.about"),
+        path: "/about",
+        icon: Info,
+      },
+
+      {
+        name: t("navbar.contact"),
+        path: "/contact",
+        icon: Phone,
+      },
     ];
 
     if (!isAuthenticated || !user) {
@@ -65,12 +75,20 @@ const Navbar = () => {
     if (userRole === "admin") {
       return [
         ...commonItems,
-        { name: "پنل ادمین", path: "/admin/dashboard", icon: Shield },
+        {
+          name: t("navbar.adminPanel"),
+          path: "/admin/dashboard",
+          icon: Shield,
+        },
       ];
     } else {
       return [
         ...commonItems,
-        { name: "داشبورد", path: "/dashboard", icon: LayoutDashboard },
+        {
+          name: t("navbar.dashboard"),
+          path: "/dashboard",
+          icon: LayoutDashboard,
+        },
       ];
     }
   };
@@ -120,14 +138,14 @@ const Navbar = () => {
                   <div className="hidden md:block text-right">
                     <p className="text-sm font-medium">{user.name}</p>
                     <p className="text-xs text-muted-foreground capitalize">
-                      {userRole === "admin" ? "ادمین" : "کاربر"}
+                      {userRole === "admin"
+                        ? t("roles.admin")
+                        : t("roles.user")}
                     </p>
                   </div>
                   <Avatar className="cursor-pointer ring-2 ring-primary/20">
                     <AvatarImage src={user?.avatar} alt={user.name} />
-                    <AvatarFallback>
-                      {getUserInitials(user.name)}
-                    </AvatarFallback>
+                    <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                   </Avatar>
                 </div>
               </DropdownMenuTrigger>
@@ -140,17 +158,19 @@ const Navbar = () => {
                   }}
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
-                  {userRole === "admin" ? "پنل ادمین" : "داشبورد"}
+                  {userRole === "admin"
+                    ? t("navbar.adminPanel")
+                    : t("navbar.dashboard")}
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   onClick={() => {
-                    navigate("/profile");
+                    navigate("/settings");
                     setOpen(false);
                   }}
                 >
                   <User className="mr-2 h-4 w-4" />
-                  پروفایل
+                  {t("navbar.profile")}
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
@@ -158,7 +178,7 @@ const Navbar = () => {
                   className="text-red-600 hover:text-red-700 focus:text-red-700"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  خروج
+                  {t("navbar.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -171,7 +191,7 @@ const Navbar = () => {
                   scrollTo(0, 0);
                 }}
               >
-                ورود
+                {t("navbar.login")}
               </Button>
               <Button
                 onClick={() => {
@@ -179,7 +199,7 @@ const Navbar = () => {
                   scrollTo(0, 0);
                 }}
               >
-                ثبت نام
+                {t("navbar.register")}
               </Button>
             </div>
           )}
@@ -223,7 +243,9 @@ const Navbar = () => {
                   <div className="border-t my-2 pt-2">
                     <p className="px-3 py-2 text-sm font-medium">{user.name}</p>
                     <p className="px-3 py-1 text-xs text-muted-foreground capitalize">
-                      {userRole === "admin" ? "ادمین" : "کاربر"}
+                      {userRole === "admin"
+                        ? t("roles.admin")
+                        : t("roles.user")}
                     </p>
                   </div>
 
@@ -236,20 +258,22 @@ const Navbar = () => {
                     }}
                   >
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    {userRole === "admin" ? "پنل ادمین" : "داشبورد"}
+                    {userRole === "admin"
+                      ? t("navbar.adminPanel")
+                      : t("navbar.dashboard")}
                   </Button>
 
                   <Button
                     variant="ghost"
                     className="justify-start"
                     onClick={() => {
-                      navigate("/profile");
+                      navigate("/settings");
                       scrollTo(0, 0);
                       setOpen(false);
                     }}
                   >
                     <User className="mr-2 h-4 w-4" />
-                    پروفایل
+                    {t("navbar.profile")}
                   </Button>
 
                   <Button
@@ -258,7 +282,7 @@ const Navbar = () => {
                     onClick={handleLogout}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    خروج
+                    {t("navbar.logout")}
                   </Button>
                 </>
               )}
@@ -272,7 +296,7 @@ const Navbar = () => {
                       setOpen(false);
                     }}
                   >
-                    ورود
+                    {t("navbar.login")}
                   </Button>
                   <Button
                     onClick={() => {
@@ -281,7 +305,7 @@ const Navbar = () => {
                       setOpen(false);
                     }}
                   >
-                    ثبت نام
+                    {t("navbar.register")}
                   </Button>
                 </div>
               )}

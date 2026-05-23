@@ -114,7 +114,7 @@ const FeaturesSection = () => {
             >
               {/* Number watermark */}
               <span
-                className="absolute top-6 left-6 text-6xl font-black text-zinc-100 dark:text-zinc-900 select-none transition-colors duration-300 group-hover:text-zinc-200 dark:group-hover:text-zinc-800"
+                className={`absolute top-6 ${i18n.language === "en" ? "right-6" : "left-6"} text-6xl font-black text-zinc-100 dark:text-zinc-900 select-none transition-colors duration-300 group-hover:text-zinc-200 dark:group-hover:text-zinc-800`}
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
                 {f.num}

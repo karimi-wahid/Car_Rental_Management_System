@@ -37,23 +37,23 @@ import ImageStrip from "@/components/cars/ImageStrip";
 import SpecPill from "@/components/cars/SpecPill";
 import TabBtn from "@/components/cars/TabBtn";
 
-const FUEL_MAP = {
-  petrol: "fuel.petrol",
-  diesel: "fuel.diesel",
-  electric: "fuel.electric",
-  hybrid: "fuel.hybrid",
-};
-
-const TRANS_MAP = {
-  automatic: "transmission.automatic",
-  manual: "transmission.manual",
-};
-
 // ── Main Page ──────────────────────────────────────────────────
 const CarDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+
+  const TRANS_MAP = {
+    automatic: t("car.transmission.automatic"),
+    manual: t("car.transmission.manual"),
+  };
+
+  const FUEL_MAP = {
+    petrol: t("fuel.petrol"),
+    diesel: t("fuel.diesel"),
+    electric: t("fuel.electric"),
+    hybrid: t("fuel.hybrid"),
+  };
 
   const isRTL = i18n.language !== "en";
   const { isAuthenticated } = useAuthStore();
@@ -148,24 +148,24 @@ const CarDetailsPage = () => {
   const specs = [
     {
       icon: Users,
-      label: t("cars.capacity"),
+      label: t("car.specs.capacity"),
       value: `${car.seats} ${t("cars.person")}`,
     },
     {
       icon: Fuel,
-      label: t("cars.fuel"),
+      label: t("car.specs.fuel"),
       value: FUEL_MAP[car.fuelType]?.[i18n.language] || car.fuelType,
     },
     {
       icon: Gauge,
-      label: t("cars.mileage"),
+      label: t("car.specs.mileage"),
       value: car.mileage
         ? Number(car.mileage).toLocaleString(
             i18n.language === "en" ? "en-US" : "fa-IR",
           )
         : "—",
     },
-    { icon: Calendar, label: t("cars.year"), value: car.year },
+    { icon: Calendar, label: t("car.specs.year"), value: car.year },
   ];
 
   return (
