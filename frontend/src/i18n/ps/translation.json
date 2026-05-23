@@ -490,5 +490,87 @@
     "loginRequired": "ایمیل تایید شو! مهرباني وکړئ ننوځئ.",
     "somethingWrong": "یو څه ستونزه رامنځته شوه. مهرباني وکړئ بیا ننوځئ.",
     "loading": "ستاسو ایمیل تاییدیږي..."
+  },
+  "unauthorized": {
+    "title": "غیر مجاز لاسرسی",
+    "description": "تاسو د دې پاڼې د لیدلو اجازه نه لرئ.",
+    "yourRole": "ستاسو رول:",
+    "allowedRoles": "اجازه لرونکي رولونه:",
+    "goDashboard": "ډشبورډ ته لاړ شئ",
+    "goBack": "مخکنۍ پاڼې ته ستنېدل",
+
+    "roles": {
+      "admin": "اډمین",
+      "user": "کارن"
+    }
+  },
+  "cars": {
+    "title": "زموږ موټرونه",
+    "description": "له زموږ د لوکس او لوړ کیفیت موټرونو څخه انتخاب وکړئ",
+
+    "empty": {
+      "title": "هیڅ موټر ونه موندل شو",
+      "description": "ستاسو د لټون له معیارونو سره سم هېڅ موټر ونه موندل شو. مهرباني وکړئ فلټرونه بدل کړئ.",
+      "resetFilters": "فلټرونه بیا تنظیم کړئ"
+    }
+  },
+  "car": {
+    "perDay": "په ورځ",
+    "day": "ورځ",
+    "availableForBooking": "د بکینګ لپاره موجود",
+    "notAvailable": "موجود نه دی",
+    "instantConfirmation": "فوري تایید",
+    "fullInsurance": "بشپړ بیمه",
+    "delivery": "په ځای سپارل",
+    "support247": "۲۴/۷ ملاتړ",
+    "back": "بېرته",
+    "loading": "د بارېدو په حال کې",
+    "carNotFound": "موټر ونه موندل شو",
+    "backToCars": "موټرو ته بېرته",
+    "bookNow": "اوس بک کړئ",
+    "share": "شریکول",
+    "reviews": "بیاکتنې",
+    "comments": "تبصرې",
+
+    "specs": {
+      "capacity": "ظرفیت",
+      "fuel": "تیل",
+      "mileage": "مایلیج",
+      "year": "کال"
+    },
+
+    "fuelTypes": {
+      "petrol": "پټرول",
+      "diesel": "ډیزل",
+      "electric": "برقي",
+      "hybrid": "هایبرډ"
+    },
+
+    "transmission": {
+      "automatic": "اتومات",
+      "manual": "لاسي"
+    },
+
+    "tabs": {
+      "specs": "تخنیکي مشخصات",
+      "features": "ځانګړتیاوې",
+      "policy": "د کرایې شرایط"
+    },
+
+    "policy": {
+      "validLicense": "د موټر چلولو معتبر جواز اړین دی",
+      "minimumAge": "د چلوونکي لږ تر لږه عمر: ۱۸ کاله",
+      "freeDelivery": "د ۳ ورځو څخه د زیاتو بکینګونو لپاره وړیا سپارل",
+      "freeCancellation": "د سپارلو څخه ۲۴ ساعته مخکې وړیا لغوه کول",
+      "unlimitedMileage": "نامحدود مایلیج شامل دی",
+      "support": "۲۴/۷ د لارې مرسته"
+    },
+
+    "trust": {
+      "insurance": "بشپړ بیمه",
+      "confirmation": "فوري تایید",
+      "delivery": "په ځای سپارل",
+      "support": "۲۴/۷ ملاتړ"
+    }
   }
 }

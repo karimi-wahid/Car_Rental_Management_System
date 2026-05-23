@@ -8,8 +8,11 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { SkeletonCard } from "@/components/common/LoadingState";
 import useCarStore from "@/store/carStore";
+import { useTranslation } from "react-i18next";
 
 const CarsPage = () => {
+  const { t, i18n } = useTranslation();
+
   const {
     cars,
     loading,
@@ -54,11 +57,11 @@ const CarsPage = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="container-custom py-8 px-2"
-      dir="rtl"
+      dir={i18n.language === "en" ? "ltr" : "rtl"}
     >
       <PageHeader
-        title="موترهای ما"
-        description="از مجموعه موترهای لوکس و باکیفیت ما انتخاب کنید"
+        title={t("cars.title")}
+        description={t("cars.description")}
         withBreadcrumb
       />
 
@@ -73,7 +76,11 @@ const CarsPage = () => {
         {/* Main Content */}
         <div className="flex-1 p-2">
           {/* Sorting and Results Count */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4 mb-6">
+          <div
+            className={`flex flex-col sm:flex-row sm:items-center gap-4 mb-6 ${
+              i18n.language === "en" ? "justify-start" : "justify-end"
+            }`}
+          >
             <CarSorting
               value={filters.sortBy || "createdAt"}
               order={filters.sortOrder || "desc"}
@@ -104,10 +111,10 @@ const CarsPage = () => {
             ) : (
               <EmptyState
                 icon="search"
-                title="هیچ موتری یافت نشد"
-                description="هیچ موتری با معیارهای جستجوی شما یافت نشد. لطفاً فیلترها را تغییر دهید."
+                title={t("cars.empty.title")}
+                description={t("cars.empty.description")}
                 action={{
-                  label: "بازنشانی فیلترها",
+                  label: t("cars.empty.resetFilters"),
                   onClick: resetFilters,
                 }}
               />

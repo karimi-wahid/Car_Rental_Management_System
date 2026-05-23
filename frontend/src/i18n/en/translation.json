@@ -487,5 +487,87 @@
     "loginRequired": "Email verified! Please log in.",
     "somethingWrong": "Something went wrong. Please try logging in.",
     "loading": "Verifying your email..."
+  },
+  "unauthorized": {
+    "title": "Unauthorized Access",
+    "description": "You do not have permission to view this page.",
+    "yourRole": "Your role:",
+    "allowedRoles": "Allowed roles:",
+    "goDashboard": "Go to Dashboard",
+    "goBack": "Back to Previous Page",
+
+    "roles": {
+      "admin": "Admin",
+      "user": "User"
+    }
+  },
+  "cars": {
+    "title": "Our Cars",
+    "description": "Choose from our collection of luxury and premium cars",
+
+    "empty": {
+      "title": "No cars found",
+      "description": "No cars matched your search criteria. Please change the filters.",
+      "resetFilters": "Reset Filters"
+    }
+  },
+  "car": {
+    "perDay": "per day",
+    "day": "day",
+    "availableForBooking": "Available for booking",
+    "notAvailable": "Not available",
+    "instantConfirmation": "Instant confirmation",
+    "fullInsurance": "Full insurance",
+    "delivery": "On-site delivery",
+    "support247": "24/7 support",
+    "back": "Back",
+    "loading": "Loading",
+    "carNotFound": "Car not found",
+    "backToCars": "Back to cars",
+    "bookNow": "Book now",
+    "share": "Share",
+    "reviews": "Reviews",
+    "comments": "Comments",
+
+    "specs": {
+      "capacity": "Capacity",
+      "fuel": "Fuel",
+      "mileage": "Mileage",
+      "year": "Year"
+    },
+
+    "fuelTypes": {
+      "petrol": "Petrol",
+      "diesel": "Diesel",
+      "electric": "Electric",
+      "hybrid": "Hybrid"
+    },
+
+    "transmission": {
+      "automatic": "Automatic",
+      "manual": "Manual"
+    },
+
+    "tabs": {
+      "specs": "Specifications",
+      "features": "Features",
+      "policy": "Rental Policy"
+    },
+
+    "policy": {
+      "validLicense": "A valid driving license is required",
+      "minimumAge": "Minimum driver age: 18 years",
+      "freeDelivery": "Free delivery for bookings over 3 days",
+      "freeCancellation": "Free cancellation up to 24 hours before pickup",
+      "unlimitedMileage": "Unlimited mileage included",
+      "support": "24/7 roadside assistance"
+    },
+
+    "trust": {
+      "insurance": "Full insurance",
+      "confirmation": "Instant confirmation",
+      "delivery": "On-site delivery",
+      "support": "24/7 support"
+    }
   }
 }

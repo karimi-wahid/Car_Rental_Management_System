@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
@@ -32,199 +33,29 @@ import FavoriteButton from "@/components/cars/FavoriteButton";
 import { CarReviews } from "@/components/cars/CarReviews";
 import { CarComments } from "@/components/cars/CarComments";
 import { cn } from "@/lib/utils";
+import ImageStrip from "@/components/cars/ImageStrip";
+import SpecPill from "@/components/cars/SpecPill";
+import TabBtn from "@/components/cars/TabBtn";
 
 const FUEL_MAP = {
-  petrol: "پطرول",
-  diesel: "دیزل",
-  electric: "برقی",
-  hybrid: "هایبرید",
-};
-const TRANS_MAP = { automatic: "اتوماتیک", manual: "دستی" };
-
-// ── Fullscreen Gallery ─────────────────────────────────────────
-const FullscreenGallery = ({ images, initial, onClose }) => {
-  const [current, setCurrent] = useState(initial);
-  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
-  const next = () => setCurrent((c) => (c + 1) % images.length);
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key === "ArrowLeft") next();
-      if (e.key === "ArrowRight") prev();
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-zinc-950/95 backdrop-blur-sm flex items-center justify-center"
-      onClick={onClose}
-    >
-      <button
-        className="absolute top-5 left-5 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
-        onClick={onClose}
-      >
-        <X className="w-5 h-5" />
-      </button>
-
-      <button
-        className="absolute right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
-        onClick={(e) => {
-          e.stopPropagation();
-          prev();
-        }}
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
-      <button
-        className="absolute left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
-        onClick={(e) => {
-          e.stopPropagation();
-          next();
-        }}
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-
-      <motion.img
-        key={current}
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.25 }}
-        src={images[current]?.url || images[current]}
-        className="max-h-[85vh] max-w-[90vw] object-contain"
-        onClick={(e) => e.stopPropagation()}
-      />
-
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-        {images.map((_, i) => (
-          <button
-            key={i}
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrent(i);
-            }}
-            className={cn(
-              "h-1 rounded-full transition-all duration-300",
-              i === current ? "w-6 bg-white" : "w-2 bg-white/30",
-            )}
-          />
-        ))}
-      </div>
-    </motion.div>
-  );
+  petrol: "fuel.petrol",
+  diesel: "fuel.diesel",
+  electric: "fuel.electric",
+  hybrid: "fuel.hybrid",
 };
 
-// ── Image Strip ────────────────────────────────────────────────
-const ImageStrip = ({ images, carName }) => {
-  const [gallery, setGallery] = useState(null);
-  const main = images?.[0]?.url || images?.[0] || "/placeholder-car.jpg";
-  const thumbs = images?.slice(1, 5) || [];
-
-  return (
-    <>
-      <div className="grid grid-cols-4 grid-rows-2 gap-2 h-105 md:h-130">
-        {/* Main large image */}
-        <div
-          className="col-span-3 row-span-2 relative overflow-hidden rounded-2xl cursor-zoom-in"
-          onClick={() => setGallery(0)}
-        >
-          <motion.img
-            src={main}
-            alt={carName}
-            whileHover={{ scale: 1.03 }}
-            transition={{ duration: 0.5 }}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
-        </div>
-
-        {/* Thumbnails */}
-        {[0, 1, 2, 3].map((i) => {
-          const src = thumbs[i]?.url || thumbs[i];
-          return (
-            <div
-              key={i}
-              className={cn(
-                "relative overflow-hidden rounded-xl cursor-pointer",
-                i === 3 && images.length > 5 ? "relative" : "",
-              )}
-              onClick={() => src && setGallery(i + 1)}
-            >
-              {src ? (
-                <>
-                  <motion.img
-                    src={src}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.4 }}
-                    className="w-full h-full object-cover"
-                  />
-                  {i === 3 && images.length > 5 && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">
-                        +{images.length - 4}
-                      </span>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="w-full h-full bg-zinc-100 dark:bg-zinc-800" />
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <AnimatePresence>
-        {gallery !== null && (
-          <FullscreenGallery
-            images={images}
-            initial={gallery}
-            onClose={() => setGallery(null)}
-          />
-        )}
-      </AnimatePresence>
-    </>
-  );
+const TRANS_MAP = {
+  automatic: "transmission.automatic",
+  manual: "transmission.manual",
 };
-
-// ── Quick Spec Pill ────────────────────────────────────────────
-const SpecPill = ({ icon: Icon, label, value }) => (
-  <div className="flex flex-col items-center gap-1.5 px-5 py-4 bg-zinc-50 dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-    <Icon className="w-4 h-4 text-zinc-400" />
-    <span className="text-sm font-semibold text-zinc-900 dark:text-white">
-      {value}
-    </span>
-    <span className="text-[10px] text-zinc-400 uppercase tracking-wider">
-      {label}
-    </span>
-  </div>
-);
-
-// ── Tab Button ─────────────────────────────────────────────────
-const TabBtn = ({ active, onClick, children }) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "text-sm font-medium pb-3 border-b-2 transition-all duration-200 whitespace-nowrap",
-      active
-        ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white"
-        : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300",
-    )}
-  >
-    {children}
-  </button>
-);
 
 // ── Main Page ──────────────────────────────────────────────────
 const CarDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+
+  const isRTL = i18n.language !== "en";
   const { isAuthenticated } = useAuthStore();
   const [bookingLoading, setBookingLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("specs");
@@ -233,14 +64,6 @@ const CarDetailsPage = () => {
   const { selectedCar: car, loading, fetchCarById } = useCarStore();
   const { createBooking, userBookings, fetchUserBookings, error } =
     useBookingStore();
-
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
   useEffect(() => {
     if (id) {
@@ -259,7 +82,7 @@ const CarDetailsPage = () => {
 
   const handleBooking = async (startDate, endDate) => {
     if (!isAuthenticated) {
-      toast.error("لطفاً برای رزرو موتر وارد حساب خود شوید");
+      toast.error(t("cars.loginToBook"));
       navigate("/login", { state: { from: `/cars/${id}` } });
       return;
     }
@@ -270,10 +93,10 @@ const CarDetailsPage = () => {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       });
-      toast.success("رزرو موفقانه انجام شد!");
+      toast.success(t("cars.bookingSuccess"));
       navigate("/bookings");
     } catch {
-      toast.error(error || "رزرو ناموفق بود");
+      toast.error(error || t("cars.bookingFailed"));
     } finally {
       setBookingLoading(false);
     }
@@ -286,18 +109,21 @@ const CarDetailsPage = () => {
       } catch {}
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success("لینک کپی شد");
+      toast.success(t("cars.linkCopied"));
     }
   };
 
   // ── Loading ──
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
+      <div
+        className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-zinc-400 tracking-widest uppercase">
-            در حال بارگذاری
+            {t("common.loading")}
           </p>
         </div>
       </div>
@@ -306,29 +132,40 @@ const CarDetailsPage = () => {
   // ── Not found ──
   if (!car)
     return (
-      <div className="min-h-screen flex items-center justify-center" dir="rtl">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         <div className="text-center">
-          <p className="text-zinc-400 mb-6 text-sm">موتر مورد نظر یافت نشد</p>
+          <p className="text-zinc-400 mb-6 text-sm">{t("cars.notFound")}</p>
           <Button onClick={() => navigate("/cars")} variant="outline">
-            بازگشت به موترها
+            {t("cars.backToCars")}
           </Button>
         </div>
       </div>
     );
 
   const specs = [
-    { icon: Users, label: "ظرفیت", value: `${car.seats} نفر` },
+    {
+      icon: Users,
+      label: t("cars.capacity"),
+      value: `${car.seats} ${t("cars.person")}`,
+    },
     {
       icon: Fuel,
-      label: "سوخت",
-      value: FUEL_MAP[car.fuelType] || car.fuelType,
+      label: t("cars.fuel"),
+      value: FUEL_MAP[car.fuelType]?.[i18n.language] || car.fuelType,
     },
     {
       icon: Gauge,
-      label: "کیلومتر",
-      value: car.mileage ? Number(car.mileage).toLocaleString("fa-IR") : "—",
+      label: t("cars.mileage"),
+      value: car.mileage
+        ? Number(car.mileage).toLocaleString(
+            i18n.language === "en" ? "en-US" : "fa-IR",
+          )
+        : "—",
     },
-    { icon: Calendar, label: "سال", value: car.year },
+    { icon: Calendar, label: t("cars.year"), value: car.year },
   ];
 
   return (
@@ -336,7 +173,7 @@ const CarDetailsPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="bg-white dark:bg-zinc-950 min-h-screen"
-      dir="rtl"
+      dir={isRTL ? "rtl" : "ltr"}
     >
       {/* ── Sticky top bar ─────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-100 dark:border-zinc-800">
@@ -345,8 +182,13 @@ const CarDetailsPage = () => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            بازگشت
+            {isRTL ? (
+              <ArrowRight className="h-4 w-4" />
+            ) : (
+              <ArrowLeft className="h-4 w-4" />
+            )}
+
+            {t("common.back")}
           </button>
 
           <div className="hidden md:block text-sm font-medium text-zinc-900 dark:text-white truncate max-w-xs">
@@ -403,7 +245,7 @@ const CarDetailsPage = () => {
                 {formatCurrency(car.pricePerDay)}
               </p>
               <p className="text-xs text-zinc-400 mt-1 tracking-widest uppercase">
-                فی روز
+                {t("car.perDay")}
               </p>
             </motion.div>
           </div>
@@ -439,20 +281,20 @@ const CarDetailsPage = () => {
               {car.availability ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 rounded-full">
                   <CheckCircle className="w-3.5 h-3.5" />
-                  موجود برای رزرو
+                  {t("car.availableForBooking")}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full">
-                  غیر موجود
+                  {t("car.notAvailable")}
                 </span>
               )}
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1.5 rounded-full">
                 <Clock className="w-3.5 h-3.5" />
-                تایید فوری
+                {t("car.instantConfirmation")}
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1.5 rounded-full">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                بیمه کامل
+                {t("car.fullInsurance")}
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1.5 rounded-full">
                 {TRANS_MAP[car.transmission] || car.transmission}
@@ -464,9 +306,9 @@ const CarDetailsPage = () => {
             {/* Tab nav */}
             <div className="flex gap-8 border-b border-zinc-100 dark:border-zinc-800">
               {[
-                { id: "specs", label: "مشخصات فنی" },
-                { id: "features", label: "امکانات" },
-                { id: "policy", label: "شرایط کرایه" },
+                { id: "specs", label: t("car.tabs.specs") },
+                { id: "features", label: t("car.tabs.features") },
+                { id: "policy", label: t("car.tabs.policy") },
               ].map((t) => (
                 <TabBtn
                   key={t.id}
@@ -510,19 +352,28 @@ const CarDetailsPage = () => {
                     {[
                       {
                         icon: ShieldCheck,
-                        text: "گواهینامه معتبر رانندگی ضروری است",
+                        text: t("car.policy.validLicense"),
                       },
-                      { icon: Users, text: "حداقل سن راننده: ۱۸ سال" },
+                      {
+                        icon: Users,
+                        text: t("car.policy.minimumAge"),
+                      },
                       {
                         icon: MapPin,
-                        text: "تحویل در محل: رایگان برای رزرو بالای ۳ روز",
+                        text: t("car.policy.freeDelivery"),
                       },
                       {
                         icon: Clock,
-                        text: "لغو رایگان تا ۲۴ ساعت قبل از تحویل",
+                        text: t("car.policy.freeCancellation"),
                       },
-                      { icon: Gauge, text: "کیلومتراژ نامحدود شامل قیمت است" },
-                      { icon: Star, text: "کمک‌رسانی ۲۴/۷ در طول کرایه" },
+                      {
+                        icon: Gauge,
+                        text: t("car.policy.unlimitedMileage"),
+                      },
+                      {
+                        icon: Star,
+                        text: t("car.policy.support"),
+                      },
                     ].map(({ icon: Icon, text }, i) => (
                       <div
                         key={i}
@@ -566,7 +417,9 @@ const CarDetailsPage = () => {
                     >
                       {formatCurrency(car.pricePerDay)}
                     </span>
-                    <span className="text-zinc-500 text-sm mr-2">/ روز</span>
+                    <span className="text-zinc-500 text-sm mr-2">
+                      / {t("car.day")}
+                    </span>
                   </div>
                   {car.averageRating > 0 && (
                     <div className="flex items-center gap-1 text-amber-400">
@@ -597,10 +450,22 @@ const CarDetailsPage = () => {
               {/* Trust signals */}
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {[
-                  { icon: ShieldCheck, text: "بیمه کامل" },
-                  { icon: Clock, text: "تایید فوری" },
-                  { icon: MapPin, text: "تحویل در محل" },
-                  { icon: Star, text: "۲۴/۷ پشتیبانی" },
+                  {
+                    icon: ShieldCheck,
+                    text: t("car.fullInsurance"),
+                  },
+                  {
+                    icon: Clock,
+                    text: t("car.instantConfirmation"),
+                  },
+                  {
+                    icon: MapPin,
+                    text: t("car.delivery"),
+                  },
+                  {
+                    icon: Star,
+                    text: t("car.support247"),
+                  },
                 ].map(({ icon: Icon, text }) => (
                   <div
                     key={text}
