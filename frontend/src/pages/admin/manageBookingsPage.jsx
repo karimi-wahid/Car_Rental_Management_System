@@ -37,8 +37,10 @@ import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import useBookingStore from "@/store/bookingStore";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const ManageBookingsPage = () => {
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -46,6 +48,8 @@ const ManageBookingsPage = () => {
   const [newStatus, setNewStatus] = useState("");
   const [statusNote, setStatusNote] = useState("");
   const navigate = useNavigate();
+  const isRTL = i18n.language !== "en";
+
   const {
     bookings,
     loading,
@@ -66,20 +70,20 @@ const ManageBookingsPage = () => {
   }, [fetchAllBookings, currentPage, itemsPerPage]);
 
   const handleStatusUpdate = async () => {
-    console.log(selectedBooking._id, newStatus, statusNote);
     if (!selectedBooking || !newStatus) return;
 
     try {
       await updateBookingStatus(selectedBooking._id, newStatus, statusNote);
-
-      toast.success(`وضعیت رزرو به ${getStatusText(newStatus)} تغییر کرد`);
-
+      toast.success(
+        t("manageBookings.statusUpdateSuccess", {
+          status: getStatusText(newStatus),
+        }),
+      );
       setIsStatusDialogOpen(false);
       setStatusNote("");
       setNewStatus("");
     } catch (err) {
-      toast.error(error);
-      console.log(error);
+      toast.error(error || t("manageBookings.statusUpdateError"));
     }
   };
 
@@ -99,17 +103,23 @@ const ManageBookingsPage = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "confirmed":
-        return "تایید شده";
+        return t("manageBookings.statusConfirmed");
       case "pending":
-        return "در انتظار";
+        return t("manageBookings.statusPending");
       case "cancelled":
-        return "لغو شده";
+        return t("manageBookings.statusCancelled");
       default:
         return status;
     }
   };
 
   const filteredBookings = bookings.filter((booking) => {
+    if (statusFilter !== "all" && booking.status !== statusFilter) {
+      return false;
+    }
+
+    if (!searchQuery) return true;
+
     const carMatch = booking.car?.name
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -123,9 +133,9 @@ const ManageBookingsPage = () => {
   });
 
   const statusOptions = [
-    { value: "pending", label: "در انتظار" },
-    { value: "confirmed", label: "تایید شده" },
-    { value: "cancelled", label: "لغو شده" },
+    { value: "pending", label: t("manageBookings.statusPending") },
+    { value: "confirmed", label: t("manageBookings.statusConfirmed") },
+    { value: "cancelled", label: t("manageBookings.statusCancelled") },
   ];
 
   return (
@@ -133,44 +143,60 @@ const ManageBookingsPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      dir="rtl"
+      dir={isRTL ? "rtl" : "ltr"}
     >
       <PageHeader
-        title="مدیریت رزروها"
-        description="مشاهده و مدیریت تمام رزروها"
+        title={t("manageBookings.title")}
+        description={t("manageBookings.description")}
       />
 
       {/* Filters */}
       <Card className="mb-6">
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div
+            className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 ${isRTL ? "sm:flex-row-reverse" : ""}`}
+          >
             <div className="relative flex-1">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Search
+                className={`absolute ${isRTL ? "right-3" : "left-3"} top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4`}
+              />
               <Input
-                placeholder="جستجو بر اساس نام موتر یا مشتری..."
+                placeholder={t("manageBookings.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-9 text-right"
+                className={`${isRTL ? "pr-9 text-right" : "pl-9 text-left"}`}
               />
             </div>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-45">
-                <Filter className="w-4 h-4 ml-2" />
-                <SelectValue placeholder="وضعیت" />
+                <Filter className={`w-4 h-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+                <SelectValue placeholder={t("manageBookings.status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-right">
-                  همه رزروها
+                <SelectItem
+                  value="all"
+                  className={isRTL ? "text-right" : "text-left"}
+                >
+                  {t("manageBookings.allBookings")}
                 </SelectItem>
-                <SelectItem value="pending" className="text-right">
-                  در انتظار
+                <SelectItem
+                  value="pending"
+                  className={isRTL ? "text-right" : "text-left"}
+                >
+                  {t("manageBookings.statusPending")}
                 </SelectItem>
-                <SelectItem value="confirmed" className="text-right">
-                  تایید شده
+                <SelectItem
+                  value="confirmed"
+                  className={isRTL ? "text-right" : "text-left"}
+                >
+                  {t("manageBookings.statusConfirmed")}
                 </SelectItem>
-                <SelectItem value="cancelled" className="text-right">
-                  لغو شده
+                <SelectItem
+                  value="cancelled"
+                  className={isRTL ? "text-right" : "text-left"}
+                >
+                  {t("manageBookings.statusCancelled")}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -184,20 +210,36 @@ const ManageBookingsPage = () => {
           {loading ? (
             <div className="p-8 text-center">
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">در حال بارگذاری رزروها...</p>
+              <p className="text-muted-foreground">
+                {t("manageBookings.loading")}
+              </p>
             </div>
           ) : filteredBookings.length > 0 ? (
             <>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">مشتری</TableHead>
-                    <TableHead className="text-right">موتر</TableHead>
-                    <TableHead className="text-right">تاریخ‌ها</TableHead>
-                    <TableHead className="text-right">مدت</TableHead>
-                    <TableHead className="text-right">مجموع</TableHead>
-                    <TableHead className="text-right">وضعیت</TableHead>
-                    <TableHead className="text-left">عملیات</TableHead>
+                    <TableHead className={isRTL ? "text-right" : "text-left"}>
+                      {t("manageBookings.customer")}
+                    </TableHead>
+                    <TableHead className={isRTL ? "text-right" : "text-left"}>
+                      {t("manageBookings.car")}
+                    </TableHead>
+                    <TableHead className={isRTL ? "text-right" : "text-left"}>
+                      {t("manageBookings.dates")}
+                    </TableHead>
+                    <TableHead className={isRTL ? "text-right" : "text-left"}>
+                      {t("manageBookings.duration")}
+                    </TableHead>
+                    <TableHead className={isRTL ? "text-right" : "text-left"}>
+                      {t("manageBookings.total")}
+                    </TableHead>
+                    <TableHead className={isRTL ? "text-right" : "text-left"}>
+                      {t("manageBookings.status")}
+                    </TableHead>
+                    <TableHead className={isRTL ? "text-left" : "text-right"}>
+                      {t("manageBookings.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -214,7 +256,9 @@ const ManageBookingsPage = () => {
                       <TableRow key={booking._id}>
                         <TableCell>
                           {user && (
-                            <div className="flex items-center gap-3">
+                            <div
+                              className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
+                            >
                               <Avatar className="h-8 w-8">
                                 <AvatarImage src={user.avatar} />
                                 <AvatarFallback>
@@ -222,12 +266,13 @@ const ManageBookingsPage = () => {
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-medium text-right">
+                                <p
+                                  className={`font-medium ${isRTL ? "text-right" : "text-left"}`}
+                                >
                                   {user.name}
                                 </p>
                                 <p
-                                  className="text-xs text-muted-foreground text-right"
-                                  dir="ltr"
+                                  className={`text-xs text-muted-foreground ${isRTL ? "text-right" : "text-left"}`}
                                 >
                                   {user.email}
                                 </p>
@@ -236,31 +281,39 @@ const ManageBookingsPage = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-lg overflow-hidden">
+                          <div
+                            className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+                          >
+                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
                               <img
                                 src={
-                                  booking.car.images?.[0]?.url ||
+                                  booking.car?.images?.[0]?.url ||
                                   "/placeholder-car.jpg"
                                 }
-                                alt={booking.car.name}
+                                alt={booking.car?.name}
                                 className="w-full h-full object-cover"
                               />
                             </div>
                             <div>
-                              <p className="font-medium text-right">
-                                {booking.car.name}
+                              <p
+                                className={`font-medium ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {booking.car?.name}
                               </p>
-                              <p className="text-xs text-muted-foreground text-right">
-                                {booking.car.licensePlate}
+                              <p
+                                className={`text-xs text-muted-foreground ${isRTL ? "text-right" : "text-left"}`}
+                              >
+                                {booking.car?.licensePlate}
                               </p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1 text-sm">
-                              <Calendar className="w-3 h-3 ml-1" />
+                            <div
+                              className={`flex items-center gap-1 text-sm ${isRTL ? "flex-row-reverse" : ""}`}
+                            >
+                              <Calendar className="w-3 h-3" />
                               <span>
                                 {formatDate(start)} - {formatDate(end)}
                               </span>
@@ -268,9 +321,11 @@ const ManageBookingsPage = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{days} روز</Badge>
+                          <Badge variant="outline">
+                            {t("manageBookings.daysCount", { count: days })}
+                          </Badge>
                         </TableCell>
-                        <TableCell className="font-semibold text-right">
+                        <TableCell className="font-semibold">
                           {formatCurrency(booking.totalPrice)}
                         </TableCell>
                         <TableCell>
@@ -278,8 +333,12 @@ const ManageBookingsPage = () => {
                             {getStatusText(booking.status)}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-left">
-                          <div className="flex items-center justify-end gap-2">
+                        <TableCell
+                          className={isRTL ? "text-left" : "text-right"}
+                        >
+                          <div
+                            className={`flex items-center gap-2 ${isRTL ? "justify-end" : "justify-start"}`}
+                          >
                             <Button
                               variant="ghost"
                               size="icon"
@@ -298,14 +357,18 @@ const ManageBookingsPage = () => {
                               }}
                             >
                               <SelectTrigger className="w-25">
-                                <SelectValue placeholder="به‌روزرسانی" />
+                                <SelectValue
+                                  placeholder={t("manageBookings.update")}
+                                />
                               </SelectTrigger>
                               <SelectContent>
                                 {statusOptions.map((option) => (
                                   <SelectItem
                                     key={option.value}
                                     value={option.value}
-                                    className="text-right"
+                                    className={
+                                      isRTL ? "text-right" : "text-left"
+                                    }
                                   >
                                     {option.label}
                                   </SelectItem>
@@ -320,7 +383,7 @@ const ManageBookingsPage = () => {
                 </TableBody>
               </Table>
 
-              {pagination.pages > 1 && (
+              {pagination.totalPages > 1 && (
                 <div className="p-4 border-t">
                   <Pagination
                     currentPage={currentPage}
@@ -335,11 +398,17 @@ const ManageBookingsPage = () => {
           ) : (
             <div className="p-12 text-center">
               <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">هیچ رزروی یافت نشد</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                {searchQuery
+                  ? t("manageBookings.noSearchResults")
+                  : t("manageBookings.noBookingsFound")}
+              </h3>
               <p className="text-muted-foreground">
                 {searchQuery
-                  ? `نتیجه‌ای برای "${searchQuery}" یافت نشد`
-                  : "هیچ رزروی با فیلترهای انتخاب شده مطابقت ندارد."}
+                  ? t("manageBookings.noResultsForQuery", {
+                      query: searchQuery,
+                    })
+                  : t("manageBookings.noBookingsDescription")}
               </p>
             </div>
           )}
@@ -350,29 +419,30 @@ const ManageBookingsPage = () => {
       <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-right">
-              به‌روزرسانی وضعیت رزرو
+            <DialogTitle className={isRTL ? "text-right" : "text-left"}>
+              {t("manageBookings.updateStatusTitle")}
             </DialogTitle>
-            <DialogDescription className="text-right">
-              وضعیت این رزرو را تغییر دهید و یادداشت اضافه کنید.
+            <DialogDescription className={isRTL ? "text-right" : "text-left"}>
+              {t("manageBookings.updateStatusDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-right block">وضعیت جدید</Label>
-              <Select
-                value={newStatus}
-                onValueChange={(value) => setNewStatus(value)}
-              >
-                <SelectTrigger className="text-right">
-                  <SelectValue placeholder="انتخاب وضعیت جدید" />
+              <Label className={`${isRTL ? "text-right" : "text-left"} block`}>
+                {t("manageBookings.newStatus")}
+              </Label>
+              <Select value={newStatus} onValueChange={setNewStatus}>
+                <SelectTrigger className={isRTL ? "text-right" : "text-left"}>
+                  <SelectValue
+                    placeholder={t("manageBookings.selectNewStatus")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {statusOptions.map((option) => (
                     <SelectItem
                       key={option.value}
                       value={option.value}
-                      className="text-right"
+                      className={isRTL ? "text-right" : "text-left"}
                     >
                       {option.label}
                     </SelectItem>
@@ -381,31 +451,36 @@ const ManageBookingsPage = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="note" className="text-right block">
-                یادداشت (اختیاری)
+              <Label
+                htmlFor="note"
+                className={`${isRTL ? "text-right" : "text-left"} block`}
+              >
+                {t("manageBookings.noteOptional")}
               </Label>
               <Textarea
                 id="note"
                 value={statusNote}
                 onChange={(e) => setStatusNote(e.target.value)}
-                placeholder="هرگونه یادداشت درباره این تغییر وضعیت را وارد کنید..."
-                className="text-right"
+                placeholder={t("manageBookings.notePlaceholder")}
+                className={isRTL ? "text-right" : "text-left"}
               />
             </div>
           </div>
-          <DialogFooter className="flex-row-reverse sm:flex-row-reverse">
+          <DialogFooter
+            className={isRTL ? "flex-row-reverse sm:flex-row-reverse" : ""}
+          >
             <Button
               variant="outline"
               onClick={() => setIsStatusDialogOpen(false)}
             >
-              لغو
+              {t("manageBookings.common.cancel")}
             </Button>
             <Button
               onClick={handleStatusUpdate}
               disabled={!newStatus}
-              className="mr-2 sm:mr-0 sm:ml-2"
+              className={isRTL ? "mr-2 sm:mr-0 sm:ml-2" : ""}
             >
-              به‌روزرسانی وضعیت
+              {t("manageBookings.updateStatus")}
             </Button>
           </DialogFooter>
         </DialogContent>

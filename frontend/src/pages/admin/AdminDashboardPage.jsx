@@ -22,15 +22,6 @@ import AdminStatsGrid from "@/components/admin/AdminStatsGrid";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useTranslation } from "react-i18next";
 
-const COLORS = [
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#ec4899",
-];
-
 const AdminDashboardPage = () => {
   const { t, i18n } = useTranslation();
   const user = useAuthStore((state) => state.user);
