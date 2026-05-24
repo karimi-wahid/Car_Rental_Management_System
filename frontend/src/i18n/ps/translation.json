@@ -797,7 +797,6 @@
     "login": "ننوتل",
     "register": "راجستر"
   },
-
   "roles": {
     "admin": "اډمین",
     "user": "کارن"
@@ -836,5 +835,96 @@
     "darkMode": "تیاره حالت",
     "lightMode": "رڼا حالت",
     "back": "بېرته"
+  },
+  "pageLoader": {
+    "loading": "پورته کیږي..."
+  },
+  "adminNavbar": {
+    "adminPanel": "د مدیریت پینل",
+    "admin": "مدیر",
+    "systemAdmin": "د سیسټم مدیر",
+    "logout": "وتل"
+  },
+  "adminSidebar": {
+    "dashboard": "ډشبورد",
+    "carManagement": "د موټرو مدیریت",
+    "userManagement": "د کاروونکو مدیریت",
+    "bookings": "بکینګونه",
+    "comments": "نظریې",
+    "messages": "پیغامونه",
+    "help": "مرسته",
+    "admin": "مدیر",
+    "systemAdmin": "د سیسټم مدیر",
+    "logout": "وتل"
+  },
+  "adminDashboard": {
+    "dashboardTitle": "د مدیریت ډشبورد",
+    "welcomeMessage": "ښه راغلاست، {{name}}! دلته تاسو کولی شئ خپل د کار وضعیت وګورئ.",
+    "totalUsers": "ټول کارونکي",
+    "totalCars": "ټول موټرونه",
+    "totalBookings": "ټول بکینګونه",
+    "totalRevenue": "ټول عاید",
+    "newUsersToday": "نن {{count}} نوی کارونکی",
+    "newUsersToday_plural": "نن {{count}} نوي کارونکي",
+    "availableCars": "{{count}} موټر شتون لري",
+    "availableCars_plural": "{{count}} موټرونه شتون لري",
+    "pendingBookings": "{{count}} د تصویب په انتظار کې",
+    "pendingBookings_plural": "{{count}} د تصویب په انتظار کې",
+    "averageBookingValue": "اوسط: {{value}}",
+    "statusPending": "په انتظار کې",
+    "statusConfirmed": "تایید شوی",
+    "statusCompleted": "بشپړ شوی",
+    "statusCancelled": "لغوه شوی",
+    "errorLoadingData": "د ډشبورد معلوماتو په ترلاسه کولو کې تېروتنه",
+    "admin": "مدیر",
+    "activityUserCreated": "نوی کارونکی ثبت شو",
+    "activityBookingCreated": "نوی بکینګ جوړ شو",
+    "activityPaymentReceived": "تادیه ترلاسه شوه",
+    "activityCarAdded": "نوی موټر اضافه شو",
+    "activityBookingCompleted": "بکینګ بشپړ شو",
+    "activityGeneral": "فعالیت"
+  },
+  "adminCharts": {
+    "revenueOverview": "د عاید عمومي کتنه",
+    "details": "تفصیلات",
+    "revenue": "عاید",
+    "totalRevenue": "ټول عاید",
+    "averageMonthly": "میاشتنی اوسط",
+    "bookingStatusDistribution": "د بکینګونو حالت ویش",
+    "totalBookings": "ټول بکینګونه",
+    "noDataAvailable": "کوم معلومات نشته"
+  },
+  "adminPopularCars": {
+    "title": "ترټولو مشهور موټرونه",
+    "subtitle": "د بکینګونو پراساس غوره موټرونه",
+    "viewAllCars": "ټول موټرونه وګورئ",
+    "bookingsCount": "{{count}} بکینګ",
+    "bookingsCount_plural": "{{count}} بکینګونه",
+    "noBookingsTitle": "تر اوسه کوم بکینګ نشته",
+    "noBookingsDescription": "مشهور موټرونه به دلته د بکینګونو ترسره کیدو وروسته ښکاره شي.",
+    "manageCars": "موټرونه مدیریت کړئ"
+  },
+  "adminRecentActivities": {
+    "title": "وروستي فعالیتونه",
+    "subtitle": "{{count}} وروستی فعالیت",
+    "subtitle_plural": "{{count}} وروستي فعالیتونه",
+    "viewAll": "ټول وګورئ",
+    "activityOccurred": "فعالیت ترسره شو",
+    "justNow": "همدا اوس",
+    "minutesAgo": "{{count}} دقیقه مخکې",
+    "minutesAgo_plural": "{{count}} دقیقې مخکې",
+    "hoursAgo": "{{count}} ساعت مخکې",
+    "hoursAgo_plural": "{{count}} ساعتونه مخکې",
+    "daysAgo": "{{count}} ورځ مخکې",
+    "daysAgo_plural": "{{count}} ورځې مخکې",
+    "byUser": "د {{name}} لخوا",
+    "noActivitiesTitle": "کوم فعالیت ثبت شوی نه دی",
+    "noActivitiesDescription": "د سیسټم فعالیتونه به دلته د ترسره کیدو سره سم ښکاره شي.",
+    "refresh": "تازه کول",
+    "status": {
+      "success": "بریالی",
+      "pending": "په انتظار کې",
+      "failed": "ناکام"
+    }
   }
 }

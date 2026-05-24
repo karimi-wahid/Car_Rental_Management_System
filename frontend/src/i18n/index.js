@@ -5,7 +5,7 @@ import enTranslation from "./en/translation.json";
 import faTranslation from "./fa/translation.json";
 import psTranslation from "./ps/translation.json";
 
-const savedLanguage = localStorage.getItem("lang") || "en";
+const savedLanguage = localStorage.getItem("lang") || "ps";
 
 i18n.use(initReactI18next).init({
   resources: {

@@ -795,7 +795,6 @@
     "login": "Login",
     "register": "Register"
   },
-
   "roles": {
     "admin": "Admin",
     "user": "User"
@@ -834,5 +833,96 @@
     "darkMode": "Dark Mode",
     "lightMode": "Light Mode",
     "back": "Back"
+  },
+  "pageLoader": {
+    "loading": "Loading..."
+  },
+  "adminNavbar": {
+    "adminPanel": "Admin Panel",
+    "admin": "Admin",
+    "systemAdmin": "System Administrator",
+    "logout": "Logout"
+  },
+  "adminSidebar": {
+    "dashboard": "Dashboard",
+    "carManagement": "Car Management",
+    "userManagement": "User Management",
+    "bookings": "Bookings",
+    "comments": "Comments",
+    "messages": "Messages",
+    "help": "Help",
+    "admin": "Admin",
+    "systemAdmin": "System Admin",
+    "logout": "Logout"
+  },
+  "adminDashboard": {
+    "dashboardTitle": "داشبورد مدیریت",
+    "welcomeMessage": "خوش آمدید، {{name}}! در اینجا وضعیت کسب و کار خود را مشاهده می‌کنید.",
+    "totalUsers": "کل کاربران",
+    "totalCars": "کل موترها",
+    "totalBookings": "کل رزروها",
+    "totalRevenue": "درآمد کل",
+    "newUsersToday": "{{count}} کاربر جدید امروز",
+    "newUsersToday_plural": "{{count}} کاربر جدید امروز",
+    "availableCars": "{{count}} موتر در دسترس",
+    "availableCars_plural": "{{count}} موتر در دسترس",
+    "pendingBookings": "{{count}} در انتظار تایید",
+    "pendingBookings_plural": "{{count}} در انتظار تایید",
+    "averageBookingValue": "میانگین: {{value}}",
+    "statusPending": "در انتظار",
+    "statusConfirmed": "تایید شده",
+    "statusCompleted": "تکمیل شده",
+    "statusCancelled": "لغو شده",
+    "errorLoadingData": "خطا در دریافت اطلاعات داشبورد",
+    "admin": "ادمین",
+    "activityUserCreated": "کاربر جدید ثبت نام کرد",
+    "activityBookingCreated": "رزرو جدید ایجاد شد",
+    "activityPaymentReceived": "پرداخت دریافت شد",
+    "activityCarAdded": "موتر جدید اضافه شد",
+    "activityBookingCompleted": "رزرو تکمیل شد",
+    "activityGeneral": "فعالیت"
+  },
+  "adminCharts": {
+    "revenueOverview": "Revenue Overview",
+    "details": "Details",
+    "revenue": "Revenue",
+    "totalRevenue": "Total Revenue",
+    "averageMonthly": "Average Monthly",
+    "bookingStatusDistribution": "Booking Status Distribution",
+    "totalBookings": "Total Bookings",
+    "noDataAvailable": "No data available"
+  },
+  "adminPopularCars": {
+    "title": "Most Popular Cars",
+    "subtitle": "Top performing vehicles based on bookings",
+    "viewAllCars": "View All Cars",
+    "bookingsCount": "{{count}} booking",
+    "bookingsCount_plural": "{{count}} bookings",
+    "noBookingsTitle": "No bookings yet",
+    "noBookingsDescription": "Popular cars will appear here once bookings are made.",
+    "manageCars": "Manage Cars"
+  },
+  "adminRecentActivities": {
+    "title": "Recent Activities",
+    "subtitle": "{{count}} recent activity",
+    "subtitle_plural": "{{count}} recent activities",
+    "viewAll": "View All",
+    "activityOccurred": "Activity occurred",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} minute ago",
+    "minutesAgo_plural": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hour ago",
+    "hoursAgo_plural": "{{count}} hours ago",
+    "daysAgo": "{{count}} day ago",
+    "daysAgo_plural": "{{count}} days ago",
+    "byUser": "by {{name}}",
+    "noActivitiesTitle": "No activities recorded",
+    "noActivitiesDescription": "System activities will appear here as they occur.",
+    "refresh": "Refresh",
+    "status": {
+      "success": "Success",
+      "pending": "Pending",
+      "failed": "Failed"
+    }
   }
 }

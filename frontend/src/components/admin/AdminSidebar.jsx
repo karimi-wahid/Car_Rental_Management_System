@@ -18,102 +18,56 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuthStore } from "@/store/authStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-const navigation = [
-  {
-    name: "داشبورد",
-    href: "/admin/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "مدیریت موترها",
-    href: "/admin/cars",
-    icon: Car,
-  },
-  {
-    name: "مدیریت کاربران",
-    href: "/admin/users",
-    icon: Users,
-  },
-  {
-    name: "رزروها",
-    href: "/admin/bookings",
-    icon: Calendar,
-  },
-  {
-    name: "نظرات",
-    href: "/admin/comments",
-    icon: MessageSquare,
-  },
-  {
-    name: "پیام ها",
-    href: "/admin/contacts",
-    icon: Bell,
-    badge: { count: 3, variant: "default" },
-  },
-  // {
-  //   name: "تخفیف‌ها",
-  //   href: "/admin/promotions",
-  //   icon: Tag,
-  //   badge: null,
-  // },
-  // {
-  //   name: "امنیت",
-  //   href: "/admin/security",
-  //   icon: Shield,
-  //   badge: null,
-  // },
-  // {
-  //   name: "تنظیمات",
-  //   href: "/admin/settings",
-  //   icon: Settings,
-  //   badge: null,
-  // },
-  // {
-  //   name: "تحلیل و آمار",
-  //   href: "/admin/analytics",
-  //   icon: BarChart3,
-  //   badge: null,
-  // },
-  // {
-  //   name: "گزارشات",
-  //   href: "/admin/reports",
-  //   icon: FileText,
-  //   badge: null,
-  // },
-  // {
-  //   name: "درآمد",
-  //   href: "/admin/revenue",
-  //   icon: TrendingUp,
-  //   badge: { count: "+۱۲٪", variant: "success" },
-  // },
-  // {
-  //   name: "پرداخت‌ها",
-  //   href: "/admin/payments",
-  //   icon: CreditCard,
-  //   badge: null,
-  // },
-];
-
-const bottomNavigation = [
-  {
-    name: "راهنما",
-    href: "/admin/help",
-    icon: HelpCircle,
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const AdminSidebar = () => {
+  const { t, i18n } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const isRTL = i18n.language !== "en";
+
+  // Navigation items with translations
+  const navigation = [
+    {
+      name: t("adminSidebar.dashboard"),
+      href: "/admin/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      name: t("adminSidebar.carManagement"),
+      href: "/admin/cars",
+      icon: Car,
+    },
+    {
+      name: t("adminSidebar.userManagement"),
+      href: "/admin/users",
+      icon: Users,
+    },
+    {
+      name: t("adminSidebar.bookings"),
+      href: "/admin/bookings",
+      icon: Calendar,
+    },
+    {
+      name: t("adminSidebar.comments"),
+      href: "/admin/comments",
+      icon: MessageSquare,
+    },
+    {
+      name: t("adminSidebar.messages"),
+      href: "/admin/contacts",
+      icon: Bell,
+      badge: { count: 3, variant: "default" },
+    },
+  ];
 
   // Check if device is mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkMobile();
@@ -126,7 +80,12 @@ const AdminSidebar = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate("/");
+  };
+
+  const getUserRoleText = () => {
+    const role = user?.role || "admin";
+    return t(`roles.${role}`, t("adminSidebar.systemAdmin"));
   };
 
   return (
@@ -137,7 +96,8 @@ const AdminSidebar = () => {
       className={cn(
         "relative bg-card border-l h-145",
         "flex flex-col",
-        "fixed lg:relative inset-y-1.5 lg:inset-y-1.5 right-0 z-40",
+        "fixed lg:relative inset-y-1.5 lg:inset-y-1.5 z-40",
+        isRTL ? "right-0" : "left-0",
       )}
     >
       {/* Toggle Button - Only show on desktop */}
@@ -145,10 +105,19 @@ const AdminSidebar = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute -left-3 top-20 z-50 h-6 w-6 rounded-full border bg-background shadow-md hover:bg-accent"
+          className={cn(
+            "absolute top-20 z-50 h-6 w-6 rounded-full border bg-background shadow-md hover:bg-accent",
+            isRTL ? "left-3" : "right-0",
+          )}
           onClick={() => setCollapsed(!collapsed)}
         >
           {collapsed ? (
+            isRTL ? (
+              <ChevronRight className="h-3 w-3" />
+            ) : (
+              <ChevronLeft className="h-3 w-3" />
+            )
+          ) : isRTL ? (
             <ChevronLeft className="h-3 w-3" />
           ) : (
             <ChevronRight className="h-3 w-3" />
@@ -162,12 +131,13 @@ const AdminSidebar = () => {
           className={cn(
             "flex items-center",
             shouldCollapse ? "justify-center" : "gap-3",
+            isRTL ? "flex-row-reverse" : "",
           )}
         >
           <Avatar className="h-10 w-10 ring-2 ring-destructive/20 shrink-0">
             <AvatarImage src={user?.avatar} alt={user?.name} />
             <AvatarFallback className="bg-destructive/10 text-destructive">
-              {getInitials(user?.name || "ادمین")}
+              {getInitials(user?.name || t("adminSidebar.admin"))}
             </AvatarFallback>
           </Avatar>
           {!shouldCollapse && (
@@ -178,11 +148,11 @@ const AdminSidebar = () => {
               className="flex-1 min-w-0"
             >
               <p className="text-sm font-semibold truncate">
-                {user?.name || "ادمین سیستم"}
+                {user?.name || t("adminSidebar.systemAdmin")}
               </p>
               <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
                 <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full" />
-                مدیر سیستم
+                {getUserRoleText()}
               </p>
             </motion.div>
           )}
@@ -206,13 +176,14 @@ const AdminSidebar = () => {
                       isActive
                         ? "bg-primary text-primary-foreground shadow-md"
                         : "text-muted-foreground",
+                      isRTL ? "" : "flex-row-reverse",
                     )
                   }
                 >
                   <item.icon
                     className={cn(
                       "w-5 h-5 shrink-0",
-                      !shouldCollapse && "ml-3",
+                      !shouldCollapse && (isRTL ? "mr-5" : "ml-5"),
                     )}
                   />
                   {!shouldCollapse && (
@@ -220,7 +191,10 @@ const AdminSidebar = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="text-sm font-medium flex-1 text-right"
+                      className={cn(
+                        "text-sm font-medium flex-1",
+                        isRTL ? "text-right" : "text-left",
+                      )}
                     >
                       {item.name}
                     </motion.span>
@@ -228,55 +202,14 @@ const AdminSidebar = () => {
 
                   {/* Tooltip for collapsed/mobile state */}
                   {shouldCollapse && (
-                    <div className="absolute right-full mr-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-                      {item.name}
-                      {item.badge && ` (${item.badge.count})`}
-                    </div>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-
-          {/* Separator */}
-          {!shouldCollapse && <div className="my-4 border-t" />}
-
-          {/* Bottom Navigation */}
-          <ul className="space-y-1">
-            {bottomNavigation.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.href}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center rounded-lg transition-all duration-200",
-                      "hover:bg-accent hover:text-accent-foreground group",
-                      shouldCollapse ? "justify-center p-3" : "px-4 py-3",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "text-muted-foreground",
-                    )
-                  }
-                >
-                  <item.icon
-                    className={cn(
-                      "w-5 h-5 shrink-0",
-                      !shouldCollapse && "ml-3",
-                    )}
-                  />
-                  {!shouldCollapse && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="text-sm font-medium"
+                    <div
+                      className={cn(
+                        "absolute px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none",
+                        isRTL ? "left-full mr-2" : "right-full ml-2",
+                      )}
                     >
                       {item.name}
-                    </motion.span>
-                  )}
-                  {shouldCollapse && (
-                    <div className="absolute right-full mr-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-                      {item.name}
+                      {item.badge && ` (${item.badge.count})`}
                     </div>
                   )}
                 </NavLink>
@@ -293,17 +226,26 @@ const AdminSidebar = () => {
           className={cn(
             "w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 justify-start group relative",
             shouldCollapse ? "justify-center p-3" : "px-4",
+            isRTL && !shouldCollapse ? "flex-row-reverse" : "",
           )}
           onClick={handleLogout}
         >
           <LogOut
-            className={cn("w-5 h-5 shrink-0", !shouldCollapse && "ml-2")}
+            className={cn(
+              "w-5 h-5 shrink-0",
+              !shouldCollapse && (isRTL ? "mr-2" : "ml-2"),
+            )}
           />
-          {!shouldCollapse && "خروج"}
+          {!shouldCollapse && t("adminSidebar.logout")}
 
           {shouldCollapse && (
-            <div className="absolute right-full mr-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-              خروج
+            <div
+              className={cn(
+                "absolute px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none",
+                isRTL ? "left-full mr-2" : "right-full ml-2",
+              )}
+            >
+              {t("adminSidebar.logout")}
             </div>
           )}
         </Button>

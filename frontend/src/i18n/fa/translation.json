@@ -831,5 +831,96 @@
     "darkMode": "حالت تاریک",
     "lightMode": "حالت روشن",
     "back": "بازگشت"
+  },
+  "pageLoader": {
+    "loading": "در حال بارگذاری..."
+  },
+  "adminNavbar": {
+    "adminPanel": "پنل مدیریت",
+    "admin": "ادمین",
+    "systemAdmin": "مدیر سیستم",
+    "logout": "خروج"
+  },
+  "adminSidebar": {
+    "dashboard": "داشبورد",
+    "carManagement": "مدیریت موترها",
+    "userManagement": "مدیریت کاربران",
+    "bookings": "رزروها",
+    "comments": "نظرات",
+    "messages": "پیام‌ها",
+    "help": "راهنما",
+    "admin": "ادمین",
+    "systemAdmin": "مدیر سیستم",
+    "logout": "خروج"
+  },
+  "adminDashboard": {
+    "dashboardTitle": "داشبورد مدیریت",
+    "welcomeMessage": "خوش آمدید، {{name}}! در اینجا وضعیت کسب و کار خود را مشاهده می‌کنید.",
+    "totalUsers": "کل کاربران",
+    "totalCars": "کل موترها",
+    "totalBookings": "کل رزروها",
+    "totalRevenue": "درآمد کل",
+    "newUsersToday": "{{count}} کاربر جدید امروز",
+    "newUsersToday_plural": "{{count}} کاربر جدید امروز",
+    "availableCars": "{{count}} موتر در دسترس",
+    "availableCars_plural": "{{count}} موتر در دسترس",
+    "pendingBookings": "{{count}} در انتظار تایید",
+    "pendingBookings_plural": "{{count}} در انتظار تایید",
+    "averageBookingValue": "میانگین: {{value}}",
+    "statusPending": "در انتظار",
+    "statusConfirmed": "تایید شده",
+    "statusCompleted": "تکمیل شده",
+    "statusCancelled": "لغو شده",
+    "errorLoadingData": "خطا در دریافت اطلاعات داشبورد",
+    "admin": "ادمین",
+    "activityUserCreated": "کاربر جدید ثبت نام کرد",
+    "activityBookingCreated": "رزرو جدید ایجاد شد",
+    "activityPaymentReceived": "پرداخت دریافت شد",
+    "activityCarAdded": "موتر جدید اضافه شد",
+    "activityBookingCompleted": "رزرو تکمیل شد",
+    "activityGeneral": "فعالیت"
+  },
+  "adminCharts": {
+    "revenueOverview": "نمای کلی درآمد",
+    "details": "جزئیات",
+    "revenue": "درآمد",
+    "totalRevenue": "کل درآمد",
+    "averageMonthly": "میانگین ماهانه",
+    "bookingStatusDistribution": "توزیع وضعیت رزروها",
+    "totalBookings": "کل رزروها",
+    "noDataAvailable": "داده‌ای موجود نیست"
+  },
+  "adminPopularCars": {
+    "title": "محبوب‌ترین موترها",
+    "subtitle": "پرفروش‌ترین موترها بر اساس رزرو",
+    "viewAllCars": "مشاهده همه موترها",
+    "bookingsCount": "{{count}} رزرو",
+    "bookingsCount_plural": "{{count}} رزرو",
+    "noBookingsTitle": "هنوز رزروی ثبت نشده",
+    "noBookingsDescription": "پس از ثبت اولین رزرو، محبوب‌ترین موترها اینجا نمایش داده می‌شوند.",
+    "manageCars": "مدیریت موترها"
+  },
+  "adminRecentActivities": {
+    "title": "فعالیت‌های اخیر",
+    "subtitle": "{{count}} فعالیت اخیر",
+    "subtitle_plural": "{{count}} فعالیت اخیر",
+    "viewAll": "مشاهده همه",
+    "activityOccurred": "فعالیت انجام شد",
+    "justNow": "همین الان",
+    "minutesAgo": "{{count}} دقیقه پیش",
+    "minutesAgo_plural": "{{count}} دقیقه پیش",
+    "hoursAgo": "{{count}} ساعت پیش",
+    "hoursAgo_plural": "{{count}} ساعت پیش",
+    "daysAgo": "{{count}} روز پیش",
+    "daysAgo_plural": "{{count}} روز پیش",
+    "byUser": "توسط {{name}}",
+    "noActivitiesTitle": "هیچ فعالیتی ثبت نشده",
+    "noActivitiesDescription": "فعالیت‌های سیستم به محض وقوع اینجا نمایش داده می‌شوند.",
+    "refresh": "بازخوانی",
+    "status": {
+      "success": "موفق",
+      "pending": "در انتظار",
+      "failed": "ناموفق"
+    }
   }
 }

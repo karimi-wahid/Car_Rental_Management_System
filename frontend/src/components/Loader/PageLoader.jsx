@@ -1,7 +1,14 @@
 import { motion } from "motion/react";
 import { LoaderPinwheel } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-export const PageLoader = ({ text = "در حال بارگذاری" }) => {
+export const PageLoader = ({ text }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language !== "en";
+
+  // Use provided text prop or fallback to translation
+  const loadingText = text || t("pageLoader.loading");
+
   return (
     <div className="min-h-screen flex items-center justify-center text-center">
       <motion.div
@@ -36,9 +43,11 @@ export const PageLoader = ({ text = "در حال بارگذاری" }) => {
           CarRental
         </h2>
 
-        <p className="text-muted-foreground">{text}</p>
+        <p className="text-muted-foreground">{loadingText}</p>
 
-        <div className="mt-4 flex justify-center space-x-2">
+        <div
+          className={`mt-4 flex justify-center ${isRTL ? "space-x-reverse" : ""} space-x-2`}
+        >
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1, repeat: Infinity, delay: 0 }}
